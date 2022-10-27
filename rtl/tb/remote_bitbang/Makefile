@@ -14,7 +14,7 @@
 #
 #
 # Author: Robert Balas (balasr@iis.ee.ethz.ch)
-
+CC 				= gcc
 CFLAGS          = -Wall -Wextra -Wno-missing-field-initializers \
 			-Wno-unused-function -Wno-missing-braces \
 			-O2 -g -march=native \
@@ -80,10 +80,8 @@ debug: ALL_CFLAGS = $(ALL_CFLAGS_DBG)
 debug: all
 
 sv-lib: ALL_CFLAGS += -fPIC
-sv-lib: 
-	@echo '************  bitbang makefile librbs.so ************'
-	$(SV_LIB)
-
+sv-lib: $(SV_LIB)
+	
 #compilation boilerplate
 $(SV_LIB): $(OBJS)
 	$(LD) -shared -E --exclude-libs ALL -o $(SV_LIB) $(LDFLAGS) \
