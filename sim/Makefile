@@ -1,4 +1,4 @@
-.PHONY: build lib clean sim simc
+.PHONY: build lib clean sim simconsole simc
 
 mkfile_path := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
@@ -19,6 +19,13 @@ clean-deps:
 
 sim:
 	$(VSIM) -64 -gui vopt_tb -L models_lib -L vip_lib \
+		-suppress vsim-3009 -suppress vsim-8683 \
+		+UVM_NO_RELNOTES -stats -t ps \
+		-sv_lib $(SVLIB) $(VSIM_FLAGS) \
+		-do "set StdArithNoWarnings 1; set NumericStdNoWarnings 1"
+
+simconsole:
+	$(VSIM) -64 -c vopt_tb -L models_lib -L vip_lib \
 		-suppress vsim-3009 -suppress vsim-8683 \
 		+UVM_NO_RELNOTES -stats -t ps \
 		-sv_lib $(SVLIB) $(VSIM_FLAGS) \
