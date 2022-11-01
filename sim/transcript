@@ -1,6 +1,7 @@
-# ** Error: (vsim-3763) SystemVerilog DPI cannot access file '.\../rtl/tb/remote_bitbang/librbs.dll'
-# No such file or directory. (errno = ENOENT)
-# Use the -help option for complete vsim usage.
 # vsim -64 -c vopt_tb -L models_lib -L vip_lib -suppress vsim-3009 -suppress vsim-8683 "+UVM_NO_RELNOTES" -stats -t ps -sv_lib ../rtl/tb/remote_bitbang/librbs -do "set StdArithNoWarnings 1; set NumericStdNoWarnings 1" -gBAUDRATE=115200 -gUSE_SDVT_CPI=0 -gUSE_SDVT_SPI=0 -gLOAD_L2=JTAG -gENABLE_DEV_DPI=0 -gUSE_SDVT_I2S=0 
+# Start time: 08:49:15 on Nov 01,2022
+# ** Error (suppressible): (vsim-19) Failed to access library 'work' at "work".
+# No such file or directory. (errno = ENOENT)
 # Error loading design
+# End time: 08:49:15 on Nov 01,2022, Elapsed time: 0:00:00
 # Errors: 1, Warnings: 0
