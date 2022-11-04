@@ -15,7 +15,7 @@
  */
 
 
-`include "periph_bus_defines.sv"
+`include "periph_bus_defines.svh"
 
 module apb_efpga_demux #(
     parameter ADDR_WIDTH = 32,

@@ -1,7 +1,9 @@
 // Copyright 2021 QuickLogic
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
-
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
 module fcbsmc #(
     parameter [7:0] PAR_FLASH_READ_CMD = 8'b0000_0011,  //Flash Read Command
     parameter [7:0] PAR_FLASH_DEEP_PWR_EN = 8'b1011_1001,  //Flash Deep Power Down Enable Command

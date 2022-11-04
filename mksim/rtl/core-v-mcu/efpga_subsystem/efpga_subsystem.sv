@@ -1,6 +1,11 @@
 // Copyright 2021 QuickLogic
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
+
 `include "pulp_soc_defines.svh"
 
 module efpga_subsystem #(

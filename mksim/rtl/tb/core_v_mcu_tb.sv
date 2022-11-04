@@ -8,6 +8,10 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
+
 `include "../includes/pulp_soc_defines.svh"
 
 // Use pseudo-terminal by default

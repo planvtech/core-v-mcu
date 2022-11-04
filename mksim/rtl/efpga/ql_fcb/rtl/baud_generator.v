@@ -14,7 +14,9 @@
 // -----------------------------------------------------------------------------
 // Comments: 
 // -----------------------------------------------------------------------------
-
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
 module baud_generator (smc_clear_br_cnt,Baud_rate_fe, Baud_rate_re, Baud_Rate_o,
 						Bus_Clk_i, 
 						Divisor_i,

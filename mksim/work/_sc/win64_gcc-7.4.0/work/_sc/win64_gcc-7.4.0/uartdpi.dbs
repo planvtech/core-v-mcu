@@ -1,0 +1,11 @@
+Z                              97
+R;0;0;35;28;-1
+R;0;0;39;25;-1
+R;0;0;43;26;-1
+R;0;1;43;36;-1
+E;
+Z2
+S1;c
+S0;obj
+Z1
+F0;C:/WS/planv_mcu/core-v-mcu/core-v-mcu/mksim/rtl/tb/uartdpi/uartdpi.c

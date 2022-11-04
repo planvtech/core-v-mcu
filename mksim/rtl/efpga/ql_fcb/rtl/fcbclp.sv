@@ -1,7 +1,9 @@
 // Copyright 2021 QuickLogic
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
-
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
 module fcbclp #(
     parameter [10:0] PAR_QLFCB_11BIT_100NS = 11'h00A,  // 1: Default ON, 0: Default Off
     parameter [10:0] PAR_QLFCB_11BIT_200NS = 11'h014,  // Default Assume 100MHz

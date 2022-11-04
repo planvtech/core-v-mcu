@@ -38,7 +38,7 @@ module uartdpi
    end
    
    import "DPI-C" function
-     chandle uartdpi_create(input string name);
+     chandle uartdpi_create(/*input string name*/);
 
    import "DPI-C" function
      byte uartdpi_read(input chandle obj);
@@ -52,7 +52,7 @@ module uartdpi
    chandle obj;
    
    initial begin
-      obj = uartdpi_create(NAME);
+      obj = uartdpi_create(/*NAME*/);
    end
 
    // TX

@@ -50,7 +50,9 @@ SPI_slave
 			   by the SPI master followed by 0 bytes of read/write data.
 
 ------------------------------------------------------------------------------*/
-
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
 
 module SPI_slave (
 	input			rst_n,			// system/global reset (active-high)

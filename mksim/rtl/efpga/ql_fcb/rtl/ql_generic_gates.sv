@@ -6,6 +6,11 @@
 //-- Clock Gating, 						--//	
 //-- Driving Strength X 4					--//
 //----------------------------------------------------------------//
+
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
+
 module ql_clkgate_x4 (
     input clk_in,  // Clock Input
     input en,  // Clock Output Enable, High Active

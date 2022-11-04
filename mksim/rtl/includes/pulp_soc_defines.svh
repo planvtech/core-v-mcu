@@ -132,6 +132,8 @@
 `define N_IO        48    // Number of IO in pad frame
 `define N_SYSIO     3     // Number of IO used for system functions like reset
 `define N_GPIO      32    // Number of IO the GPIO block can potentially control
+`define N_PERIO		2	  // edited by mkdigitals !! -- added just for running the simulation with minimum alteration
+
 
 `define N_APBIO     51    // number of APB based IO gpio(32)+pwm(16)+i2cs(3)
 `define NBIT_PADCFG 6     // Number of pad configuration signals

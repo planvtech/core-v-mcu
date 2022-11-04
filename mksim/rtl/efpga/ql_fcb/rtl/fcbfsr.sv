@@ -1,7 +1,9 @@
 // Copyright 2021 QuickLogic
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
-
+//mkdigitals added begin
+`timescale 1ns/1ps
+//mkdigitals added end
 module fcbfsr #(
     parameter [15:0] PAR_RAMFIFO_CFG  = 16'b0000_0000_0000_0000   //Define the RAMFIFO which Read back data
 ) (
