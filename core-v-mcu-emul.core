@@ -45,6 +45,17 @@ filesets:
     - emulation/core-v-mcu-nexys/tcl/flatten.tcl
     file_type: tclSource
 
+  kr260-xdc:
+    files:
+    - emulation/core-v-mcu-kr260/constraints/core-v-mcu-pin-assignment.xdc
+    file_type: xdc
+
+  kr260-cfg:
+    files:
+    - emulation/core-v-mcu-kr260/tcl/common.tcl
+    - emulation/core-v-mcu-kr260/tcl/flatten.tcl
+    file_type: tclSource
+
   xilinx-ips:
     files:
     - emulation/xilinx/ips/xilinx_clk_mngr.tcl
@@ -92,4 +103,18 @@ targets:
     tools:
       vivado:
         part: xc7a100tcsg324-1
+    toplevel: xilinx_core_v_mcu
+
+  kr260:
+    <<: *default
+    default_tool: vivado
+    description: Xilinx KR260 board
+    parameters:
+    - PULP_FPGA_EMUL=true
+    filesets_append:
+    - kr260-cfg
+    - kr260-xdc
+    tools:
+      vivado:
+        part: xck26-sfvc784-2lv-c
     toplevel: xilinx_core_v_mcu

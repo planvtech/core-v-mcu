@@ -1010,6 +1010,7 @@ if args.xilinx_core_v_mcu_sv != None:
         for ionum in range(N_IO):
             if sysionames[ionum] != -1:
                  x_sv.write("  wire s_%s;\n" %(sysionames[ionum][:-2]))
+        x_sv.write("  wire s_tmp;\n")
         x_sv.write("\n")
 
         ionum_start = 0
@@ -1039,8 +1040,15 @@ if args.xilinx_core_v_mcu_sv != None:
                     x_sv.write("    .IBUF_LOW_PWR(\"FALSE\")\n")
                     x_sv.write("  ) i_sysclk_iobuf (\n")
                     x_sv.write("    .I(ref_clk),\n")
-                    x_sv.write("    .O(s_io_in[%d])\n" % sysionames.index("ref_clk_i"))
+                    x_sv.write("    .O(s_tmp)\n")
                     x_sv.write("  );\n\n")
+
+                    x_sv.write("  BUFG i_bufg\n")
+                    x_sv.write("    (\n")
+                    x_sv.write("     .I(s_tmp),\n")
+                    x_sv.write("     .O(s_io_in[%d])\n" % sysionames.index("ref_clk_i"))
+                    x_sv.write("     );\n\n")
+
                     x_sv.write("  fpga_slow_clk_gen i_slow_clk_gen (\n")
                     x_sv.write("    .rst_ni(s_io_in[%d]),\n" % sysionames.index("rstn_i"))
                     x_sv.write("    .clk_i(s_slow_clk),\n")
@@ -1102,9 +1110,10 @@ if args.input_xdc != None:
     with open(args.input_xdc, 'r') as input_xdc:
         with open(args.output_xdc, 'w+') as output_xdc:
             output_xdc.write("set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {s_tck}]\n")
+            output_xdc.write("set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_sysclk_iobuf/O]\n")
             for line in input_xdc:
                 elements = line.split()
-                if len(elements) >= 10 :
+                if len(elements) > 10 :
                     if elements[10] == "sysclk_p" or elements[10] == "sysclk_n" :
                         elements[0] = elements[0][1:]
                         output_xdc.write(' '.join(elements) + "\n")

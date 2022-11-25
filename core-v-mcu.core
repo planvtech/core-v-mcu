@@ -132,6 +132,11 @@ filesets:
     - emulation/core-v-mcu-genesys2/ips/xilinx_clk_mngr.tcl
     file_type: tclSource
 
+  kr260-ips:
+    files:
+    - emulation/xilinx/ips/xilinx_clk_mngr.tcl
+    file_type: tclSource
+
   xilinx-ips:
     files:
 #    - emulation/xilinx/ips/xilinx_slow_clk_mngr.tcl
@@ -187,6 +192,17 @@ filesets:
   nexys-xdc:
     files:
     - emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
+    file_type: xdc
+
+  kr260-rtl:
+    files:
+    - emulation/core-v-mcu-kr260/rtl/core_v_mcu_kr260.v
+    - emulation/xilinx/rtl/fpga_clk_gen.sv
+    file_type: systemVerilogSource
+
+  kr260-xdc:
+    files:
+    - emulation/core-v-mcu-kr260/constraints/core-v-mcu-pin-assignment.xdc
     file_type: xdc
 
   xilinx-tcl:
@@ -363,3 +379,22 @@ targets:
       vivado:
         part: xc7k325tffg900-2
     toplevel: core_v_mcu_genesys2
+
+  kr260:
+    <<: *default_target
+    default_tool: vivado
+    description: Xilinx KR260 Board
+    parameters:
+    - PULP_FPGA_EMUL=true
+    filesets_append:
+    - kr260-ips
+    - xilinx-ips
+    - xilinx-tcl
+    - emulation-rtl
+    - kr260-rtl
+    - kr260-xdc
+    - rom_init
+    tools:
+      vivado:
+        part: xck26-sfvc784-2lv-c
+    toplevel: core_v_mcu_kr260
