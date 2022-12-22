@@ -1,13 +1,11 @@
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {s_tck}]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_sysclk_iobuf/O]
 ## This file is a general .xdc for the KR260
 ## To use it in a project:
 ## - uncomment the lines corresponding to used pins
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
 ## Clock signal
-set_property -dict { PACKAGE_PIN E3 IOSTANDARD LVCMOS18 } [get_ports { ref_clk }];
-create_clock -add -name sys_clk_pin -period 40.00 -waveform {0 5} [get_ports { ref_clk }];
+set_property -dict { PACKAGE_PIN C3 IOSTANDARD LVCMOS18 } [get_ports { ref_clk }];
 
 
 ## LEDs

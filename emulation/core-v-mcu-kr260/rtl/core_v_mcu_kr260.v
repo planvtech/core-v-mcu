@@ -43,7 +43,6 @@ module core_v_mcu_kr260
   wire s_rstn;
   wire s_stm;
   wire s_bootsel;
-  wire s_tmp;
 
   //JTAG TCK clock buffer (dedicated route is false in constraints)
   IBUF  i_tck_ibuf (
@@ -62,18 +61,12 @@ module core_v_mcu_kr260
   pad_functional_pu i_pad_4   (.OEN(~s_io_oe[4]), .I(s_io_out[4]), .O(s_io_in[4]), .PAD(xilinx_io[4]), .PEN(~s_pad_cfg[4][0]));
   // Input clock buffer
   IBUFG #(
-    .IOSTANDARD("LVCMOS33"),
+    .IOSTANDARD("LVCMOS18"),
     .IBUF_LOW_PWR("FALSE")
   ) i_sysclk_iobuf (
     .I(ref_clk),
-    .O(s_tmp)
+    .O(s_io_in[5])
   );
-
-  BUFG i_bufg
-    (
-     .I(s_tmp),
-     .O(s_io_in[5])
-     );
 
   fpga_slow_clk_gen i_slow_clk_gen (
     .rst_ni(s_io_in[6]),

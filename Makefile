@@ -226,10 +226,10 @@ kr260-emul:
 				@echo "*************************************"
 				(\
 					export BOARD=kr260;\
-					export BOARD_CLOCK_MHZ=100;\
+					export BOARD_CLOCK_MHZ=25;\
 					export XILINX_PART=xck26-sfvc784-2lv-c;\
 					export XILINX_BOARD=xilinx.com:kr260_som:part0:1.1;\
-					export FC_CLK_PERIOD_NS=100;\
+					export FC_CLK_PERIOD_NS=125;\
 					export PER_CLK_PERIOD_NS=125;\
 					export FPGA_CLK_PERIOD_NS=125;\
 					export SLOW_CLK_PERIOD_NS=4000;\
