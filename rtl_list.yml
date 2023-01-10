@@ -73,6 +73,8 @@ udma/udma_filter:
   path: udma/udma_filter
 udma/udma_external_per:
   path: udma/udma_external_per
+udma/udma_ethernet:
+  path: udma/udma_ethernet
 logint_dc_fifo_xbar:
   path: logint_dc_fifo_xbar
 core-v-mcu:

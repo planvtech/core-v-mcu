@@ -25,6 +25,7 @@ filesets:
     - openhwgroup.org:ip:apb2per
     - openhwgroup.org:ip:apb_timer_unit
     - openhwgroup.org:ip:udma_uart
+    - openhwgroup.org:ip:udma_ethernet
     - openhwgroup.org:ip:udma_sdio
     - openhwgroup.org:ip:udma_qspi
     - openhwgroup.org:ip:udma_i2s

@@ -1,0 +1,54 @@
+Module,UDMA_ETHERNET,,,,,
+,Memory address: UDMA_CH_ADDR_ETHERNET(`UDMA_CH_ADDR_ETHERNET),,,,,
+,,,,,,
+,Basic ETHERNET MAC driven by UDMA system,,,,,
+Register,Offset/Field,MSB,LSB,Type,Default,Description
+0x00,RX_SADDR,,,,,
+,SADDR,11,0,RW,,Address of receive buffer on write; current address on read
+0x04,RX_SIZE,,,,,
+,SIZE,15,0,RW,,Size of receive buffer on write; bytes left on read
+0x08,RX_CFG,,,,,
+,CLR,6,6,WO,,Clear the receive channel
+,PENDING,5,5,RO,,Receive transaction is pending
+,EN,4,4,RW,,Enable the receive channel
+,CONTINUOUS,0,0,RW,,0x0: stop after last transfer for channel
+,,,,,,"0x1: after last transfer for channel,"
+,,,,,,reload buffer size and start address and restart channel
+0x0C,TX_SADDR,,,,,
+,SADDR,11,0,RW,,Address of transmit buffer on write; current address on read
+0x10,TX_SIZE,,,,,
+,SIZE,15,0,RW,,Size of receive buffer on write; bytes left on read
+0x14,TX_CFG,,,,,
+,CLR,6,6,WO,,Clear the transmit channel
+,PENDING,5,5,RO,,Transmit transaction is pending
+,EN,4,4,RW,,Enable the transmit channel
+,CONTINUOUS,0,0,RW,,0x0: stop after last transfer for channel
+,,,,,,"0x1: after last transfer for channel,"
+,,,,,,reload buffer size and start address and restart channel
+0x18,STATUS,,,,,
+,speed,9,8,RO,,
+,tx_fifo_overflow,7,7,RO,,
+,tx_fifo_bad_frame,6,6,RO,,
+,tx_fifo_good_frame,5,5,RO,,
+,rx_error_bad_frame,4,4,RO,,
+,rx_error_bad_fcs,3,3,RO,,
+,rx_fifo_overflow,2,2,RO,,
+,rx_fifo_bad_frame,1,1,RO,,
+,tx_fifo_good_frame,0,0,RO,,
+0x1C,ETH_SETUP,,,,,
+,rx_enable,9,9,RW,,
+,tx_enable,8,8,RW,,
+0x20,ERROR,,,,,
+,tx_error_fifo_overflow,5,5,RC,,0x1 indicates tx fifo overflow error; read clears the bit
+,tx_error_fifo_bad_frame,4,4,RC,,0x1 indicates tx fifo bad frame error; read clears the bit
+,rx_error_bad_frame,3,3,RC,,0x1 indicates rx bad frame error; read clears the bit
+,rx_error_bad_fcs,2,2,RC,,0x1 indicates rx bad frame check sequence error; read clears the bit
+,rx_error_fifo_overflow,1,1,RC,,0x1 indicates rx fifo overflow error; read clears the bit
+,rx_error_fifo_bad_frame,0,0,RC,,0x1 indicates rx fifo bad frame error; read clears the bit
+0x24,IRQ_EN,,,,,
+,ERR_IRQ_EN,1,1,RW,,Enable the error interrupt
+,RX_IRQ_EN,0,0,RW,,Enable the receiver interrupt
+0x28,RX_FCS,,,,,
+,rx_fcs,31,0,RO,,frame check sequence of the last received packet
+0x2C,TX_FCS,,,,,
+,tx_fcs,31,0,RO,,frame check sequence of the last transmitted packet

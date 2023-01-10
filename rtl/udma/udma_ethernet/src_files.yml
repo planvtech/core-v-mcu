@@ -1,0 +1,19 @@
+udma_ethernet:
+  files: [
+    rtl/axis_async_fifo.sv,
+    rtl/axis_gmii_rx.sv,
+    rtl/axis_gmii_tx.sv,
+    rtl/dualmem_widen.sv,
+    rtl/dualmem_widen8.sv,
+    rtl/eth_mac_1g_rgmii_fifo.sv,
+    rtl/eth_mac_1g_rgmii.sv,
+    rtl/eth_mac_1g.sv,
+    rtl/framing_top.sv,
+    rtl/iddr.sv,
+    rtl/oddr.sv,
+    rtl/rgmii_core.sv,
+    rtl/rgmii_lfsr.sv,
+    rtl/rgmii_phy_if.sv,
+    rtl/rgmii_soc.sv,
+    rtl/ssio_ddr_in.sv,
+  ]
