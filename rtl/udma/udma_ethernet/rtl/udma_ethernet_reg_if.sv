@@ -71,8 +71,8 @@ module udma_ethernet_reg_if #(
 
     input   logic               [7:0]   status_i,
     input   logic               [1:0]   speed_i,
-    input   logic               [31:0]  rx_fcs_i
-    input   logic               [31:0]  tx_fcs_i
+    input   logic               [31:0]  rx_fcs_i,
+    input   logic               [31:0]  tx_fcs_i,
 
     output  logic                       rx_irq_en_o,
     output  logic                       err_irq_en_o,
@@ -106,6 +106,8 @@ module udma_ethernet_reg_if #(
 
     logic                      r_eth_err_irq_en;
     logic                      r_eth_rx_irq_en;
+    logic                      r_eth_en_tx;
+    logic                      r_eth_en_rx;
 
     assign s_wr_addr = (cfg_valid_i & ~cfg_rwn_i) ? cfg_addr_i : 5'h0;
     assign s_rd_addr = (cfg_valid_i &  cfg_rwn_i) ? cfg_addr_i : 5'h0;
@@ -149,13 +151,11 @@ module udma_ethernet_reg_if #(
             r_err_rx_error_bad_fcs      <=  'h0;
             r_err_rx_fifo_overflow      <=  'h0;
             r_err_rx_fifo_bad_frame     <=  'h0;
-            s_err_clr                   <=  'h0;
         end
         else
         begin
             r_rx_en  <=  'h0;
             r_tx_en  <=  'h0;
-            s_err_clr <= 'h0;
 
 
             if(status_i[7])
@@ -233,7 +233,6 @@ module udma_ethernet_reg_if #(
         cfg_data_o = 32'h0;
 
         s_err_clr = 1'b0;
-        s_rx_valid_clr = 1'b0;
 
         case (s_rd_addr)
         `ETH_REG_RX_SADDR:
@@ -254,11 +253,11 @@ module udma_ethernet_reg_if #(
             cfg_data_o = {22'h0,speed_i[1:0], status_i[7:0]};
         `ETH_REG_ERROR:
          begin
-            cfg_data_o = {26'h0,r_err_tx_fifo_overflow, /
-                                r_err_tx_fifo_bad_frame, /
-                                r_err_rx_error_bad_frame, /
-                                r_err_rx_error_bad_fcs, /
-                                r_err_rx_fifo_overflow, /
+            cfg_data_o = {26'h0,r_err_tx_fifo_overflow,
+                                r_err_tx_fifo_bad_frame,
+                                r_err_rx_error_bad_frame,
+                                r_err_rx_error_bad_fcs,
+                                r_err_rx_fifo_overflow,
                                 r_err_rx_fifo_bad_frame};
             s_err_clr = 1'b1;
          end

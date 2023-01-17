@@ -82,7 +82,7 @@
 `define NB_CORES      0
 `define NB_DMAS       0
 `define NB_MPERIPHS   1
-`define NB_SPERIPHS   8
+`define NB_SPERIPHS   9
 
 
 // DEFINES
@@ -154,6 +154,7 @@
 `define N_MRAM    	0
 `define N_FILTER  	1
 `define N_FPGA    	0
+`define N_ETH       1
 `define N_EXT_PER   0			// ToDo: Only set to one if PULP_TRAINING -- do we still need?
 
 

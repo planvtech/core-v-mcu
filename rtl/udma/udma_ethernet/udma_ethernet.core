@@ -26,6 +26,8 @@ filesets:
         - rtl/rgmii_phy_if.sv
         - rtl/rgmii_soc.sv
         - rtl/ssio_ddr_in.sv
+        - rtl/udma_ethernet.sv
+        - rtl/udma_ethernet_reg_if.sv
         file_type: systemVerilogSource
 
 targets:

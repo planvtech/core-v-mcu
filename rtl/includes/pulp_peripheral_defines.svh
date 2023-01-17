@@ -18,8 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-`define BUILD_DATE 32'h20230105
-`define BUILD_TIME 32'h00112021
+`define BUILD_DATE 32'h20230117
+`define BUILD_TIME 32'h00225233
 
 //  PER_ID definitions
 `define PER_ID_UART      0
@@ -34,7 +34,8 @@
 `define PER_ID_MRAM      8
 `define PER_ID_FILTER    8
 `define PER_ID_FPGA      9
-`define PER_ID_EXT_PER   9
+`define PER_ID_ETH       9
+`define PER_ID_EXT_PER   10
 
 //  UDMA TX channels
 `define CH_ID_TX_UART    0
@@ -57,7 +58,9 @@
 `define CH_ID_TX_JTAG    9
 `define CH_ID_TX_MRAM    9
 `define CH_ID_TX_FPGA    9
-`define CH_ID_TX_EXT_PER 9
+`define CH_ID_TX_ETH     9
+`define CH_ID_TX_ETH0    9
+`define CH_ID_TX_EXT_PER 10
 
 //  UDMA RX channels
 `define CH_ID_RX_UART    0
@@ -79,11 +82,13 @@
 `define CH_ID_RX_JTAG    8
 `define CH_ID_RX_MRAM    8
 `define CH_ID_RX_FPGA    8
-`define CH_ID_RX_EXT_PER 8
+`define CH_ID_RX_ETH     8
+`define CH_ID_RX_ETH0    8
+`define CH_ID_RX_EXT_PER 9
 
 //  Number of channels
-`define N_TX_CHANNELS  9
-`define N_RX_CHANNELS  8
+`define N_TX_CHANNELS  10
+`define N_RX_CHANNELS  9
 
 //  Define indices for sysio in IO bus
 `define IOINDEX_JTAG_TCK_I            0
@@ -96,7 +101,7 @@
 `define IOINDEX_STM_I                 44
 `define IOINDEX_BOOTSEL_I             45
 //  Width of perio bus
-`define N_PERIO  47
+`define N_PERIO  49
 
 //  define index locations in perio bus
 `define PERIO_UART_NPORTS 2
@@ -158,4 +163,7 @@
 `define PERIO_MRAM_NPORTS 0
 `define PERIO_FILTER_NPORTS 0
 `define PERIO_FPGA_NPORTS 0
+`define PERIO_ETH_NPORTS 2
+`define PERIO_ETH0_TX    47
+`define PERIO_ETH0_RX    48
 `define PERIO_EXT_PER_NPORTS 0

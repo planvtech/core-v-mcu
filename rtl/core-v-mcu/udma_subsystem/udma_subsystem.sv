@@ -90,15 +90,15 @@ module udma_subsystem #(
   localparam N_EXT_PER = 0;
 `endif
 
-  localparam N_RX_CHANNELS =   `N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_CAM + 2*`N_CSI2 + `N_FPGA + N_EXT_PER;
-  localparam N_TX_CHANNELS = 2*`N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_FPGA + N_EXT_PER;
+  localparam N_RX_CHANNELS =   `N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_CAM + 2*`N_CSI2 + `N_FPGA + `N_ETH + N_EXT_PER;
+  localparam N_TX_CHANNELS = 2*`N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_FPGA + `N_ETH + N_EXT_PER;
 
   if (`N_RX_CHANNELS != N_RX_CHANNELS) $error("N_RX_CHANNELS mismatch");
   if (`N_TX_CHANNELS != N_TX_CHANNELS) $error("N_TX_CHANNELS mismatch");
 
-  localparam N_RX_EXT_CHANNELS = `N_FILTER;
+  localparam N_RX_EXT_CHANNELS = `N_FILTER + `N_ETH;
   localparam N_TX_EXT_CHANNELS = 2 * `N_FILTER;
-  localparam N_STREAMS = `N_FILTER;
+  localparam N_STREAMS = `N_FILTER + `N_ETH;
   localparam STREAM_ID_WIDTH = 1;  //$clog2(N_STREAMS)
 
   localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + N_EXT_PER;
@@ -113,7 +113,8 @@ module udma_subsystem #(
   localparam CH_ID_TX_SDIO = CH_ID_TX_I2C + `N_I2C;
   localparam CH_ID_TX_I2S = CH_ID_TX_SDIO + `N_SDIO;
   localparam CH_ID_TX_FPGA = CH_ID_TX_I2S + `N_I2S;
-  localparam CH_ID_TX_EXT_PER = CH_ID_TX_FPGA + `N_FPGA;
+  localparam CH_ID_TX_ETH = CH_ID_TX_FPGA + `N_FPGA;
+  localparam CH_ID_TX_EXT_PER = CH_ID_TX_ETH + `N_ETH;
   if (`CH_ID_TX_EXT_PER != CH_ID_TX_EXT_PER) $error("CH_ID_TX_EXT_PER mismatch");
 
   //RX Channels
@@ -124,7 +125,8 @@ module udma_subsystem #(
   localparam CH_ID_RX_I2S = CH_ID_RX_SDIO + `N_SDIO;
   localparam CH_ID_RX_CAM = CH_ID_RX_I2S + `N_I2S;
   localparam CH_ID_RX_FPGA = CH_ID_RX_CAM + `N_CAM;
-  localparam CH_ID_RX_EXT_PER = CH_ID_RX_FPGA + `N_FPGA;
+  localparam CH_ID_RX_ETH = CH_ID_RX_FPGA + `N_FPGA;
+  localparam CH_ID_RX_EXT_PER = CH_ID_RX_ETH + `N_ETH;
   if (`CH_ID_RX_EXT_PER != CH_ID_RX_EXT_PER) $error("CH_ID_RX_EXT_PER mismatch");
 
   // PER_ID definitions
@@ -136,14 +138,19 @@ module udma_subsystem #(
   localparam PER_ID_CAM = PER_ID_I2S + `N_I2S;
   localparam PER_ID_FILTER = PER_ID_CAM + `N_CAM;
   localparam PER_ID_FPGA = PER_ID_FILTER + `N_FILTER;
-  localparam PER_ID_EXT_PER = PER_ID_FPGA + `N_FPGA;
+  localparam PER_ID_ETH = PER_ID_FPGA + `N_FPGA;
+  localparam PER_ID_EXT_PER = PER_ID_ETH + `N_ETH;
   if (`PER_ID_EXT_PER != PER_ID_EXT_PER) $error("PER_ID_EXT_PER mismatch");
 
 
   localparam CH_ID_EXT_TX_FILTER = 0;
   localparam CH_ID_EXT_RX_FILTER = 0;
 
+  localparam CH_ID_EXT_TX_ETH = 1;
+  localparam CH_ID_EXT_RX_ETH = 1;
+
   localparam STREAM_ID_FILTER = 0;
+  localparam STREAM_ID_ETH = 1;
 
   logic   [    N_TX_CHANNELS-1:0][ L2_AWIDTH_NOAL-1 : 0] s_tx_cfg_startaddr;
   logic   [    N_TX_CHANNELS-1:0][     TRANS_SIZE-1 : 0] s_tx_cfg_size;
@@ -1010,6 +1017,94 @@ module udma_subsystem #(
           .data_rx_dc_valid_i(efpga_data_rx_valid_i),
           .data_rx_dc_ready_o(efpga_data_rx_ready_o),
           .data_rx_dc_i      (efpga_data_rx_i)
+      );
+    end
+  endgenerate
+
+// ETHERNET
+  generate
+    for (genvar g_eth = 0; g_eth < `N_ETH; g_eth++) begin : i_eth_gen
+      assign s_events[4*(PER_ID_ETH+g_eth)+0] = 1'b0;
+      assign s_events[4*(PER_ID_ETH+g_eth)+1] = 1'b0;
+      assign s_events[4*(PER_ID_ETH+g_eth)+2] = 1'b0;
+      assign s_events[4*(PER_ID_ETH+g_eth)+3] = 1'b0;
+
+      assign s_rx_ext_destination[CH_ID_EXT_RX_ETH+g_eth] = 'h0;
+      assign s_rx_ext_stream[CH_ID_EXT_RX_ETH+g_eth] = 'h0;
+
+      assign s_tx_ext_destination[CH_ID_EXT_TX_ETH+g_eth] = 'h0;
+      assign s_tx_ext_destination[CH_ID_EXT_TX_ETH+g_eth+1] = 'h0;
+
+      assign s_per_rst[PER_ID_ETH+g_eth] = sys_resetn_i & !s_rst_periphs[PER_ID_ETH+g_eth];
+
+      udma_ethernet #(
+        .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
+        .TRANS_SIZE(TRANS_SIZE),
+        .DATA_WIDTH(32)
+      )i_ethernet (
+        .sys_clk_i(s_clk_periphs_core[PER_ID_ETH+g_eth]),
+        .periph_clk_i(s_clk_periphs_core[PER_ID_ETH+g_eth]), //probably no usage, we will need another clock
+        .periph_clk_i_90(s_clk_periphs_core[PER_ID_ETH+g_eth]), //probably no usage, we will need another clock
+        .ref_clk_i_200(), // 200MHz delay gen ref clock
+        .rstn_i(s_per_rst[PER_ID_ETH+g_eth]),
+
+        /*
+          * Ethernet: 1000BASE-T RGMII
+          */
+        .phy_rx_clk(),  //  input wire        
+        .phy_rxd(),     //  input wire [3:0]  
+        .phy_rx_ctl(),  //  input wire        
+        .phy_tx_clk(),  //  output wire        
+        .phy_txd(),     //  output wire [3:0]  
+        .phy_tx_ctl(),  //  output wire        
+        .phy_reset_n(), //  output wire        
+        .phy_int_n(),   //  input wire        
+        .phy_pme_n(),   //  input wire        
+
+        //
+
+        .cfg_data_i (s_periph_data_to),
+        .cfg_addr_i (s_periph_addr),
+        .cfg_valid_i(s_periph_valid[PER_ID_ETH+g_eth]),
+        .cfg_rwn_i  (s_periph_rwn),
+        .cfg_data_o (s_periph_data_from[PER_ID_ETH+g_eth]),
+        .cfg_ready_o(s_periph_ready[PER_ID_ETH+g_eth]),
+
+        .cfg_rx_startaddr_o (s_rx_cfg_startaddr[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_size_o      (s_rx_cfg_size[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_continuous_o(s_rx_cfg_continuous[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_en_o        (s_rx_cfg_en[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_clr_o       (s_rx_cfg_clr[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_en_i        (s_rx_ch_en[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_pending_i   (s_rx_ch_pending[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_curr_addr_i (s_rx_ch_curr_addr[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_bytes_left_i(s_rx_ch_bytes_left[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_datasize_o  (),  // FIXME ANTONIO
+
+        .cfg_tx_startaddr_o (s_tx_cfg_startaddr[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_size_o      (s_tx_cfg_size[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_continuous_o(s_tx_cfg_continuous[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_en_o        (s_tx_cfg_en[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_clr_o       (s_tx_cfg_clr[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_en_i        (s_tx_ch_en[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_pending_i   (s_tx_ch_pending[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_curr_addr_i (s_tx_ch_curr_addr[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_bytes_left_i(s_tx_ch_bytes_left[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_datasize_o  (),  // FIXME ANTONIO
+
+        .ethernet_tx_data_i(s_stream_data[STREAM_ID_ETH+g_eth]),    //  input  logic            [DATA_WIDTH-1:0]    
+        .ethernet_tx_valid_i(s_stream_valid[STREAM_ID_ETH+g_eth]),  //  input  logic                                
+        .ethernet_tx_sof_i(s_stream_sot[STREAM_ID_ETH+g_eth]),      //  input  logic                                
+        .ethernet_tx_eof_i(s_stream_eot[STREAM_ID_ETH+g_eth]),      //  input  logic                                
+        .ethernet_tx_ready_o(s_stream_ready[STREAM_ID_ETH+g_eth]),  //  output logic                                
+
+        .ethernet_rx_id_o(s_rx_ext_stream_id[CH_ID_EXT_RX_ETH+g_eth]),      //  output  logic          [FILTID_WIDTH-1:0]   
+        .ethernet_rx_data_o(s_rx_ext_data[CH_ID_EXT_RX_ETH+g_eth]),         //  output  logic            [DATA_WIDTH-1:0]   
+        .ethernet_rx_datasize_o(s_rx_ext_datasize[CH_ID_EXT_RX_ETH+g_eth]), //  output  logic                       [1:0]   
+        .ethernet_rx_valid_o(s_rx_ext_valid[CH_ID_EXT_RX_ETH+g_eth]),       //  output  logic                               
+        .ethernet_rx_sof_o(s_rx_ext_sot[CH_ID_EXT_RX_ETH+g_eth]),           //  output  logic                               
+        .ethernet_rx_eof_o(s_rx_ext_eot[CH_ID_EXT_RX_ETH+g_eth]),           //  output  logic                               
+        .ethernet_rx_ready_i(s_rx_ext_ready[CH_ID_EXT_RX_ETH+g_eth])       //  input   logic                               
       );
     end
   endgenerate

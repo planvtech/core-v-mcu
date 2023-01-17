@@ -97,6 +97,12 @@ filesets:
     - rtl/simulation/top.sv
     - rtl/simulation/top1_wrapper.sv
     - rtl/simulation/a2_bootrom.sv
+    - rtl/simulation/BUFIO.sv
+    - rtl/simulation/BUFR.sv
+    - rtl/simulation/IDDR.sv
+    - rtl/simulation/IDELAYCTRL.sv
+    - rtl/simulation/IDELAYE2.sv
+    - rtl/simulation/ODDR.sv
     file_type: systemVerilogSource
 
   not_emulation-rtl:

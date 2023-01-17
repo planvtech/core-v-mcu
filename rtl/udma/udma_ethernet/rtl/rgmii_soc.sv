@@ -72,6 +72,15 @@ module rgmii_soc (
      * Status
      */
 
+    output wire        tx_fifo_overflow,
+    output wire        tx_fifo_bad_frame,
+    output wire        tx_fifo_good_frame,
+    output wire        rx_error_bad_frame,
+    output wire        rx_error_bad_fcs,
+    output wire        rx_fifo_overflow,
+    output wire        rx_fifo_bad_frame,
+    output wire        rx_fifo_good_frame,
+    output wire [1:0]  speed,
     output wire [31:0] rx_fcs_reg,
     output wire [31:0] tx_fcs_reg
 
@@ -216,8 +225,17 @@ core_inst (
     .rx_axis_tvalid(rx_axis_tvalid),
     .rx_axis_tlast(rx_axis_tlast),
     .rx_axis_tuser(rx_axis_tuser),
+    .tx_fifo_overflow(tx_fifo_overflow),
+    .tx_fifo_bad_frame(tx_fifo_bad_frame),
+    .tx_fifo_good_frame(tx_fifo_good_frame),
+    .rx_error_bad_frame(rx_error_bad_frame),
+    .rx_error_bad_fcs(rx_error_bad_fcs),
     .rx_fcs_reg(rx_fcs_reg),
-    .tx_fcs_reg(tx_fcs_reg)
+    .tx_fcs_reg(tx_fcs_reg),
+    .rx_fifo_overflow(rx_fifo_overflow),
+    .rx_fifo_bad_frame(rx_fifo_bad_frame),
+    .rx_fifo_good_frame(rx_fifo_good_frame),
+    .speed(speed)
 );
 
 endmodule
