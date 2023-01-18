@@ -95,16 +95,16 @@ module udma_subsystem #(
 
   if (`N_RX_CHANNELS != N_RX_CHANNELS) $error("N_RX_CHANNELS mismatch");
   if (`N_TX_CHANNELS != N_TX_CHANNELS) $error("N_TX_CHANNELS mismatch");
-
+  
   localparam N_RX_EXT_CHANNELS = `N_FILTER + `N_ETH;
-  localparam N_TX_EXT_CHANNELS = 2 * `N_FILTER;
+  localparam N_TX_EXT_CHANNELS = 2 * `N_FILTER + `N_ETH;
   localparam N_STREAMS = `N_FILTER + `N_ETH;
   localparam STREAM_ID_WIDTH = 1;  //$clog2(N_STREAMS)
 
   localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + N_EXT_PER;
   if (N_PERIPHS > 28)
     $error("Too many udma periperals: limit is 28 (32 event channels - 4 for FPGA)");
-
+  
   //TX Channels
   localparam CH_ID_TX_UART = 0;
   localparam CH_ID_TX_SPIM = CH_ID_TX_UART + `N_UART;
@@ -146,11 +146,17 @@ module udma_subsystem #(
   localparam CH_ID_EXT_TX_FILTER = 0;
   localparam CH_ID_EXT_RX_FILTER = 0;
 
-  localparam CH_ID_EXT_TX_ETH = 1;
+  localparam CH_ID_EXT_TX_ETH = 2;
   localparam CH_ID_EXT_RX_ETH = 1;
 
   localparam STREAM_ID_FILTER = 0;
   localparam STREAM_ID_ETH = 1;
+
+  $info("N_ETH = %d" , `N_ETH);
+  $info("N_FILTER = %d" , `N_FILTER);
+  $info("CH_ID_TX_ETH = %d" , `CH_ID_TX_ETH);
+  $info("CH_ID_RX_ETH = %d" , CH_ID_RX_ETH);
+  $info("PER_ID_ETH = %d" , PER_ID_ETH);
 
   logic   [    N_TX_CHANNELS-1:0][ L2_AWIDTH_NOAL-1 : 0] s_tx_cfg_startaddr;
   logic   [    N_TX_CHANNELS-1:0][     TRANS_SIZE-1 : 0] s_tx_cfg_size;
@@ -271,6 +277,7 @@ module udma_subsystem #(
       .N_RX_EXT_CHANNELS(N_RX_EXT_CHANNELS),
       .N_TX_EXT_CHANNELS(N_TX_EXT_CHANNELS),
       .N_STREAMS        (N_STREAMS),
+      .DEST_SIZE        (DEST_SIZE),
       .STREAM_ID_WIDTH  (STREAM_ID_WIDTH),
       .TRANS_SIZE       (TRANS_SIZE),
       .N_PERIPHS        (N_PERIPHS),
@@ -880,13 +887,13 @@ module udma_subsystem #(
       assign s_events[4*(PER_ID_FILTER+g_filter)+2] = 1'b0;
       assign s_events[4*(PER_ID_FILTER+g_filter)+3] = 1'b0;
 
-      assign s_rx_ext_destination[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
+      assign s_rx_ext_destination[CH_ID_EXT_RX_FILTER+g_filter][DEST_SIZE - 1 : 0] = 'h0;
       assign s_rx_ext_stream[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
       assign s_rx_ext_stream_id[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
       assign s_rx_ext_sot[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
       assign s_rx_ext_eot[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
 
-      assign s_tx_ext_destination[CH_ID_EXT_TX_FILTER+g_filter] = 'h0;
+      assign s_tx_ext_destination[CH_ID_EXT_TX_FILTER+g_filter][DEST_SIZE - 1 : 0] = 'h0;
       assign s_tx_ext_destination[CH_ID_EXT_TX_FILTER+g_filter+1] = 'h0;
 
       assign s_per_rst[PER_ID_FILTER+g_filter] = sys_resetn_i & !s_rst_periphs[PER_ID_FILTER+g_filter];
@@ -1029,11 +1036,10 @@ module udma_subsystem #(
       assign s_events[4*(PER_ID_ETH+g_eth)+2] = 1'b0;
       assign s_events[4*(PER_ID_ETH+g_eth)+3] = 1'b0;
 
-      assign s_rx_ext_destination[CH_ID_EXT_RX_ETH+g_eth] = 'h0;
+      assign s_rx_ext_destination[CH_ID_EXT_RX_ETH+g_eth][DEST_SIZE - 1 : 0] = 'h0;
       assign s_rx_ext_stream[CH_ID_EXT_RX_ETH+g_eth] = 'h0;
 
-      assign s_tx_ext_destination[CH_ID_EXT_TX_ETH+g_eth] = 'h0;
-      assign s_tx_ext_destination[CH_ID_EXT_TX_ETH+g_eth+1] = 'h0;
+      assign s_tx_ext_destination[CH_ID_EXT_TX_ETH+g_eth][DEST_SIZE - 1] = 'h0;
 
       assign s_per_rst[PER_ID_ETH+g_eth] = sys_resetn_i & !s_rst_periphs[PER_ID_ETH+g_eth];
 

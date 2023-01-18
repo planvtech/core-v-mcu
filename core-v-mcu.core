@@ -108,6 +108,7 @@ filesets:
   not_emulation-rtl:
     files:
     - rtl/core-v-mcu/soc/clk_gen.sv
+    #- rtl/simulation/clk_gen.sv
     file_type: systemVerilogSource
 
   emulation-rtl:
