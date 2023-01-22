@@ -39,6 +39,7 @@ docs:           generate documentation
 sw:             generate C header files (in ./sw)
 nexys-emul:     generate bitstream for Nexys-A7-100T emulation)
 genesys2-emul:  generate bitstream for Genesys2 FPGA board
+kr260-emul:     generate bitstream for Nexys-A7-100T emulation)
 buildsim:       build for Questa sim
 sim:            run Questa sim
 downloadn:      Download bitstream to Nexys board
@@ -62,6 +63,11 @@ $ make genesys2-emul
 ```
 Extra note for building on ubuntu - Vivado tools from Xilinx may require a larger swap size that the system default.
 The swap size can be increased by searching for "increase swapfile in ubuntu" and add your release.
+
+To target KR260 board:
+```
+$ make kr260-emul
+```
 
 ## Building documentation
 
