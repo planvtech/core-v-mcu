@@ -27,6 +27,11 @@ module clk_gen (
     output logic        soc_clk_o,
     output logic        per_clk_o,
     output logic        cluster_clk_o,
+
+    output logic        eth_clk_o,
+    output logic        eth_clk_90_o,
+    output logic        eth_delay_ref_clk_o,
+
     output logic        soc_cfg_lock_o,
     input  logic        soc_cfg_req_i,
     output logic        soc_cfg_ack_o,
@@ -49,10 +54,12 @@ module clk_gen (
     output logic [31:0] cluster_cfg_r_data_o,
     input  logic        cluster_cfg_wrn_i
 );
-  localparam SOC_PERIOD = 2.5;
-  localparam PER_PERIOD = 5.0;
-  localparam FPGA_PERIOD = 10.0;
+  localparam SOC_PERIOD = 100.0;
+  localparam PER_PERIOD = 100.0;
+  localparam FPGA_PERIOD = 100.0;
 
+  localparam ETH_CLK_PERIOD = 8.0;
+  localparam ETH_DELAY_REF_CLK_PERIOD = 5.0;
 
 `ifdef VERILATOR
   reg [2:0] count;
@@ -73,10 +80,27 @@ module clk_gen (
     soc_clk_o = 1'b0;
     per_clk_o = 1'b0;
     cluster_clk_o = 1'b0;
+    eth_clk_o = 1'b0;
+    eth_delay_ref_clk_o = 1'b0;
   end
   initial forever #(SOC_PERIOD / 2) soc_clk_o = ~soc_clk_o;
   initial forever #(PER_PERIOD / 2) per_clk_o = ~per_clk_o;
   initial forever #(FPGA_PERIOD / 2) cluster_clk_o = ~cluster_clk_o;
+
+  initial forever #(ETH_CLK_PERIOD/2) eth_clk_o = ~eth_clk_o;
+  initial forever #(ETH_CLK_PERIOD/2) eth_delay_ref_clk_o = ~eth_delay_ref_clk_o;
+
+  always @(posedge eth_clk_o)
+  begin
+    #(ETH_CLK_PERIOD/4);
+    eth_clk_90_o <= 1'b1;
+  end
+
+  always @(negedge eth_clk_o)
+  begin
+    #(ETH_CLK_PERIOD/4);
+    eth_clk_90_o <= 1'b0;
+  end
 `endif  // !`ifdef VERILATOR
 
   always_comb begin

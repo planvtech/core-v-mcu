@@ -212,6 +212,11 @@ module soc_domain
   logic                                               s_rstn_glob;
   logic                                               s_sel_fll_clk;
 
+  logic                                               s_eth_clk;
+  logic                                               s_eth_clk_90;
+  logic                                               s_eth_rstn;
+  logic                                               s_eth_delay_ref_clk;   
+
   logic                                               s_dma_pe_evt;
   logic                                               s_dma_pe_irq;
   logic                                               s_pf_evt;
@@ -333,6 +338,12 @@ module soc_domain
       .rstpin_ni      (rstn_glob_i),
       .sel_fll_clk_i  (s_sel_fll_clk),
       .ref_clk_i      (ref_clk_i),
+
+      .eth_clk_i          (s_eth_clk),
+      .eth_clk_90_i       (s_eth_clk_90),
+      .eth_rstn_i         (s_eth_rstn),
+      .eth_delay_ref_clk_i(s_eth_delay_ref_clk),
+
       .dmactive_i     (s_dmactive),
       .wd_expired_o   (s_wd_expired),
       .dft_test_mode_i(dft_test_mode_i),
@@ -466,8 +477,13 @@ module soc_domain
       .cluster_fll_slave_r_data_o(s_cluster_fll_master.r_data),
       .cluster_fll_slave_lock_o  (s_cluster_fll_master.lock),
 
+      .rstn_eth_sync_o(s_eth_rstn),
+
       .clk_soc_o(s_soc_clk),
-      .clk_per_o(s_periph_clk)
+      .clk_per_o(s_periph_clk),
+      .eth_clk_o(s_eth_clk),
+      .eth_clk_90_o(s_eth_clk_90),
+      .eth_delay_ref_clk_o(s_eth_delay_ref_clk)
   );
 
   soc_interconnect_wrap #(

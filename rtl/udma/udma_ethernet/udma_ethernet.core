@@ -28,6 +28,8 @@ filesets:
         - rtl/ssio_ddr_in.sv
         - rtl/udma_ethernet.sv
         - rtl/udma_ethernet_reg_if.sv
+        - rtl/eth_axis_rx_buffer.sv
+        - rtl/eth_axis_tx_buffer.sv
         file_type: systemVerilogSource
 
 targets:

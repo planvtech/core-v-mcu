@@ -23,12 +23,12 @@
 module udma_ethernet #(
     parameter L2_AWIDTH_NOAL = 12,
     parameter TRANS_SIZE     = 16,
-    parameter DATA_WIDTH     = 8,
     parameter ETHID_WIDTH    = 2
 ) (
     input  logic                      sys_clk_i,
     input  logic                      periph_clk_i, //probably no usage, we will need another clock
     input  logic                      periph_clk_i_90, //probably no usage, we will need another clock
+    input  logic                      periph_rstn_i, //probably no usage, we will need another clock
     input  logic                      ref_clk_i_200, // 200MHz delay gen ref clock
 	input  logic   	                  rstn_i,
 
@@ -76,14 +76,14 @@ module udma_ethernet #(
     input  logic [L2_AWIDTH_NOAL-1:0] cfg_tx_curr_addr_i,       // no operational usage !
     input  logic     [TRANS_SIZE-1:0] cfg_tx_bytes_left_i,      // no operational usage !
 
-    input  logic            [DATA_WIDTH-1:0]    ethernet_tx_data_i,
+    input  logic                      [31:0]    ethernet_tx_data_i,
     input  logic                                ethernet_tx_valid_i,
     input  logic                                ethernet_tx_sof_i,
     input  logic                                ethernet_tx_eof_i,
     output logic                                ethernet_tx_ready_o,
 
     output  logic          [ETHID_WIDTH-1:0]    ethernet_rx_id_o,
-    output  logic            [DATA_WIDTH-1:0]   ethernet_rx_data_o,
+    output  logic                     [31:0]    ethernet_rx_data_o,
     output  logic                       [1:0]   ethernet_rx_datasize_o,
     output  logic                               ethernet_rx_valid_o,
     output  logic                               ethernet_rx_sof_o,
@@ -143,22 +143,6 @@ module udma_ethernet #(
     //CONFIGURATION
     wire        mac_gmii_tx_en = s_eth_en_tx;
 
-    //TX CHANNEL ASSIGNMENTS
-    assign  eth_tx_axis_tdata[7:0]  =   ethernet_tx_data_i[7:0];
-    assign  eth_tx_axis_tvalid      =   ethernet_tx_valid_i;
-    assign  eth_tx_axis_tuser       =   ethernet_tx_sof_i;
-    assign  eth_tx_axis_tlast       =   ethernet_tx_eof_i;
-    assign  ethernet_tx_ready_o     =   eth_tx_axis_tready;
-
-    //RX CHANNEL ASSIGNMENTS
-    assign  ethernet_rx_data_o[7:0]                 =   eth_rx_axis_tdata;
-    assign  ethernet_rx_data_o[DATA_WIDTH - 1 : 8]  =   'h0;
-    assign  ethernet_rx_valid_o                     =   eth_rx_axis_tvalid;
-    assign  ethernet_rx_sof_o                       =   eth_rx_axis_tuser;
-    assign  ethernet_rx_eof_o                       =   eth_rx_axis_tlast;
-    assign  eth_rx_axis_tready                      =   ethernet_rx_ready_i;
-
-
     udma_ethernet_reg_if #(
         .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
         .TRANS_SIZE(TRANS_SIZE)
@@ -204,11 +188,49 @@ module udma_ethernet #(
     );
 
 
+    eth_axis_rx_buffer rx_buffer_i
+    (
+    .s_clk_i(periph_clk_i),             //  input   logic   
+    .s_rstn_i(periph_rstn_i),           //  input   logic   
+    .s_axis_tdata(eth_rx_axis_tdata),   //  input   logic   [7:0]
+    .s_axis_tvalid(eth_rx_axis_tvalid), //  input   logic   
+    .s_axis_tuser(eth_rx_axis_tuser),   //  input   logic   
+    .s_axis_tlast(eth_rx_axis_tlast),   //  input   logic   
+    .s_axis_tready(eth_rx_axis_tready), //  output  logic   
 
+    .m_clk_i(sys_clk_i),                        //  input   logic           
+    .m_rstn_i(rstn_i),                          //  input   logic           
+    .m_axis_tdata(ethernet_rx_data_o),          //  output  logic   [31:0]  
+    .m_axis_byte_count(ethernet_rx_datasize_o), //  input   logic   [1:0]   
+    .m_axis_tvalid(ethernet_rx_valid_o),        //  output  logic           
+    .m_axis_tuser(ethernet_rx_sof_o),           //  output  logic           
+    .m_axis_tlast(ethernet_rx_eof_o),           //  output  logic           
+    .m_axis_tready(ethernet_rx_ready_i)         //  input   logic           
+    );
+
+    eth_axis_tx_buffer tx_buffer_i
+    (
+    .s_clk_i(sys_clk_i),                    //  input   logic          
+    .s_rstn_i(rstn_i),                      //  input   logic          
+    .s_axis_tdata(ethernet_tx_data_i),      //  input   logic   [31:0] 
+    .s_axis_byte_count(2'b11),              //  input   logic   [1:0]  //mustafa - check if there is any way to utilize this
+    .s_axis_tvalid(ethernet_tx_valid_i),    //  input   logic          
+    .s_axis_tuser(ethernet_tx_sof_i),       //  input   logic          
+    .s_axis_tlast(ethernet_tx_eof_i),       //  input   logic          
+    .s_axis_tready(eth_tx_axis_tready),     //  output  logic           
+
+    .m_clk_i(periph_clk_i),                 //  input   logic          
+    .m_rstn_i(periph_rstn_i),               //  input   logic          
+    .m_axis_tdata(eth_tx_axis_tdata),       //  output  logic   [7:0]   
+    .m_axis_tvalid(eth_tx_axis_tvalid),     //  output  logic           
+    .m_axis_tuser(eth_tx_axis_tuser),       //  output  logic           
+    .m_axis_tlast(eth_tx_axis_tlast),       //  output  logic           
+    .m_axis_tready(eth_tx_axis_tready)      //  input   logic          
+    );
 
     rgmii_soc rgmii_soc1
     (
-        .rst_int(rst_int),
+        .rst_int(~periph_rstn_i),
         .clk_int(periph_clk_i), //125 MHz clock
         .clk90_int(periph_clk_i_90), //125 MHz Clock with 90 degree phase shift
         .clk_200_int(ref_clk_i_200), // 200 MHz clock for inout delays ref_clk

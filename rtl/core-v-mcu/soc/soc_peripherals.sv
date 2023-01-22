@@ -26,6 +26,10 @@ module soc_peripherals #(
     input  logic                 rst_ni,
     input  logic                 rstpin_ni,
     input  logic                 ref_clk_i,
+    input  logic                 eth_clk_i,
+    input  logic                 eth_clk_90_i,
+    input  logic                 eth_rstn_i,
+    input  logic                 eth_delay_ref_clk_i,
     input  logic                 dmactive_i,
     input  logic                 sel_fll_clk_i,
     input  logic                 dft_test_mode_i,
@@ -388,6 +392,11 @@ module soc_peripherals #(
       .periph_clk_i(periph_clk_i),
       .efpga_clk_i (periph_clk_i),  // FIXME if udma stays
       .sys_resetn_i(apb_reset),
+
+      .eth_clk_i(eth_clk_i),
+      .eth_clk_90_i(eth_clk_90_i),
+      .eth_rstn_i(eth_rstn_i),
+      .eth_relay_ref_clk_i(eth_relay_ref_clk_i),
 
       .udma_apb_paddr  (s_udma_bus.paddr[APB_ADDR_WIDTH-1:0]),
       .udma_apb_pwdata (s_udma_bus.pwdata),

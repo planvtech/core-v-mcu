@@ -44,6 +44,10 @@ module udma_subsystem #(
     input logic sys_resetn_i,
 
     input logic periph_clk_i,
+    input logic eth_clk_i,
+    input logic eth_clk_90_i,
+    input logic eth_rstn_i,
+    input logic eth_delay_ref_clk_i,
 
     input  logic [APB_ADDR_WIDTH-1:0] udma_apb_paddr,
     input  logic [              31:0] udma_apb_pwdata,
@@ -1049,9 +1053,10 @@ module udma_subsystem #(
         .DATA_WIDTH(32)
       )i_ethernet (
         .sys_clk_i(s_clk_periphs_core[PER_ID_ETH+g_eth]),
-        .periph_clk_i(s_clk_periphs_core[PER_ID_ETH+g_eth]), //probably no usage, we will need another clock
-        .periph_clk_i_90(s_clk_periphs_core[PER_ID_ETH+g_eth]), //probably no usage, we will need another clock
-        .ref_clk_i_200(), // 200MHz delay gen ref clock
+        .periph_clk_i(eth_clk_i),
+        .periph_clk_i_90(eth_clk_90_i),
+        .periph_rstn_i(eth_rstn_i),
+        .ref_clk_i_200(eth_delay_ref_clk_i),// 200MHz delay gen ref clock
         .rstn_i(s_per_rst[PER_ID_ETH+g_eth]),
 
         /*
