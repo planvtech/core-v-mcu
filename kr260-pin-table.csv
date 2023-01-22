@@ -6,10 +6,10 @@ J18[2],IO_3,3,jtag_tms,,,,
 J21[40],IO_4,4,jtag_trst,,,,
 CLK100MHZ,IO_5,5,ref_clk,,,,
 CPU_RESETN,IO_6,6,rstn,,,,
-J21[29],IO_7,7,,uart0_rx,,apbio_0,fpgaio_0
-J21[31],IO_8,8,,uart0_tx,,apbio_1,fpgaio_1
-J18[3],IO_9,9,,uart1_tx,,apbio_2,fpgaio_2
-J18[5],IO_10,10,,uart1_rx,,apbio_3,fpgaio_3
+J18[5],IO_7,7,,uart0_rx,,apbio_0,fpgaio_0
+J18[3],IO_8,8,,uart0_tx,,apbio_1,fpgaio_1
+J21[31],IO_9,9,,uart1_tx,,apbio_2,fpgaio_2
+J21[29],IO_10,10,,uart1_rx,,apbio_3,fpgaio_3
 LED[0],IO_11,11,,apbio_32,apbio_47,apbio_4,fpgaio_4
 J18[7],IO_12,12,,apbio_0,,apbio_5,fpgaio_5
 J21[7],Jxadc[1],13,,qspim0_csn0,apbio_34,apbio_6,fpgaio_6

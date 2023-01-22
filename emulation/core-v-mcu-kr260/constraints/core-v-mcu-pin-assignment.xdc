@@ -25,8 +25,8 @@ set_property -dict { PACKAGE_PIN B11 IOSTANDARD LVCMOS33 } [get_ports { xilinx_i
 
 ##Pmod Header J18
 #set_property -dict { PACKAGE_PIN J11   IOSTANDARD LVCMOS33 } [get_ports { J18[1] }];
-set_property -dict { PACKAGE_PIN J10 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[9] }];
-set_property -dict { PACKAGE_PIN K13 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[10] }];
+set_property -dict { PACKAGE_PIN J10 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[8] }];
+set_property -dict { PACKAGE_PIN K13 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[7] }];
 set_property -dict { PACKAGE_PIN K12 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[12] }];
 set_property -dict { PACKAGE_PIN H11 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[3] }];
 set_property -dict { PACKAGE_PIN G10 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[1] }];
@@ -64,8 +64,8 @@ set_property -dict { PACKAGE_PIN Y14 IOSTANDARD LVCMOS33 } [get_ports { xilinx_i
 set_property -dict { PACKAGE_PIN AA12 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[20] }];
 set_property -dict { PACKAGE_PIN W12 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[45] }];
 set_property -dict { PACKAGE_PIN W11 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[4] }];
-set_property -dict { PACKAGE_PIN AH14 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[7] }];
-set_property -dict { PACKAGE_PIN AG13 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[8] }];
+set_property -dict { PACKAGE_PIN AH14 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[10] }];
+set_property -dict { PACKAGE_PIN AG13 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[9] }];
 set_property -dict { PACKAGE_PIN AB13 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[46] }];
 set_property -dict { PACKAGE_PIN Y13 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[47] }];
 set_property -dict { PACKAGE_PIN AA8 IOSTANDARD LVCMOS33 } [get_ports { xilinx_io[6] }]; #J21[22]
