@@ -1035,7 +1035,7 @@ if args.xilinx_core_v_mcu_sv != None:
                 if sysionames[ionum] == "ref_clk_i":
                     x_sv.write("  // Input clock buffer\n")
                     x_sv.write("  IBUFG #(\n")
-                    x_sv.write("    .IOSTANDARD(\"LVCMOS33\"),\n")
+                    x_sv.write("    .IOSTANDARD(\"LVCMOS18\"),\n")
                     x_sv.write("    .IBUF_LOW_PWR(\"FALSE\")\n")
                     x_sv.write("  ) i_sysclk_iobuf (\n")
                     x_sv.write("    .I(ref_clk),\n")
@@ -1102,9 +1102,10 @@ if args.input_xdc != None:
     with open(args.input_xdc, 'r') as input_xdc:
         with open(args.output_xdc, 'w+') as output_xdc:
             output_xdc.write("set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {s_tck}]\n")
+            #output_xdc.write("set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_sysclk_iobuf/O]\n")
             for line in input_xdc:
                 elements = line.split()
-                if len(elements) >= 10 :
+                if len(elements) > 10 :
                     if elements[10] == "sysclk_p" or elements[10] == "sysclk_n" :
                         elements[0] = elements[0][1:]
                         output_xdc.write(' '.join(elements) + "\n")

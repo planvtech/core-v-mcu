@@ -354,9 +354,9 @@ module core_v_mcu #(
 
       .dft_test_mode_i(s_test_mode),
       .dft_cg_enable_i(s_dft_cg_enable),
-      .bootsel_i(bootsel_i),
+      .bootsel_i(1'b0),
       .jtag_tck_i  (jtag_tck_i),
-      .jtag_trst_ni(jtag_trst_i),
+      .jtag_trst_ni(1'b1),
       .jtag_tms_i  (jtag_tms_i),
       .jtag_tdi_i  (jtag_tdi_i),
       .jtag_tdo_o  (jtag_tdo_o),
