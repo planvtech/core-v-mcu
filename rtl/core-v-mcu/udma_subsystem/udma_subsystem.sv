@@ -105,7 +105,7 @@ module udma_subsystem #(
   localparam N_STREAMS = `N_FILTER + `N_ETH;
   localparam STREAM_ID_WIDTH = 1;  //$clog2(N_STREAMS)
 
-  localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + N_EXT_PER;
+  localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + `N_ETH + N_EXT_PER;
   if (N_PERIPHS > 28)
     $error("Too many udma periperals: limit is 28 (32 event channels - 4 for FPGA)");
   
@@ -1049,8 +1049,7 @@ module udma_subsystem #(
 
       udma_ethernet #(
         .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
-        .TRANS_SIZE(TRANS_SIZE),
-        .DATA_WIDTH(32)
+        .TRANS_SIZE(TRANS_SIZE)
       )i_ethernet (
         .sys_clk_i(s_clk_periphs_core[PER_ID_ETH+g_eth]),
         .periph_clk_i(eth_clk_i),
@@ -1103,14 +1102,14 @@ module udma_subsystem #(
         .cfg_tx_bytes_left_i(s_tx_ch_bytes_left[CH_ID_TX_ETH+g_eth]),
         .cfg_tx_datasize_o  (),  // FIXME ANTONIO
 
-        .ethernet_tx_data_i(s_stream_data[STREAM_ID_ETH+g_eth]),    //  input  logic            [DATA_WIDTH-1:0]    
+        .ethernet_tx_data_i(s_stream_data[STREAM_ID_ETH+g_eth]),    //  input  logic            [31:0]    
         .ethernet_tx_valid_i(s_stream_valid[STREAM_ID_ETH+g_eth]),  //  input  logic                                
         .ethernet_tx_sof_i(s_stream_sot[STREAM_ID_ETH+g_eth]),      //  input  logic                                
         .ethernet_tx_eof_i(s_stream_eot[STREAM_ID_ETH+g_eth]),      //  input  logic                                
         .ethernet_tx_ready_o(s_stream_ready[STREAM_ID_ETH+g_eth]),  //  output logic                                
 
         .ethernet_rx_id_o(s_rx_ext_stream_id[CH_ID_EXT_RX_ETH+g_eth]),      //  output  logic          [FILTID_WIDTH-1:0]   
-        .ethernet_rx_data_o(s_rx_ext_data[CH_ID_EXT_RX_ETH+g_eth]),         //  output  logic            [DATA_WIDTH-1:0]   
+        .ethernet_rx_data_o(s_rx_ext_data[CH_ID_EXT_RX_ETH+g_eth]),         //  output  logic            [31:0]   
         .ethernet_rx_datasize_o(s_rx_ext_datasize[CH_ID_EXT_RX_ETH+g_eth]), //  output  logic                       [1:0]   
         .ethernet_rx_valid_o(s_rx_ext_valid[CH_ID_EXT_RX_ETH+g_eth]),       //  output  logic                               
         .ethernet_rx_sof_o(s_rx_ext_sot[CH_ID_EXT_RX_ETH+g_eth]),           //  output  logic                               

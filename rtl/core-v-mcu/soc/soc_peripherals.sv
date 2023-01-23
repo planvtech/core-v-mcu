@@ -396,7 +396,7 @@ module soc_peripherals #(
       .eth_clk_i(eth_clk_i),
       .eth_clk_90_i(eth_clk_90_i),
       .eth_rstn_i(eth_rstn_i),
-      .eth_relay_ref_clk_i(eth_relay_ref_clk_i),
+      .eth_delay_ref_clk_i(eth_delay_ref_clk_i),
 
       .udma_apb_paddr  (s_udma_bus.paddr[APB_ADDR_WIDTH-1:0]),
       .udma_apb_pwdata (s_udma_bus.pwdata),

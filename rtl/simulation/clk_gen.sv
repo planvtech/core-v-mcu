@@ -88,7 +88,7 @@ module clk_gen (
   initial forever #(FPGA_PERIOD / 2) cluster_clk_o = ~cluster_clk_o;
 
   initial forever #(ETH_CLK_PERIOD/2) eth_clk_o = ~eth_clk_o;
-  initial forever #(ETH_CLK_PERIOD/2) eth_delay_ref_clk_o = ~eth_delay_ref_clk_o;
+  initial forever #(ETH_DELAY_REF_CLK_PERIOD/2) eth_delay_ref_clk_o = ~eth_delay_ref_clk_o;
 
   always @(posedge eth_clk_o)
   begin
