@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "udma_qspi_driver.h": "c",
+        "udma_ctrl_reg_defs.h": "c"
+    }
+}

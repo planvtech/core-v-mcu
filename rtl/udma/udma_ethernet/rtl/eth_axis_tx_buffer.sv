@@ -35,7 +35,7 @@ module eth_axis_tx_buffer
     logic   [1:0]   read_data_byte_count;
     udma_dc_fifo #(
     .DATA_WIDTH(36),
-    .BUFFER_DEPTH(32)
+    .BUFFER_DEPTH(2048)
     ) dc_fifo_tx(
     .src_clk_i(s_clk_i),    //input  logic                  
     .src_rstn_i(s_rstn_i),   //input  logic                  

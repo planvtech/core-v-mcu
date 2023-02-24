@@ -26,6 +26,7 @@ Register,Offset/Field,MSB,LSB,Type,Default,Description
 ,,,,,,"0x1: after last transfer for channel,"
 ,,,,,,reload buffer size and start address and restart channel
 0x18,STATUS,,,,,
+,busy,10,10,RO,,
 ,speed,9,8,RO,,
 ,TX_FIFO_OVERFLOW,7,7,RO,,
 ,TX_FIFO_BAD_FRAME,6,6,RO,,

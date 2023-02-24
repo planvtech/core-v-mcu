@@ -16,6 +16,7 @@
 //      Tuser should be passed transparently, tready is driven directly from the fifo, the operation depends on
 //      both tready and tvalid to be high!
 //
+//      note: altering this module quickly for single byte operation, will return word operation as soon as possible 
 
 module eth_axis_rx_buffer 
 (
@@ -44,7 +45,7 @@ module eth_axis_rx_buffer
     logic   [1:0]   read_data_byte_count;
     udma_dc_fifo #(
     .DATA_WIDTH(36),
-    .BUFFER_DEPTH(32)
+    .BUFFER_DEPTH(2048)
     ) dc_fifo_tx(
     .src_clk_i(s_clk_i),    //input  logic                  
     .src_rstn_i(s_rstn_i),   //input  logic                  
@@ -68,45 +69,45 @@ module eth_axis_rx_buffer
     assign m_axis_tlast = buffer_data_o[34];
     assign m_axis_byte_count[1:0] = buffer_data_o[33:32];
 
-    always_ff @( posedge s_clk_i or negedge s_rstn_i ) begin : count_and_shift
-        if(!s_rstn_i)
-        begin
-            read_data_byte_count[1:0]   <=  2'h0;
-            byte_n_0[7:0]               <=  8'h0;
-            byte_n_1[7:0]               <=  8'h0;
-            byte_n_2[7:0]               <=  8'h0;  
-            tuser_reg                   <=  1'b0;
-        end
-        else
-        begin
-            if(s_axis_tready & s_axis_tvalid)
-            begin
-                tuser_reg <= s_axis_tuser ? 1'b1 : tuser_reg;
+    // always_ff @( posedge s_clk_i or negedge s_rstn_i ) begin : count_and_shift
+    //     if(!s_rstn_i)
+    //     begin
+    //         read_data_byte_count[1:0]   <=  2'h0;
+    //         byte_n_0[7:0]               <=  8'h0;
+    //         byte_n_1[7:0]               <=  8'h0;
+    //         byte_n_2[7:0]               <=  8'h0;  
+    //         tuser_reg                   <=  1'b0;
+    //     end
+    //     else
+    //     begin
+    //         if(s_axis_tready & s_axis_tvalid)
+    //         begin
+    //             tuser_reg <= s_axis_tuser ? 1'b1 : tuser_reg;
 
-                if(s_axis_tlast)
-                begin
-                    read_data_byte_count <= 2'h0;
-                    tuser_reg <= 1'b0;
-                end
-                else
-                begin
-                    if(read_data_byte_count == 2'h3)
-                    begin
-                        read_data_byte_count <= 2'h0;
-                        tuser_reg <= 1'b0;
-                    end
-                    else
-                    begin
-                        read_data_byte_count <= read_data_byte_count + 2'h1;
-                    end
-                end
+    //             if(s_axis_tlast)
+    //             begin
+    //                 read_data_byte_count <= 2'h0;
+    //                 tuser_reg <= 1'b0;
+    //             end
+    //             else
+    //             begin
+    //                 if(read_data_byte_count == 2'h3)
+    //                 begin
+    //                     read_data_byte_count <= 2'h0;
+    //                     tuser_reg <= 1'b0;
+    //                 end
+    //                 else
+    //                 begin
+    //                     read_data_byte_count <= read_data_byte_count + 2'h1;
+    //                 end
+    //             end
 
-                byte_n_0[7:0] <= read_data_byte_count[1:0] == 2'h0 ? s_axis_tdata[7:0] : byte_n_0[7:0];
-                byte_n_1[7:0] <= read_data_byte_count[1:0] == 2'h1 ? s_axis_tdata[7:0] : byte_n_1[7:0];
-                byte_n_2[7:0] <= read_data_byte_count[1:0] == 2'h2 ? s_axis_tdata[7:0] : byte_n_2[7:0];
-            end
-        end
-    end
+    //             //byte_n_0[7:0] <= read_data_byte_count[1:0] == 2'h0 ? s_axis_tdata[7:0] : byte_n_0[7:0];
+    //             //byte_n_1[7:0] <= read_data_byte_count[1:0] == 2'h1 ? s_axis_tdata[7:0] : byte_n_1[7:0];
+    //             //byte_n_2[7:0] <= read_data_byte_count[1:0] == 2'h2 ? s_axis_tdata[7:0] : byte_n_2[7:0];
+    //         end
+    //     end
+    // end
 
     always_comb begin : set_data_and_valid
 
@@ -115,6 +116,6 @@ module eth_axis_rx_buffer
                             read_data_byte_count[1:0], 
                             byte_n_2, byte_n_1, byte_n_0, s_axis_tdata};
 
-        buffer_wr_en <= s_axis_tready & s_axis_tvalid & (read_data_byte_count == 2'h3 | s_axis_tlast);
+        buffer_wr_en <= s_axis_tready & s_axis_tvalid; // & (read_data_byte_count == 2'h3 | s_axis_tlast);
     end
 endmodule

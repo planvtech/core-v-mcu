@@ -30,6 +30,8 @@ filesets:
         - rtl/udma_ethernet_reg_if.sv
         - rtl/eth_axis_rx_buffer.sv
         - rtl/eth_axis_tx_buffer.sv
+        - rtl/udma_eth_tx_controller.sv
+        - rtl/udma_eth_rx_controller.sv
         file_type: systemVerilogSource
 
 targets:

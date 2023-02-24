@@ -77,7 +77,8 @@ module udma_ethernet_reg_if #(
     output  logic                       rx_irq_en_o,
     output  logic                       err_irq_en_o,
     output  logic                       en_rx_o,
-    output  logic                       en_tx_o
+    output  logic                       en_tx_o,
+    input   logic                       tx_busy_i
 );
 
     logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr;
@@ -209,7 +210,7 @@ module udma_ethernet_reg_if #(
                 `ETH_REG_TX_CFG:
                 begin
                     r_tx_clr           <= cfg_data_i[6];
-                    r_tx_en            <= cfg_data_i[4];
+                    r_tx_en            <= cfg_data_i[4] & ~tx_busy_i;
                     r_tx_continuous   <= cfg_data_i[0];
                 end
 
@@ -250,7 +251,7 @@ module udma_ethernet_reg_if #(
         `ETH_REG_ETH_SETUP:
             cfg_data_o = {22'h0, r_eth_en_rx, r_eth_en_tx, 8'h0};
         `ETH_REG_STATUS:
-            cfg_data_o = {22'h0,speed_i[1:0], status_i[7:0]};
+            cfg_data_o = {21'h0,tx_busy_i ,speed_i[1:0], status_i[7:0]};
         `ETH_REG_ERROR:
          begin
             cfg_data_o = {26'h0,r_err_tx_fifo_overflow,

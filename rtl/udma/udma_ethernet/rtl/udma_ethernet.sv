@@ -45,7 +45,10 @@ module udma_ethernet #(
     input wire         phy_int_n,
     input wire         phy_pme_n,
 
-    //
+    /*
+    *   Interrupts
+    */
+    output wire        eth_rx_event_o,
 
 	input  logic               [31:0] cfg_data_i,
 	input  logic                [4:0] cfg_addr_i,
@@ -54,41 +57,39 @@ module udma_ethernet #(
 	output logic                      cfg_ready_o,
     output logic               [31:0] cfg_data_o,
 
-    output logic [L2_AWIDTH_NOAL-1:0] cfg_rx_startaddr_o,       // no operational usage !
-    output logic     [TRANS_SIZE-1:0] cfg_rx_size_o,            // no operational usage ! 
-    output logic                [1:0] cfg_rx_datasize_o,        // no operational usage !
-    output logic                      cfg_rx_continuous_o,      // no operational usage !
-    output logic                      cfg_rx_en_o,              // no operational usage !
-    output logic                      cfg_rx_clr_o,             // no operational usage !
-    input  logic                      cfg_rx_en_i,              // no operational usage !
-    input  logic                      cfg_rx_pending_i,         // no operational usage !
-    input  logic [L2_AWIDTH_NOAL-1:0] cfg_rx_curr_addr_i,       // no operational usage !
-    input  logic     [TRANS_SIZE-1:0] cfg_rx_bytes_left_i,      // no operational usage !
+    output logic [L2_AWIDTH_NOAL-1:0] cfg_rx_startaddr_o,       
+    output logic     [TRANS_SIZE-1:0] cfg_rx_size_o,            
+    output logic                [1:0] cfg_rx_datasize_o,        
+    output logic                      cfg_rx_continuous_o,      
+    output logic                      cfg_rx_en_o,              
+    output logic                      cfg_rx_clr_o,             
+    input  logic                      cfg_rx_en_i,              
+    input  logic                      cfg_rx_pending_i,         
+    input  logic [L2_AWIDTH_NOAL-1:0] cfg_rx_curr_addr_i,       
+    input  logic     [TRANS_SIZE-1:0] cfg_rx_bytes_left_i,      
 
-    output logic [L2_AWIDTH_NOAL-1:0] cfg_tx_startaddr_o,       // no operational usage !
-    output logic     [TRANS_SIZE-1:0] cfg_tx_size_o,            // no operational usage !
-    output logic                [1:0] cfg_tx_datasize_o,        // no operational usage !
-    output logic                      cfg_tx_continuous_o,      // no operational usage !
-    output logic                      cfg_tx_en_o,              // no operational usage !
-    output logic                      cfg_tx_clr_o,             // no operational usage !
-    input  logic                      cfg_tx_en_i,              // no operational usage !
-    input  logic                      cfg_tx_pending_i,         // no operational usage !
-    input  logic [L2_AWIDTH_NOAL-1:0] cfg_tx_curr_addr_i,       // no operational usage !
-    input  logic     [TRANS_SIZE-1:0] cfg_tx_bytes_left_i,      // no operational usage !
+    output logic [L2_AWIDTH_NOAL-1:0] cfg_tx_startaddr_o,       
+    output logic     [TRANS_SIZE-1:0] cfg_tx_size_o,            
+    output logic                [1:0] cfg_tx_datasize_o,        
+    output logic                      cfg_tx_continuous_o,      
+    output logic                      cfg_tx_en_o,              
+    output logic                      cfg_tx_clr_o,             
+    input  logic                      cfg_tx_en_i,              
+    input  logic                      cfg_tx_pending_i,         
+    input  logic [L2_AWIDTH_NOAL-1:0] cfg_tx_curr_addr_i,       
+    input  logic     [TRANS_SIZE-1:0] cfg_tx_bytes_left_i,      
 
-    input  logic                      [31:0]    ethernet_tx_data_i,
-    input  logic                                ethernet_tx_valid_i,
-    input  logic                                ethernet_tx_sof_i,
-    input  logic                                ethernet_tx_eof_i,
-    output logic                                ethernet_tx_ready_o,
+    output logic                      data_tx_req_o,
+    input  logic                      data_tx_gnt_i,
+    output logic                [1:0] data_tx_datasize_o,
+    input  logic               [31:0] data_tx_i,
+    input  logic                      data_tx_valid_i,
+    output logic                      data_tx_ready_o,
 
-    output  logic          [ETHID_WIDTH-1:0]    ethernet_rx_id_o,
-    output  logic                     [31:0]    ethernet_rx_data_o,
-    output  logic                       [1:0]   ethernet_rx_datasize_o,
-    output  logic                               ethernet_rx_valid_o,
-    output  logic                               ethernet_rx_sof_o,
-    output  logic                               ethernet_rx_eof_o,
-    input   logic                               ethernet_rx_ready_i
+    output logic                [1:0] data_rx_datasize_o,
+    output logic               [31:0] data_rx_o,
+    output logic                      data_rx_valid_o,
+    input  logic                      data_rx_ready_i
 );
 
     assign cfg_tx_datasize_o  = 2'b00;
@@ -99,9 +100,17 @@ module udma_ethernet #(
     logic                      s_eth_err_irq_en;
     logic                      s_eth_en_rx;
     logic                      s_eth_en_tx;
-    
     /*
-     * AXI input
+    *  TX Buffer AXIS Input   
+    */
+    wire    [31:0]   tx_buffer_axis_tdata;
+    wire             tx_buffer_axis_tvalid;
+    wire             tx_buffer_axis_tsize;
+    wire             tx_buffer_axis_tready;
+    wire             tx_buffer_axis_tlast;
+    wire             tx_buffer_axis_tuser;
+    /*
+     * Core AXIS input
      */
     wire    [7:0]   eth_tx_axis_tdata;
     wire            eth_tx_axis_tvalid;
@@ -110,7 +119,7 @@ module udma_ethernet #(
     wire            eth_tx_axis_tuser;
 
     /*
-     * AXI output
+     * AXIS output
      */
     wire    [7:0]  eth_rx_axis_tdata;
     wire           eth_rx_axis_tvalid;
@@ -140,6 +149,48 @@ module udma_ethernet #(
                                 eth_rx_fifo_overflow,
                                 eth_rx_fifo_bad_frame,
                                 eth_rx_fifo_good_frame};
+
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_tx_startaddr_s;
+    logic        [TRANS_SIZE-1:0]  reg_tx_size_s;
+    logic                          reg_tx_continuous_s;
+    logic                          reg_tx_en_to_ctrl;
+    logic                          reg_tx_clr_s;
+    logic                          reg_tx_en_from_ctrl;
+    logic                          reg_tx_pending_s;
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_tx_curr_addr_s;
+    logic        [TRANS_SIZE-1:0]  reg_tx_bytes_left_s;
+    logic                          s_tx_busy;
+
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr_s;
+    logic        [TRANS_SIZE-1:0]  reg_rx_size_s;
+    logic                          reg_rx_continuous_s;
+    logic                          reg_rx_en_to_ctrl;
+    logic                          reg_rx_en_from_ctrl;
+    logic                          reg_rx_clr_s;
+    logic                          reg_rx_pending_s;
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_curr_addr_s;
+    logic        [TRANS_SIZE-1:0]  reg_rx_bytes_left_s;
+
+    logic                          rx_channel_enable;
+    logic                          rx_buffer_valid;
+    logic                          rx_buffer_ready;
+
+    logic                          rx_queue_ready;
+    logic                   [7:0]  rx_buffer_axis_tdata;
+    logic                          rx_buffer_axis_tvalid;
+    logic                          rx_buffer_axis_tready;
+    logic                          rx_buffer_axis_tlast;
+    logic                          rx_buffer_axis_tuser;
+
+    assign rx_buffer_ready = rx_channel_enable ? data_rx_ready_i : 1'b0;
+    assign data_rx_valid_o = rx_channel_enable ? rx_buffer_valid : 1'b0;
+
+    assign rx_buffer_axis_tdata = eth_rx_axis_tdata;
+    assign rx_buffer_axis_tvalid = rx_queue_ready ? eth_rx_axis_tvalid : 1'b0;
+    assign rx_buffer_axis_tlast = eth_rx_axis_tlast;
+    assign rx_buffer_axis_tuser = eth_rx_axis_tvalid;
+    assign eth_rx_axis_tready   = rx_queue_ready ? rx_buffer_axis_tready : 1'b0;
+
     //CONFIGURATION
     wire        mac_gmii_tx_en = s_eth_en_tx;
 
@@ -157,34 +208,146 @@ module udma_ethernet #(
         .cfg_ready_o        ( cfg_ready_o         ),
         .cfg_data_o         ( cfg_data_o          ),
 
-        .cfg_rx_startaddr_o ( cfg_rx_startaddr_o  ),
-        .cfg_rx_size_o      ( cfg_rx_size_o       ),
-        .cfg_rx_continuous_o( cfg_rx_continuous_o ),
-        .cfg_rx_en_o        ( cfg_rx_en_o         ),
-        .cfg_rx_clr_o       ( cfg_rx_clr_o        ),
-        .cfg_rx_en_i        ( cfg_rx_en_i         ),
-        .cfg_rx_pending_i   ( cfg_rx_pending_i    ),
-        .cfg_rx_curr_addr_i ( cfg_rx_curr_addr_i  ),
-        .cfg_rx_bytes_left_i( cfg_rx_bytes_left_i ),
+        .cfg_rx_startaddr_o ( reg_rx_startaddr_s  ),
+        .cfg_rx_size_o      ( reg_rx_size_s       ),
+        .cfg_rx_continuous_o( reg_rx_continuous_s ),
+        .cfg_rx_en_o        ( reg_rx_en_to_ctrl   ),
+        .cfg_rx_clr_o       ( reg_rx_clr_s        ),
+        .cfg_rx_en_i        ( reg_rx_en_from_ctrl ),
+        .cfg_rx_pending_i   ( reg_rx_pending_s    ),
+        .cfg_rx_curr_addr_i ( reg_rx_curr_addr_s  ),
+        .cfg_rx_bytes_left_i( reg_rx_bytes_left_s ),
 
-        .cfg_tx_startaddr_o ( cfg_tx_startaddr_o  ),
-        .cfg_tx_size_o      ( cfg_tx_size_o       ),
-        .cfg_tx_continuous_o( cfg_tx_continuous_o ),
-        .cfg_tx_en_o        ( cfg_tx_en_o         ),
-        .cfg_tx_clr_o       ( cfg_tx_clr_o        ),
-        .cfg_tx_en_i        ( cfg_tx_en_i         ),
-        .cfg_tx_pending_i   ( cfg_tx_pending_i    ),
-        .cfg_tx_curr_addr_i ( cfg_tx_curr_addr_i  ),
-        .cfg_tx_bytes_left_i( cfg_tx_bytes_left_i ),
+        .cfg_tx_startaddr_o ( reg_tx_startaddr_s  ),
+        .cfg_tx_size_o      ( reg_tx_size_s       ),
+        .cfg_tx_continuous_o( reg_tx_continuous_s ),
+        .cfg_tx_en_o        ( reg_tx_en_to_ctrl   ),
+        .cfg_tx_clr_o       ( reg_tx_clr_s        ),
+        .cfg_tx_en_i        ( reg_tx_en_from_ctrl ),
+        .cfg_tx_pending_i   ( reg_tx_pending_s    ),
+        .cfg_tx_curr_addr_i ( reg_tx_curr_addr_s  ),
+        .cfg_tx_bytes_left_i( reg_tx_bytes_left_s ),
 
         .status_i           ( eth_status        ),
         .speed_i            ( eth_speed         ),
         .rx_fcs_i           ( eth_rx_fcs_reg    ),
         .tx_fcs_i           ( eth_tx_fcs_reg    ),
         .rx_irq_en_o        ( s_eth_rx_irq_en   ),
-        .err_irq_en_o       ( s_eth_err_irq_en ),
+        .err_irq_en_o       ( s_eth_err_irq_en  ),
         .en_rx_o			( s_eth_en_rx       ),
-        .en_tx_o			( s_eth_en_tx       )
+        .en_tx_o			( s_eth_en_tx       ),
+        .tx_busy_i          ( s_tx_busy         )
+    );
+
+    //////////////////////////////////////////////////////////
+    // TX CONTROLLER
+    //////////////////////////////////////////////////////////
+    udma_eth_tx_controller #(
+    .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
+    .TRANS_SIZE(TRANS_SIZE)
+    )
+    u_eth_tx_ctrl
+    (
+    .clk_i(sys_clk_i),
+    .rstn_i(rstn_i),
+    ////////////// interface to core //////////////////////////
+    .cfg_tx_startaddr_o(cfg_tx_startaddr_o),
+    .cfg_tx_size_o(cfg_tx_size_o),
+    .cfg_tx_datasize_o(cfg_tx_datasize_o),
+    .cfg_tx_continuous_o(cfg_tx_continuous_o),
+    .cfg_tx_en_o(cfg_tx_en_o),
+    .cfg_tx_clr_o(cfg_tx_clr_o),
+    .cfg_tx_en_i(cfg_tx_en_i),
+    .cfg_tx_pending_i(cfg_tx_pending_i),
+    .cfg_tx_curr_addr_i(cfg_tx_curr_addr_i),
+    .cfg_tx_bytes_left_i(cfg_tx_bytes_left_i),
+
+    ////////////// interface with the register control ////////
+
+    .reg_tx_startaddr_i(reg_tx_startaddr_s),
+    .reg_tx_size_i(reg_tx_size_s),
+    .reg_tx_continuous_i(reg_tx_continuous_s),
+    .reg_tx_en_i(reg_tx_en_to_ctrl),
+    .reg_tx_clr_i(reg_tx_clr_s),
+    .reg_tx_en_o(reg_tx_en_from_ctrl),
+    .reg_tx_pending_o(reg_tx_pending_s),
+    .reg_tx_curr_addr_o(reg_tx_curr_addr_s),
+    .reg_tx_bytes_left_o(reg_tx_bytes_left_s),
+    .busy_o(tx_busy_s),
+
+    ///////////// udma data channel /////////////////////
+    
+    .data_tx_req_o(data_tx_req_o),
+    .data_tx_gnt_i(data_tx_gnt_i),
+    .data_tx_datasize_o(data_tx_datasize_o),
+    .data_tx_i(data_tx_i),
+    .data_tx_valid_i(data_tx_valid_i),
+    .data_tx_ready_o(data_tx_ready_o),
+
+    ////////////// eth axis channel ///////////////////////
+
+    .m_axis_tdata_o(tx_buffer_axis_tdata),
+    .m_axis_tsize_o(tx_buffer_axis_tsize),
+    .m_axis_tvalid_o(tx_buffer_axis_tvalid),
+    .m_axis_tuser_o(tx_buffer_axis_tuser),
+    .m_axis_tlast_o(tx_buffer_axis_tlast),
+    .m_axis_tready_i(tx_buffer_axis_tready) 
+    );
+
+
+    //////////////////////////////////////////////////////////
+    // RX CONTROLLER
+    //////////////////////////////////////////////////////////
+    udma_eth_rx_controller #(
+    .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
+    .TRANS_SIZE(TRANS_SIZE)
+    )
+    u_eth_rx_ctrl
+    (
+    //////////////// system clk and its associated reset
+    .sys_clk_i(sys_clk_i),
+    .sys_rstn_i(rstn_i),
+    //////////////// 125MHz clk and its associated reset
+    .eth_clk_i(periph_clk_i),
+    .eth_rstn_i(periph_rstn_i),
+    ////////////// interface to core //////////////////////////
+    .cfg_rx_startaddr_o(cfg_rx_startaddr_o),
+    .cfg_rx_size_o(cfg_rx_size_o),
+    .cfg_rx_datasize_o(cfg_rx_datasize_o),
+    .cfg_rx_continuous_o(cfg_rx_continuous_o),
+    .cfg_rx_en_o(cfg_rx_en_o),
+    .cfg_rx_clr_o(cfg_rx_clr_o),
+    .cfg_rx_en_i(cfg_rx_en_i),
+    .cfg_rx_pending_i(cfg_rx_pending_i),
+    .cfg_rx_curr_addr_i(cfg_rx_curr_addr_i),
+    .cfg_rx_bytes_left_i(cfg_rx_bytes_left_i),
+
+    ////////////// interface with the register control ////////
+
+    .reg_rx_startaddr_i(reg_rx_startaddr_s),
+    .reg_rx_continuous_i(reg_rx_continuous_s),
+    .reg_rx_clr_i(reg_rx_clr_s),
+    .reg_rx_en_o(reg_rx_en_to_ctrl),
+    .reg_rx_pending_o(reg_rx_pending_s),
+    .reg_rx_curr_addr_o(reg_rx_curr_addr_s),
+    .reg_rx_bytes_left_o(reg_rx_bytes_left_s),
+
+    ///////////// udma data channel control  /////////////////////
+    
+    .rx_buffer_ready_i(rx_buffer_ready),
+    .rx_buffer_rd_en_o(rx_channel_enable),
+    .rx_buffer_valid_i(rx_buffer_valid),
+    ////////////// eth axis channel monitor///////////////////////
+
+    .s_axis_tvalid_i(rx_buffer_axis_tvalid),
+    .s_axis_tlast_i(rx_buffer_axis_tlast),
+    .s_axis_tready_i(rx_buffer_axis_tready),
+
+    //////////////  rx_interrupt        //////////////////////////////
+    .eth_rx_event(eth_rx_event_o),
+    .eth_error_event(),
+    //////////////  packet_queue_ready    //////////////////////////////
+    .packet_queue_ready_o(rx_queue_ready)
     );
 
 
@@ -192,32 +355,32 @@ module udma_ethernet #(
     (
     .s_clk_i(periph_clk_i),             //  input   logic   
     .s_rstn_i(periph_rstn_i),           //  input   logic   
-    .s_axis_tdata(eth_rx_axis_tdata),   //  input   logic   [7:0]
-    .s_axis_tvalid(eth_rx_axis_tvalid), //  input   logic   
-    .s_axis_tuser(eth_rx_axis_tuser),   //  input   logic   
-    .s_axis_tlast(eth_rx_axis_tlast),   //  input   logic   
-    .s_axis_tready(eth_rx_axis_tready), //  output  logic   
+    .s_axis_tdata(rx_buffer_axis_tdata),   //  input   logic   [7:0]
+    .s_axis_tvalid(rx_buffer_axis_tvalid), //  input   logic   
+    .s_axis_tuser(rx_buffer_axis_tuser),   //  input   logic   
+    .s_axis_tlast(rx_buffer_axis_tlast),   //  input   logic   
+    .s_axis_tready(rx_buffer_axis_tready), //  output  logic   
 
     .m_clk_i(sys_clk_i),                        //  input   logic           
     .m_rstn_i(rstn_i),                          //  input   logic           
-    .m_axis_tdata(ethernet_rx_data_o),          //  output  logic   [31:0]  
-    .m_axis_byte_count(ethernet_rx_datasize_o), //  input   logic   [1:0]   
-    .m_axis_tvalid(ethernet_rx_valid_o),        //  output  logic           
-    .m_axis_tuser(ethernet_rx_sof_o),           //  output  logic           
-    .m_axis_tlast(ethernet_rx_eof_o),           //  output  logic           
-    .m_axis_tready(ethernet_rx_ready_i)         //  input   logic           
+    .m_axis_tdata(data_rx_o),          //  output  logic   [31:0]  
+    .m_axis_byte_count(data_rx_datasize_o), //  input   logic   [1:0]   
+    .m_axis_tvalid(rx_buffer_valid),        //  output  logic           
+    .m_axis_tuser(),           //  output  logic           
+    .m_axis_tlast(),           //  output  logic           
+    .m_axis_tready(rx_buffer_ready)         //  input   logic           
     );
 
     eth_axis_tx_buffer tx_buffer_i
     (
     .s_clk_i(sys_clk_i),                    //  input   logic          
     .s_rstn_i(rstn_i),                      //  input   logic          
-    .s_axis_tdata(ethernet_tx_data_i),      //  input   logic   [31:0] 
-    .s_axis_byte_count(2'b11),              //  input   logic   [1:0]  //mustafa - check if there is any way to utilize this
-    .s_axis_tvalid(ethernet_tx_valid_i),    //  input   logic          
-    .s_axis_tuser(ethernet_tx_sof_i),       //  input   logic          
-    .s_axis_tlast(ethernet_tx_eof_i),       //  input   logic          
-    .s_axis_tready(eth_tx_axis_tready),     //  output  logic           
+    .s_axis_tdata(tx_buffer_axis_tdata),      //  input   logic   [31:0] 
+    .s_axis_byte_count(tx_buffer_axis_tsize),              //  input   logic   
+    .s_axis_tvalid(tx_buffer_axis_tvalid),    //  input   logic          
+    .s_axis_tuser(tx_buffer_axis_tuser),       //  input   logic          
+    .s_axis_tlast(tx_buffer_axis_tlast),       //  input   logic          
+    .s_axis_tready(tx_buffer_axis_tready),     //  output  logic           
 
     .m_clk_i(periph_clk_i),                 //  input   logic          
     .m_rstn_i(periph_rstn_i),               //  input   logic          

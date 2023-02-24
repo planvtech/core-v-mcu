@@ -20,8 +20,8 @@ echo "######################################"
   && python3 util/ioscript.py\
       --soc-defines rtl/includes/pulp_soc_defines.svh\
       --peripheral-defines rtl/includes/pulp_peripheral_defines.svh\
-      --periph-bus-defines rtl/includes/periph_bus_defines.sv\
-      --pin-table pin-table.csv\
+      --periph-bus-defines rtl/includes/periph_bus_defines.svh\
+      --pin-table nexys-pin-table.csv\
       --perdef-json perdef.json\
       --pad-control rtl/core-v-mcu/top/pad_control.sv\
       --pad-frame-sv rtl/core-v-mcu/top/pad_frame.sv\

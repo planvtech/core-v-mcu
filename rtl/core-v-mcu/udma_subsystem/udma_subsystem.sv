@@ -100,9 +100,9 @@ module udma_subsystem #(
   if (`N_RX_CHANNELS != N_RX_CHANNELS) $error("N_RX_CHANNELS mismatch");
   if (`N_TX_CHANNELS != N_TX_CHANNELS) $error("N_TX_CHANNELS mismatch");
   
-  localparam N_RX_EXT_CHANNELS = `N_FILTER + `N_ETH;
-  localparam N_TX_EXT_CHANNELS = 2 * `N_FILTER + `N_ETH;
-  localparam N_STREAMS = `N_FILTER + `N_ETH;
+  localparam N_RX_EXT_CHANNELS = `N_FILTER;
+  localparam N_TX_EXT_CHANNELS = 2 * `N_FILTER;
+  localparam N_STREAMS = `N_FILTER;
   localparam STREAM_ID_WIDTH = 1;  //$clog2(N_STREAMS)
 
   localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + `N_ETH + N_EXT_PER;
@@ -150,17 +150,7 @@ module udma_subsystem #(
   localparam CH_ID_EXT_TX_FILTER = 0;
   localparam CH_ID_EXT_RX_FILTER = 0;
 
-  localparam CH_ID_EXT_TX_ETH = 2;
-  localparam CH_ID_EXT_RX_ETH = 1;
-
   localparam STREAM_ID_FILTER = 0;
-  localparam STREAM_ID_ETH = 1;
-
-  $info("N_ETH = %d" , `N_ETH);
-  $info("N_FILTER = %d" , `N_FILTER);
-  $info("CH_ID_TX_ETH = %d" , `CH_ID_TX_ETH);
-  $info("CH_ID_RX_ETH = %d" , CH_ID_RX_ETH);
-  $info("PER_ID_ETH = %d" , PER_ID_ETH);
 
   logic   [    N_TX_CHANNELS-1:0][ L2_AWIDTH_NOAL-1 : 0] s_tx_cfg_startaddr;
   logic   [    N_TX_CHANNELS-1:0][     TRANS_SIZE-1 : 0] s_tx_cfg_size;
@@ -257,6 +247,17 @@ module udma_subsystem #(
   logic                                                  s_filter_eot_evt;
   logic                                                  s_filter_act_evt;
 
+  logic                                                  eth_rx_evt;
+ 
+  //phy loopback, will be set to outputs after verification at this level
+  logic                                                  phy_rx_clk;
+  logic   [3:0]                                          phy_rxd;
+  logic                                                  phy_rx_ctl;
+  logic                                                  phy_tx_clk;
+  logic   [3:0]                                          phy_txd;
+  logic                                                  phy_tx_ctl;
+  logic                                                  phy_reset_n;
+  //////////////////////////////////////////
 
   integer                                                i;
 
@@ -1035,17 +1036,18 @@ module udma_subsystem #(
 // ETHERNET
   generate
     for (genvar g_eth = 0; g_eth < `N_ETH; g_eth++) begin : i_eth_gen
-      assign s_events[4*(PER_ID_ETH+g_eth)+0] = 1'b0;
-      assign s_events[4*(PER_ID_ETH+g_eth)+1] = 1'b0;
-      assign s_events[4*(PER_ID_ETH+g_eth)+2] = 1'b0;
+      assign s_events[4*(PER_ID_ETH+g_eth)+0] = s_rx_ch_events[CH_ID_RX_ETH+g_eth];
+      assign s_events[4*(PER_ID_ETH+g_eth)+1] = s_tx_ch_events[CH_ID_TX_ETH+g_eth];
+      assign s_events[4*(PER_ID_ETH+g_eth)+2] = eth_rx_evt;
       assign s_events[4*(PER_ID_ETH+g_eth)+3] = 1'b0;
 
-      assign s_rx_ext_destination[CH_ID_EXT_RX_ETH+g_eth][DEST_SIZE - 1 : 0] = 'h0;
-      assign s_rx_ext_stream[CH_ID_EXT_RX_ETH+g_eth] = 'h0;
-
-      assign s_tx_ext_destination[CH_ID_EXT_TX_ETH+g_eth][DEST_SIZE - 1] = 'h0;
-
       assign s_per_rst[PER_ID_ETH+g_eth] = sys_resetn_i & !s_rst_periphs[PER_ID_ETH+g_eth];
+
+      //phy signals loopback
+      assign phy_rx_clk = phy_tx_clk;
+      assign phy_rxd    = phy_txd;
+      assign phy_rx_ctl = phy_tx_ctl;
+      //
 
       udma_ethernet #(
         .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
@@ -1061,17 +1063,19 @@ module udma_subsystem #(
         /*
           * Ethernet: 1000BASE-T RGMII
           */
-        .phy_rx_clk(),  //  input wire        
-        .phy_rxd(),     //  input wire [3:0]  
-        .phy_rx_ctl(),  //  input wire        
-        .phy_tx_clk(),  //  output wire        
-        .phy_txd(),     //  output wire [3:0]  
-        .phy_tx_ctl(),  //  output wire        
-        .phy_reset_n(), //  output wire        
-        .phy_int_n(),   //  input wire        
-        .phy_pme_n(),   //  input wire        
+        .phy_rx_clk(phy_rx_clk),    //  input wire        
+        .phy_rxd(phy_rxd),          //  input wire [3:0]  
+        .phy_rx_ctl(phy_rx_ctl),    //  input wire        
+        .phy_tx_clk(phy_tx_clk),    //  output wire        
+        .phy_txd(phy_txd),          //  output wire [3:0]  
+        .phy_tx_ctl(phy_tx_ctl),    //  output wire        
+        .phy_reset_n(phy_reset_n),  //  output wire        
+        .phy_int_n(phy_int_n),      //  input wire        
+        .phy_pme_n(phy_pme_n),      //  input wire        
 
         //
+
+        .eth_rx_event_o(eth_rx_evt),
 
         .cfg_data_i (s_periph_data_to),
         .cfg_addr_i (s_periph_addr),
@@ -1100,21 +1104,19 @@ module udma_subsystem #(
         .cfg_tx_pending_i   (s_tx_ch_pending[CH_ID_TX_ETH+g_eth]),
         .cfg_tx_curr_addr_i (s_tx_ch_curr_addr[CH_ID_TX_ETH+g_eth]),
         .cfg_tx_bytes_left_i(s_tx_ch_bytes_left[CH_ID_TX_ETH+g_eth]),
-        .cfg_tx_datasize_o  (),  // FIXME ANTONIO
+        .cfg_tx_datasize_o  (),  // FIXME ANTONIO     
 
-        .ethernet_tx_data_i(s_stream_data[STREAM_ID_ETH+g_eth]),    //  input  logic            [31:0]    
-        .ethernet_tx_valid_i(s_stream_valid[STREAM_ID_ETH+g_eth]),  //  input  logic                                
-        .ethernet_tx_sof_i(s_stream_sot[STREAM_ID_ETH+g_eth]),      //  input  logic                                
-        .ethernet_tx_eof_i(s_stream_eot[STREAM_ID_ETH+g_eth]),      //  input  logic                                
-        .ethernet_tx_ready_o(s_stream_ready[STREAM_ID_ETH+g_eth]),  //  output logic                                
+        .data_tx_req_o     (s_tx_ch_req[CH_ID_TX_ETH+g_eth]),
+        .data_tx_gnt_i     (s_tx_ch_gnt[CH_ID_TX_ETH+g_eth]),
+        .data_tx_datasize_o(s_tx_ch_datasize[CH_ID_TX_ETH+g_eth]),
+        .data_tx_i         (s_tx_ch_data[CH_ID_TX_ETH+g_eth]),
+        .data_tx_valid_i   (s_tx_ch_valid[CH_ID_TX_ETH+g_eth]),
+        .data_tx_ready_o   (s_tx_ch_ready[CH_ID_TX_ETH+g_eth]),
 
-        .ethernet_rx_id_o(s_rx_ext_stream_id[CH_ID_EXT_RX_ETH+g_eth]),      //  output  logic          [FILTID_WIDTH-1:0]   
-        .ethernet_rx_data_o(s_rx_ext_data[CH_ID_EXT_RX_ETH+g_eth]),         //  output  logic            [31:0]   
-        .ethernet_rx_datasize_o(s_rx_ext_datasize[CH_ID_EXT_RX_ETH+g_eth]), //  output  logic                       [1:0]   
-        .ethernet_rx_valid_o(s_rx_ext_valid[CH_ID_EXT_RX_ETH+g_eth]),       //  output  logic                               
-        .ethernet_rx_sof_o(s_rx_ext_sot[CH_ID_EXT_RX_ETH+g_eth]),           //  output  logic                               
-        .ethernet_rx_eof_o(s_rx_ext_eot[CH_ID_EXT_RX_ETH+g_eth]),           //  output  logic                               
-        .ethernet_rx_ready_i(s_rx_ext_ready[CH_ID_EXT_RX_ETH+g_eth])       //  input   logic                               
+        .data_rx_datasize_o(s_rx_ch_datasize[CH_ID_RX_ETH+g_eth]),
+        .data_rx_o         (s_rx_ch_data[CH_ID_RX_ETH+g_eth]),
+        .data_rx_valid_o   (s_rx_ch_valid[CH_ID_RX_ETH+g_eth]),
+        .data_rx_ready_i   (s_rx_ch_ready[CH_ID_RX_ETH+g_eth])                  
       );
     end
   endgenerate
