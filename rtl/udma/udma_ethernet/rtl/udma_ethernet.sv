@@ -92,9 +92,6 @@ module udma_ethernet #(
     input  logic                      data_rx_ready_i
 );
 
-    assign cfg_tx_datasize_o  = 2'b00;
-    assign cfg_rx_datasize_o  = 2'b00;
-
     logic               [7:0]  s_eth_status;
     logic                      s_eth_rx_irq_en;
     logic                      s_eth_err_irq_en;
@@ -273,7 +270,7 @@ module udma_ethernet #(
     .reg_tx_pending_o(reg_tx_pending_s),
     .reg_tx_curr_addr_o(reg_tx_curr_addr_s),
     .reg_tx_bytes_left_o(reg_tx_bytes_left_s),
-    .busy_o(tx_busy_s),
+    .busy_o(s_tx_busy),
 
     ///////////// udma data channel /////////////////////
     
@@ -327,7 +324,7 @@ module udma_ethernet #(
     .reg_rx_startaddr_i(reg_rx_startaddr_s),
     .reg_rx_continuous_i(reg_rx_continuous_s),
     .reg_rx_clr_i(reg_rx_clr_s),
-    .reg_rx_en_o(reg_rx_en_to_ctrl),
+    .reg_rx_en_o(reg_rx_en_from_ctrl),
     .reg_rx_pending_o(reg_rx_pending_s),
     .reg_rx_curr_addr_o(reg_rx_curr_addr_s),
     .reg_rx_bytes_left_o(reg_rx_bytes_left_s),

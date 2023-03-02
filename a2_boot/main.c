@@ -45,13 +45,15 @@
 uint16_t udma_uart_open (uint8_t uart_id, uint32_t xbaudrate);
 uint16_t udma_uart_writeraw(uint8_t uart_id, uint16_t write_len, uint8_t* write_buffer);
 uint8_t udma_uart_readraw(uint8_t uart_id, uint16_t read_len, uint8_t* read_buffer);
+uint16_t udma_eth_open (uint8_t eth_id);
+uint16_t udma_eth_writeraw(uint8_t eth_id, uint16_t write_len, uint8_t* write_buffer);
 uint16_t udma_qspim_open (uint8_t qspim_id, uint32_t clk_freq);
 void udma_flash_readid(uint32_t l2addr);
 uint32_t udma_flash_reset_enable(uint8_t qspim_id, uint8_t cs);
 uint32_t udma_flash_reset_memory(uint8_t qspim_id, uint8_t cs);
 void udma_flash_read(uint32_t flash_addr,uint32_t l2addr,uint16_t read_len );
 void dbg_str(const char *s);
-
+void eth_test();
 __attribute__((noreturn)) void changeStack(boot_code_t *data, unsigned int entry, unsigned int stack);
 
 //All the global variables are initialized to 0 by the assembly code in crto.s.
@@ -233,6 +235,9 @@ int main(void)
 
 	udma_uart_open (0, 115200);	//UART 1 is used to print debug msgs from Bootloader
 	udma_uart_open (1, 115200);	//UART 1 is used to print debug msgs from Bootloader
+	//mkdigitals begin
+	eth_test();
+	//mkdigitals end
 	dbg_str(__DATE__);
 	dbg_str("  ");
 	dbg_str(__TIME__);
@@ -340,3 +345,9 @@ uint32_t atoh(uint8_t *aBuf, uint16_t aSize)
     return lValue;
 }
 
+void eth_test()
+{
+	char ethTestString[3] = "Hel";//lo World";
+	udma_eth_open(0);
+	udma_eth_writeraw(0, 3, ethTestString);
+}
