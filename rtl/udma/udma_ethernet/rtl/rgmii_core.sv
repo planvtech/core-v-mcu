@@ -29,7 +29,7 @@ THE SOFTWARE.
  */
 module rgmii_core #
 (
-    parameter TARGET = "XILINX"
+    parameter TARGET = "GENERIC" //mkdigitals altered this line, org: parameter TARGET = "XILINX"
 )
 (
     /*
@@ -99,7 +99,7 @@ eth_mac_1g_rgmii_fifo #(
     .CLOCK_INPUT_STYLE("BUFR"),
     .USE_CLK90("TRUE"),
     .ENABLE_PADDING(1),
-    .MIN_FRAME_LENGTH(64),
+    .MIN_FRAME_LENGTH(8), ////mkdigitals altered this line, org: .MIN_FRAME_LENGTH(64),
     .TX_FIFO_ADDR_WIDTH(12),
     .TX_FRAME_FIFO(1),
     .RX_FIFO_ADDR_WIDTH(12),

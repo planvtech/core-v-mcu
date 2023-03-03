@@ -102,7 +102,7 @@ module udma_ethernet #(
     */
     wire    [31:0]   tx_buffer_axis_tdata;
     wire             tx_buffer_axis_tvalid;
-    wire             tx_buffer_axis_tsize;
+    wire    [1:0]    tx_buffer_axis_tsize;
     wire             tx_buffer_axis_tready;
     wire             tx_buffer_axis_tlast;
     wire             tx_buffer_axis_tuser;
@@ -403,7 +403,7 @@ module udma_ethernet #(
         .phy_reset_n(phy_reset_n),
         .phy_int_n(phy_int_n),
         .phy_pme_n(phy_pme_n),
-        .mac_gmii_tx_en(mac_gmii_tx_en),
+        .mac_gmii_tx_en(),
         .tx_axis_tdata(eth_tx_axis_tdata),
         .tx_axis_tvalid(eth_tx_axis_tvalid),
         .tx_axis_tready(eth_tx_axis_tready),

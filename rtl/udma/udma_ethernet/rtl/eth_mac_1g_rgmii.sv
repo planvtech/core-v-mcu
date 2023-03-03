@@ -128,15 +128,15 @@ always @(posedge rx_clk) begin
 end
 
 // PHY speed detection
-reg [2:0] rx_prescale;
+reg [2:0] rx_prescale = 'h0; //mkdigitals added initialization value
 
 always @(posedge rx_clk) begin
     rx_prescale <= rx_prescale + 3'd1;
 end
 
-reg rx_prescale_sync_1;
-reg rx_prescale_sync_2;
-reg rx_prescale_sync_3;
+reg rx_prescale_sync_1 = 'b0; //mkdigitals added initialization value
+reg rx_prescale_sync_2 = 'b0; //mkdigitals added initialization value
+reg rx_prescale_sync_3 = 'b0; //mkdigitals added initialization value
 
 always @(posedge gtx_clk) begin
     rx_prescale_sync_1 <= rx_prescale[2];
