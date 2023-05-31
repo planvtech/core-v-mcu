@@ -60,12 +60,15 @@ module udma_eth_tx_controller #(
     input   logic                      m_axis_tready_i 
 );
 
-logic [1:0] state = 2'b00;
-logic [1:0] remainder = 2'b00;
-localparam STATE_IDLE           =   2'b00,
-           STATE_WAIT_GNT       =   2'b01,
-           STATE_TRANSMIT_WORDS =   2'b10,
-           STATE_TRANSMIT_BYTES =   2'b11;
+logic [2:0] state = 3'b000;
+logic [TRANS_SIZE-1:0]      byte_count = 'h1;
+//logic [1:0] remainder = 2'b00; // will be used for wordwise transmission
+localparam STATE_IDLE           =   3'b000,
+           STATE_WAIT_CMD       =   3'b001,
+           STATE_REQ            =   3'b010,
+           STATE_WAIT_GNT       =   3'b011,
+           STATE_TRANSMIT_BYTES =   3'b100; 
+           //STATE_TRANSMIT_WORDS =   3'b101; //will be used for wordwise transmission
 
 assign busy_o   = state != STATE_IDLE & reg_tx_en_o;            
 
@@ -73,90 +76,108 @@ always_ff @( posedge clk_i or negedge rstn_i ) begin : state_machine
     if(!rstn_i)
     begin
         state <= STATE_IDLE;
-        remainder <= 2'b00;
+//      remainder <= 2'b00;
+        cfg_tx_startaddr_o <= 'h0;
+        cfg_tx_size_o <= 'h0;
+        cfg_tx_datasize_o <= 'h0;
+        cfg_tx_en_o <= 'h0;
+        data_tx_datasize_o <= 'h0;
+        m_axis_tuser_o <= 'h0;
+        byte_count <= 'h1;
     end
     else
     begin
+//      data_tx_req_o <= 1'b1;
+        byte_count <= 'h1;
         case(state)
         STATE_IDLE:     // fetch the instruction and raise the data_tx_req_o
         begin
-            if(reg_tx_en_o)
+            
+            if(reg_tx_en_i)
             begin
-                if(reg_tx_size_i > 'h3)
-                begin
-                    cfg_tx_size_o <= {reg_tx_size_i[TRANS_SIZE-1:2], 2'b00};
-                    cfg_tx_datasize_o <= 2'h3;
-                    data_tx_datasize_o <= 2'h3;
-                end
-                else
-                begin
-                    cfg_tx_size_o <= reg_tx_size_i;
-                    cfg_tx_datasize_o <= 2'h0;
-                    data_tx_datasize_o <= 2'h0;
-                end
+                // if(reg_tx_size_i > 'h3)
+                // begin
+                //     cfg_tx_size_o <= {reg_tx_size_i[TRANS_SIZE-1:2], 2'b00};
+                //     cfg_tx_datasize_o <= 2'h3;
+                //     data_tx_datasize_o <= 2'h3;
+                // end
+                // else
+                // begin
+                cfg_tx_size_o <= reg_tx_size_i;
+                //     cfg_tx_datasize_o <= 2'h0;
+                //     data_tx_datasize_o <= 2'h0;
+                // end
                 cfg_tx_en_o <= 1'b1;
-                state <= STATE_WAIT_GNT;
-                remainder <= reg_tx_size_i[1:0];
-                data_tx_req_o <= 1'b1;
+                state <= STATE_WAIT_CMD;
+//              remainder <= reg_tx_size_i[1:0];
                 cfg_tx_startaddr_o <= reg_tx_startaddr_i;
                 m_axis_tuser_o <= 1'b1;
             end
-
-            
         end
-
+        STATE_WAIT_CMD:
+        begin
+            if(cfg_tx_en_i)
+            begin
+                cfg_tx_en_o <= 1'b0;
+                state <= STATE_WAIT_GNT;
+            end
+        end
         STATE_WAIT_GNT: 
         begin
             cfg_tx_en_o <= 1'b0;
             if(data_tx_gnt_i)
             begin
-                data_tx_req_o <= 1'b0;
-                if(cfg_tx_datasize_o <= 2'h3)
-                begin
-                    state <= STATE_TRANSMIT_WORDS;
-                end
-                else
-                begin
-                    state <= STATE_TRANSMIT_BYTES;    
-                end
+                // if(cfg_tx_datasize_o == 2'h3)
+                // begin
+                //     state <= STATE_TRANSMIT_WORDS;
+                // end
+                // else
+                // begin
+                     state <= STATE_TRANSMIT_BYTES;    
+                // end
             end
         end
 
-        STATE_TRANSMIT_WORDS:
-        begin
+        // STATE_TRANSMIT_WORDS:
+        // begin
             
-            if(cfg_tx_bytes_left_i == 'h0) //exit condition
+        //     if(cfg_tx_bytes_left_i == 'h0) //exit condition
+        //     begin
+        //         if(remainder == 2'h0)
+        //         begin
+        //             state <= STATE_IDLE;
+        //         end
+        //         else
+        //         begin
+        //             cfg_tx_size_o[TRANS_SIZE-1 : 2] <= 'h0;
+        //             cfg_tx_datasize_o <= 2'h0;
+        //             data_tx_datasize_o <= 2'h0;
+        //             cfg_tx_en_o <= 1'b1;
+        //             state <= STATE_WAIT_GNT;
+        //             cfg_tx_startaddr_o <= cfg_tx_startaddr_o + cfg_tx_size_o;
+        //         end
+        //     end
+
+        //     m_axis_tuser_o <= data_tx_valid_i ? 1'b0 : m_axis_tuser_o;
+
+        // end
+
+        STATE_TRANSMIT_BYTES:
+        begin
+//            remainder <= 2'h0;
+            if(data_tx_valid_i && data_tx_ready_o)
             begin
-                if(remainder == 2'h0)
+                if(byte_count == cfg_tx_size_o)
                 begin
+                    byte_count <= 'h1;
                     state <= STATE_IDLE;
                 end
                 else
                 begin
-                    cfg_tx_size_o[TRANS_SIZE-1 : 2] <= 'h0;
-                    cfg_tx_datasize_o <= 2'h0;
-                    data_tx_datasize_o <= 2'h0;
-                    cfg_tx_en_o <= 1'b1;
-                    state <= STATE_WAIT_GNT;
-                    data_tx_req_o <= 1'b1;
-                    cfg_tx_startaddr_o <= cfg_tx_startaddr_o + cfg_tx_size_o;
+                    byte_count <= byte_count + 'h1;
                 end
             end
-
-            m_axis_tuser_o <= data_tx_valid_i ? 1'b0 : m_axis_tuser_o;
-
-        end
-
-        STATE_TRANSMIT_BYTES:
-        begin
-
-            remainder <= 2'h0;
-
-            if(cfg_tx_bytes_left_i == 'h0) //exit condition
-            begin
-                state <= STATE_IDLE;
-            end
-
+            
             m_axis_tuser_o <= data_tx_valid_i ? 1'b0 : m_axis_tuser_o;
         end
         endcase
@@ -168,7 +189,7 @@ always_comb begin : data_and_indicator_connections
     m_axis_tsize_o <= cfg_tx_datasize_o;
     m_axis_tvalid_o <= data_tx_valid_i;
     data_tx_ready_o <= m_axis_tready_i;
-    m_axis_tlast_o <= remainder == 2'b00 &  cfg_tx_bytes_left_i == 'h0 & data_tx_valid_i;
+    m_axis_tlast_o <= (byte_count ==  cfg_tx_size_o) & data_tx_valid_i;
 
     cfg_tx_continuous_o <=  reg_tx_continuous_i;
     cfg_tx_clr_o        <=  reg_tx_clr_i;
@@ -176,6 +197,7 @@ always_comb begin : data_and_indicator_connections
     reg_tx_pending_o    <=  cfg_tx_pending_i;
     reg_tx_curr_addr_o  <=  cfg_tx_curr_addr_i;
     reg_tx_bytes_left_o <=  cfg_tx_bytes_left_i;
+    data_tx_req_o <= state == STATE_IDLE ? 1'b0 : m_axis_tready_i;
 end
 
 endmodule

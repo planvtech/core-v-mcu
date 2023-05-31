@@ -1,3 +1,12 @@
-vcd file newvcd.vcd
-vcd add -r sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_spim_gen[0]/i_spim/*
-vcd add -r sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_spim_gen[1]/i_spim/*
+vcd file eth.vcd
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/*
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/u_reg_if/*
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/u_eth_tx_ctrl/*
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/u_eth_rx_ctrl/*
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/rx_buffer_i/*
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/tx_buffer_i/*
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_uart_gen[1]/i_uart/*
+vcd add sim:/core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/rgmii_soc1/core_inst/eth_mac_inst/eth_mac_1g_rgmii_inst/*
+vcd add sim:/core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/rgmii_soc1/core_inst/eth_mac_inst/eth_mac_1g_rgmii_inst/rgmii_phy_if_inst/*
+vcd add sim:/core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/i_eth_gen[0]/i_ethernet/rgmii_soc1/core_inst/eth_mac_inst/eth_mac_1g_rgmii_inst/rgmii_phy_if_inst/clk_oddr_inst/*
+vcd add sim:core_v_mcu_tb/core_v_mcu_i/i_soc_domain/soc_peripherals_i/i_udma/*clk*

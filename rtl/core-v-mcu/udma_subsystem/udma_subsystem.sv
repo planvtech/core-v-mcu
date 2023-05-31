@@ -1044,7 +1044,7 @@ module udma_subsystem #(
       assign s_per_rst[PER_ID_ETH+g_eth] = sys_resetn_i & !s_rst_periphs[PER_ID_ETH+g_eth];
 
       //phy signals loopback
-      assign phy_rx_clk = phy_tx_clk;
+      assign phy_rx_clk = eth_clk_90_i;
       assign phy_rxd    = phy_txd;
       assign phy_rx_ctl = phy_tx_ctl;
       //

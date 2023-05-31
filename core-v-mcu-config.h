@@ -20,7 +20,6 @@
 
 #ifndef __CORE_V_MCU_CONFIG_H_
 #define __CORE_V_MCU_CONFIG_H_
-
 #define BUILD_DATE 0x20230527
 #define BUILD_TIME 0x00192630
 

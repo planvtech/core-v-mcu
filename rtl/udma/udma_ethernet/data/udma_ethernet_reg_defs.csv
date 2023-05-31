@@ -35,14 +35,14 @@ Register,Offset/Field,MSB,LSB,Type,Default,Description
 ,RX_ERROR_BAD_FCS,3,3,RO,,
 ,RX_FIFO_OVERFLOW,2,2,RO,,
 ,RX_FIFO_BAD_FRAME,1,1,RO,,
-,TX_FIFO_GOOD_FRAME,0,0,RO,,
+,RX_FIFO_GOOD_FRAME,0,0,RO,,
 0x1C,ETH_SETUP,,,,,
 ,RX_ENABLE,9,9,RW,,
 ,TX_ENABLE,8,8,RW,,
 0x20,ERROR,,,,,
 ,TX_ERROR_FIFO_OVERFLOW,5,5,RC,,0x1 indicates tx fifo overflow error; read clears the bit
 ,TX_ERROR_FIFO_BAD_FRAME,4,4,RC,,0x1 indicates tx fifo bad frame error; read clears the bit
-,RX_ERROR_FIFO_BAD_FRAME,3,3,RC,,0x1 indicates rx bad frame error; read clears the bit
+,RX_ERROR_BAD_FRAME,3,3,RC,,0x1 indicates rx bad frame error; read clears the bit
 ,RX_ERROR_BAD_FCS,2,2,RC,,0x1 indicates rx bad frame check sequence error; read clears the bit
 ,RX_ERROR_FIFO_OVERFLOW,1,1,RC,,0x1 indicates rx fifo overflow error; read clears the bit
 ,RX_ERROR_FIFO_BAD_FRAME,0,0,RC,,0x1 indicates rx fifo bad frame error; read clears the bit
