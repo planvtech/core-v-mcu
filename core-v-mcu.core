@@ -97,18 +97,11 @@ filesets:
     - rtl/simulation/top.sv
     - rtl/simulation/top1_wrapper.sv
     - rtl/simulation/a2_bootrom.sv
-    - rtl/simulation/BUFIO.sv
-    - rtl/simulation/BUFR.sv
-    - rtl/simulation/IDDR.sv
-    - rtl/simulation/IDELAYCTRL.sv
-    - rtl/simulation/IDELAYE2.sv
-    - rtl/simulation/ODDR.sv
-    - rtl/simulation/clk_gen.sv
     file_type: systemVerilogSource
 
   not_emulation-rtl:
     files:
-    ##- rtl/core-v-mcu/soc/clk_gen.sv
+    - rtl/core-v-mcu/soc/clk_gen.sv
     file_type: systemVerilogSource
 
   emulation-rtl:
@@ -293,7 +286,7 @@ targets:
         - --O0
         - -v 0
         - -timescale 1ns/1ps
-        xsim_options:
+  #      xsim_options:
 
   # A target for a Verilator model as a library.  Note that we do not disable
   # UNOPTFLAT warnings, since these will affect performance, so we want to see

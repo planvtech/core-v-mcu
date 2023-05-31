@@ -301,7 +301,8 @@ if args.soc_defines != None and args.pin_table != None:
 ######################################################################
 if args.soc_defines != None and args.peripheral_defines != None and args.perdef_json != None:
     sysio = {"":""}                                                 # row for each sysio = ['name', 'direction']
-    #sysionames = [-1 for row in range(int(soc_defines['N_IO']))]    # row for each sysio = [ionum, 'name']
+    sysionames = [-1 for row in range(int(soc_defines['N_IO']))]    # row for each sysio = [ionum, 'name']
+    N_IO = int(soc_defines['N_IO'])
     with open(args.peripheral_defines, 'w') as peripheral_defines_svh:
         write_license_header(peripheral_defines_svh,"")
         peripheral_defines_svh.write("\n")
@@ -573,6 +574,18 @@ if args.soc_defines != None and args.core_v_mcu_iodef_h != None:
 #
 ################################################
 if args.pad_control_sv != None:
+    N_IO = int(soc_defines['N_IO'])
+    N_PERIO = perio_index
+    N_GPIO = int(soc_defines['N_APBIO'])
+    N_FPGAIO = int(soc_defines['N_FPGAIO'])
+    NBIT_PADMUX = int(soc_defines['NBIT_PADMUX'])
+    N_PADSEL = 2**NBIT_PADMUX
+
+    io_out_mux = [['' for j in range(N_PADSEL)] for i in range(N_IO)]
+    io_oe_mux = [['' for j in range(N_PADSEL)] for i in range(N_IO)]
+    perio_in_mux = [['' for j in range(N_PADSEL)] for i in range(N_PERIO)]
+    apbio_in_mux = [['' for j in range(N_PADSEL)] for i in range(N_GPIO)]
+    fpgaio_in_mux = [['' for j in range(N_PADSEL)] for i in range(N_FPGAIO)]
     with open(args.pad_control_sv, 'w') as pad_control_sv:
         #
         # Write Apache license and header
@@ -1099,6 +1112,8 @@ if args.xilinx_core_v_mcu_sv != None:
 #
 ######################################################################
 if args.input_xdc != None:
+    N_IO = int(soc_defines['N_IO'])
+    xilinx_names = ['' for i in range(N_IO)]
     with open(args.input_xdc, 'r') as input_xdc:
         with open(args.output_xdc, 'w+') as output_xdc:
             output_xdc.write("set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {s_tck}]\n")
