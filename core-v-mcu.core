@@ -126,6 +126,7 @@ filesets:
   nexys-ips:
     files:
     - emulation/xilinx/ips/xilinx_clk_mngr.tcl
+    - emulation/xilinx/ips/xilinx_eth_clk_mngr.tcl
     file_type: tclSource
 
   genesys2-ips:

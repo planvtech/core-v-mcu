@@ -29,6 +29,11 @@ module clk_gen (
                      output logic        soc_clk_o,
                      output logic        per_clk_o,
                      output logic        cluster_clk_o,
+
+                    output logic        eth_clk_o,
+                    output logic        eth_clk_90_o,
+                    output logic        eth_delay_ref_clk_o,
+
                      output logic        soc_cfg_lock_o,
                      input logic         soc_cfg_req_i,
                      output logic        soc_cfg_ack_o,
@@ -53,6 +58,7 @@ module clk_gen (
                      );
 
   logic                                  s_locked;
+  logic                                  s_eth_locked;
 
   xilinx_clk_mngr i_clk_manager
     (
@@ -64,9 +70,22 @@ module clk_gen (
      .locked(s_locked)
      );
 
+  xilinx_eth_clk_mngr i_eth_clk_manager
+  (
+    .resetn(rstn_glob_i),
+    .clk_in1(emul_clk_i[0]),
+    .clk_out1(eth_clk_o),
+    .clk_out2(eth_clk_90_o),
+    .clk_out3(eth_delay_ref_clk_o),
+    .locked(s_eth_locked)
+    );
+
   assign soc_cfg_lock_o = s_locked;
   assign per_cfg_lock_o = s_locked;
   assign cluster_cfg_lock_o = s_locked;
+
+  assign eth_lock_o = s_eth_locked;
+  assign dly_ref_lock_o = s_eth_locked;
 
   // assign soc_cfg_ack_o = 1'b1; //Always acknowledge without doing anything for now
   // assign per_cfg_ack_o = 1'b1;

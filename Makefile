@@ -151,6 +151,8 @@ nexys-emul:
 					export PER_CLK_PERIOD_NS=200;\
 					export FPGA_CLK_PERIOD_NS=125;\
 					export SLOW_CLK_PERIOD_NS=4000;\
+					export ETH_CLK_PERIOD_NS=8;\
+					export ETH_DLY_REF_CLK_PERIOD_NS=5;\
 					fusesoc --cores-root . run --target=nexys-a7-100t --setup --build openhwgroup.org:systems:core-v-mcu\
 				) 2>&1 | tee lint.log
 				cp ./build/openhwgroup.org_systems_core-v-mcu_0/nexys-a7-100t-vivado/openhwgroup.org_systems_core-v-mcu_0.runs/impl_1/core_v_mcu_nexys.bit emulation/core_v_mcu_nexys.bit
