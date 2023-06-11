@@ -39,6 +39,42 @@
 	  "type": "sysio",
 	  "direction": "input"
 	},
+	{ "name": "eth_refclk",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "eth_rstn",
+	"type": "sysio",
+	"direction": "output"
+	},
+	{ "name": "eth_crs_dv",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_rx_er",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_rxd0",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_rxd1",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_tx_en",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "eth_txd0",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "eth_txd1",
+	  "type": "sysio",
+	  "direction": "output"
+	},
 	{ "name": "uart",
 	  "usable":	true,
 	  "type":		"udma",
@@ -171,8 +207,6 @@
 	  "usable":	true,
 	  "type":		"udma",
 	  "ports": {
-		  "tx" : "output",
-		  "rx" : "input"
 	  },
 	  "udma_tx": ["tx_eth" ],
 	  "udma_rx": ["rx_eth" ]

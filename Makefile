@@ -22,7 +22,7 @@ IOSCRIPT_GENESY+=emulation/core-v-mcu-genesys2/constraints/core-v-mcu-pin-assign
 
 
 #Must also change the localparam 'L2_BANK_SIZE' in pulp_soc.sv accordingly
-export INTERLEAVED_BANK_SIZE=28672
+export INTERLEAVED_BANK_SIZE= 24576 #mkdigitals altered this value, org: 28672
 #Must also change the localparam 'L2_BANK_SIZE_PRI' in pulp_soc.sv accordingly
 export PRIVATE_BANK_SIZE=8192
 
@@ -151,7 +151,7 @@ nexys-emul:
 					export PER_CLK_PERIOD_NS=200;\
 					export FPGA_CLK_PERIOD_NS=125;\
 					export SLOW_CLK_PERIOD_NS=4000;\
-					export ETH_CLK_PERIOD_NS=8;\
+					export ETH_CLK_PERIOD_NS=20;\
 					export ETH_DLY_REF_CLK_PERIOD_NS=5;\
 					fusesoc --cores-root . run --target=nexys-a7-100t --setup --build openhwgroup.org:systems:core-v-mcu\
 				) 2>&1 | tee lint.log
@@ -229,3 +229,16 @@ downloadn:
 downloadg:
 	vivado -mode batch -source emulation/xilinx/tcl/download.tcl -tclargs\
              emulation/core_v_mcu_genesys2.bit xc7k325t_0
+
+pythontest:
+	python3 util/ioscript.py\
+					--soc-defines rtl/includes/pulp_soc_defines.svh\
+					--peripheral-defines rtl/includes/pulp_peripheral_defines.svh\
+					--periph-bus-defines rtl/includes/periph_bus_defines.svh\
+					--pin-table nexys-pin-table-mon.csv\
+					--perdef-json perdef.json\
+					--pad-control rtl/core-v-mcu/top/pad_control.sv\
+					--emulation-toplevel core_v_mcu_nexys\
+					--xilinx-core-v-mcu-sv emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v\
+					--input-xdc emulation/core-v-mcu-nexys/constraints/Nexys-A7-100T-Master.xdc\
+					--output-xdc emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc

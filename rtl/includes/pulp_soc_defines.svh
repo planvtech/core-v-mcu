@@ -129,7 +129,7 @@
 // Peripherals
 //
 //--------------------------------------
-`define N_IO        48    // Number of IO in pad frame
+`define N_IO        57    // Number of IO in pad frame // mkdigitals altered this, before adding eth pins :48
 `define N_SYSIO     3     // Number of IO used for system functions like reset
 `define N_GPIO      32    // Number of IO the GPIO block can potentially control
 

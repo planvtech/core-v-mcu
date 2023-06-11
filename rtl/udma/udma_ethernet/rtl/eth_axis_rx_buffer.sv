@@ -31,7 +31,7 @@ module eth_axis_rx_buffer
     input   logic           m_clk_i,
     input   logic           m_rstn_i,
     output  logic   [31:0]  m_axis_tdata,
-    input   logic   [1:0]   m_axis_byte_count,
+    output  logic   [1:0]   m_axis_byte_count,
     output  logic           m_axis_tvalid,
     output  logic           m_axis_tuser,
     output  logic           m_axis_tlast,
@@ -43,22 +43,21 @@ module eth_axis_rx_buffer
     logic   [35:0]  buffer_data_i;
     logic   [1:0]   queue = 2'h0;
     logic   [1:0]   read_data_byte_count;
-    udma_dc_fifo #(
-    .DATA_WIDTH(36),
-    .BUFFER_DEPTH(2048)
-    ) dc_fifo_tx(
-    .src_clk_i(s_clk_i),    //input  logic                  
-    .src_rstn_i(s_rstn_i),   //input  logic                  
-    .src_data_i(buffer_data_i),   //input  logic [DATA_WIDTH-1:0] 
-    .src_valid_i(buffer_wr_en),  //input  logic                  
-    .src_ready_o(s_axis_tready),  //output logic                  
-    .dst_clk_i(m_clk_i),    //input  logic                  
-    .dst_rstn_i(m_rstn_i),   //input  logic                  
-    .dst_data_o(buffer_data_o[35:0]),   //output logic [DATA_WIDTH-1:0] 
-    .dst_valid_o(m_axis_tvalid),  //output logic                  
-    .dst_ready_i(m_axis_tready)   //input  logic                  
+    logic           fifo_full;
+    xilinx_dc_fifo dc_fifo_rx(
+    .wr_clk(s_clk_i),    //input  logic                  
+    .wr_rst(~s_rstn_i),   //input  logic                  
+    .din(buffer_data_i),   //input  logic [DATA_WIDTH-1:0] 
+    .wr_en(buffer_wr_en),  //input  logic                  
+    .full(fifo_full),  //output logic                  
+    .rd_clk(m_clk_i),    //input  logic                  
+    .rd_rst(~m_rstn_i),   //input  logic
+    .empty(),                 
+    .dout(buffer_data_o[35:0]),   //output logic [DATA_WIDTH-1:0] 
+    .valid(m_axis_tvalid),  //output logic                  
+    .rd_en(m_axis_tready)   //input  logic                  
     );
-
+    assign s_axis_tready = ~fifo_full;
     logic [7:0] byte_n_0 = 8'h0;
     logic [7:0] byte_n_1 = 8'h0;
     logic [7:0] byte_n_2 = 8'h0;

@@ -36,18 +36,19 @@ module udma_subsystem #(
     input  logic                       L2_wo_rvalid_i,
     input  logic [  L2_DATA_WIDTH-1:0] L2_wo_rdata_i,
 
-    input logic dft_test_mode_i,
-    input logic dft_cg_enable_i,
+    input  logic dft_test_mode_i,
+    input  logic dft_cg_enable_i,
 
-    input logic sys_clk_i,
-    input logic efpga_clk_i,
-    input logic sys_resetn_i,
+    input  logic sys_clk_i,
+    input  logic efpga_clk_i,
+    input  logic sys_resetn_i,
 
-    input logic periph_clk_i,
-    input logic eth_clk_i,
-    input logic eth_clk_90_i,
-    input logic eth_rstn_i,
-    input logic eth_delay_ref_clk_i,
+    input  logic periph_clk_i,
+    input  logic eth_clk_i,
+    input  logic eth_clk_90_i,
+    input  logic eth_rstn_i,
+    input  logic eth_delay_ref_clk_i,
+    output logic eth_refclk_o,
 
     input  logic [APB_ADDR_WIDTH-1:0] udma_apb_paddr,
     input  logic [              31:0] udma_apb_pwdata,
@@ -80,7 +81,21 @@ module udma_subsystem #(
 
     input  logic [`N_PERIO-1:0] perio_in_i,
     output logic [`N_PERIO-1:0] perio_out_o,
-    output logic [`N_PERIO-1:0] perio_oe_o
+    output logic [`N_PERIO-1:0] perio_oe_o,
+
+    // input  logic                phy_rx_clk_i,
+    // input  logic   [3:0]        phy_rxd_i,
+    // input  logic                phy_rx_ctl_i,
+    // output logic                phy_tx_clk_o,
+    // output logic   [3:0]        phy_txd_o,
+    // output logic                phy_tx_ctl_o,
+    // output logic                phy_reset_n_o
+    input wire [1:0]    phy_rxd_i,
+    input wire          phy_crs_dv_i,
+    output wire [1:0]   phy_txd_o,
+    output wire         phy_tx_en_o,
+    output wire         phy_rstn_o,
+    input wire          phy_rx_er_i
 );
 
   localparam DEST_SIZE = 2;
@@ -250,16 +265,22 @@ module udma_subsystem #(
   logic                                                  eth_rx_evt;
  
   //phy loopback, will be set to outputs after verification at this level
-  logic                                                  phy_rx_clk;
-  logic   [3:0]                                          phy_rxd;
-  logic                                                  phy_rx_ctl;
-  logic                                                  phy_tx_clk;
-  logic   [3:0]                                          phy_txd;
-  logic                                                  phy_tx_ctl;
-  logic                                                  phy_reset_n;
+  // logic                                                  phy_rx_clk;
+  // logic   [3:0]                                          phy_rxd;
+  // logic                                                  phy_rx_ctl;
+  // logic                                                  phy_tx_clk;
+  // logic   [3:0]                                          phy_txd;
+  // logic                                                  phy_tx_ctl;
+  // logic                                                  phy_reset_n;
+
+  logic [1:0]    phy_rxd;
+  logic          phy_crs_dv;
+  logic [1:0]    phy_txd;
+  logic          phy_tx_en;
+  logic          phy_rx_er;
   //////////////////////////////////////////
 
-  integer                                                i;
+  integer                   i;
 
   assign s_cam_evt     = 1'b0;
   assign s_i2s_evt     = 1'b0;
@@ -1043,11 +1064,51 @@ module udma_subsystem #(
 
       assign s_per_rst[PER_ID_ETH+g_eth] = sys_resetn_i & !s_rst_periphs[PER_ID_ETH+g_eth];
 
+// `ifdef ETH_LOOPBACK
+//       //phy signals loopback
+//       assign phy_rx_clk = eth_clk_90_i;
+//       assign phy_rxd    = phy_txd;
+//       assign phy_rx_ctl = phy_tx_ctl;
+//       //
+// `else
+//       assign phy_rx_clk = phy_rx_clk_i;
+//       assign phy_rxd    = phy_rxd_i;
+//       assign phy_rx_ctl = phy_rx_ctl_i;
+//       assign phy_tx_clk_o = phy_tx_clk;
+//       assign phy_txd_o    = phy_txd;
+//       assign phy_tx_ctl_o = phy_tx_ctl;
+// `endif
+
+`ifdef ETH_LOOPBACK
       //phy signals loopback
-      assign phy_rx_clk = eth_clk_90_i;
-      assign phy_rxd    = phy_txd;
-      assign phy_rx_ctl = phy_tx_ctl;
+      assign phy_rxd = phy_txd;
+      assign phy_crs_dv = phy_tx_en;
       //
+`else
+      assign phy_rxd = phy_rxd_i;
+      assign phy_crs_dv = phy_crs_dv_i;
+      assign phy_txd_o = phy_txd;
+      assign phy_rstn_o = s_per_rst[PER_ID_ETH+g_eth];
+      assign phy_tx_en_o = phy_tx_en;
+      assign phy_rx_er = phy_rx_er_i;
+
+      ODDR2 #(
+          .DDR_ALIGNMENT("C0"),
+          .SRTYPE("ASYNC")
+      )
+      oddr_inst (
+          .Q(eth_refclk_o),
+          .C0(eth_clk_i),
+          .C1(~eth_clk_i),
+          .CE(1'b1),
+          .D0(1'b1),
+          .D1(1'b0),
+          .R(1'b0),
+          .S(1'b0)
+      );
+
+`endif
+      
 
       udma_ethernet #(
         .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
@@ -1055,25 +1116,32 @@ module udma_subsystem #(
       )i_ethernet (
         .sys_clk_i(s_clk_periphs_core[PER_ID_ETH+g_eth]),
         .periph_clk_i(eth_clk_i),
-        .periph_clk_i_90(eth_clk_90_i),
+        //.periph_clk_i_90(eth_clk_90_i),
         .periph_rstn_i(eth_rstn_i),
         .ref_clk_i_200(eth_delay_ref_clk_i),// 200MHz delay gen ref clock
         .rstn_i(s_per_rst[PER_ID_ETH+g_eth]),
-
         /*
           * Ethernet: 1000BASE-T RGMII
           */
-        .phy_rx_clk(phy_rx_clk),    //  input wire        
-        .phy_rxd(phy_rxd),          //  input wire [3:0]  
-        .phy_rx_ctl(phy_rx_ctl),    //  input wire        
-        .phy_tx_clk(phy_tx_clk),    //  output wire        
-        .phy_txd(phy_txd),          //  output wire [3:0]  
-        .phy_tx_ctl(phy_tx_ctl),    //  output wire        
-        .phy_reset_n(phy_reset_n),  //  output wire        
-        .phy_int_n(phy_int_n),      //  input wire        
-        .phy_pme_n(phy_pme_n),      //  input wire        
-
+        // .phy_rx_clk(phy_rx_clk),    //  input wire        
+        // .phy_rxd(phy_rxd),          //  input wire [3:0]  
+        // .phy_rx_ctl(phy_rx_ctl),    //  input wire        
+        // .phy_tx_clk(phy_tx_clk),    //  output wire        
+        // .phy_txd(phy_txd),          //  output wire [3:0]  
+        // .phy_tx_ctl(phy_tx_ctl),    //  output wire        
+        // .phy_reset_n(phy_reset_n),  //  output wire        
+        // .phy_int_n(phy_int_n),      //  input wire        
+        // .phy_pme_n(phy_pme_n),      //  input wire        
         //
+
+        /*
+          * Ethernet: 10 100 -T RMII
+          */
+        .phy_rxd(phy_rxd),
+        .phy_crs_dv(phy_crs_dv),
+        .phy_txd(phy_txd),
+        .phy_tx_en(phy_tx_en),
+        .phy_rx_er(phy_rx_er),
 
         .eth_rx_event_o(eth_rx_evt),
 

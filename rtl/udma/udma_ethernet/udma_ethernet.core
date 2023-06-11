@@ -11,14 +11,12 @@ filesets:
     files_rtl:
         files:
         - rtl/axis_async_fifo.sv
+        - rtl/axis_async_fifo_adapter.sv
         - rtl/axis_gmii_rx.sv
         - rtl/axis_gmii_tx.sv
-        - rtl/dualmem_widen.sv   
-        - rtl/dualmem_widen8.sv
         - rtl/eth_mac_1g_rgmii_fifo.sv
         - rtl/eth_mac_1g_rgmii.sv
         - rtl/eth_mac_1g.sv
-        - rtl/framing_top.sv
         - rtl/iddr.sv
         - rtl/oddr.sv
         - rtl/rgmii_core.sv
@@ -26,6 +24,16 @@ filesets:
         - rtl/rgmii_phy_if.sv
         - rtl/rgmii_soc.sv
         - rtl/ssio_ddr_in.sv
+        - rtl/ssio_sdr_in.sv
+        - rtl/eth_mac_mii_fifo.sv
+        - rtl/eth_mac_mii.sv
+        - rtl/mac_phy_link.sv
+        - rtl/mii_core.sv
+        - rtl/mii_lfsr.sv
+        - rtl/mii_phy_if.sv
+        - rtl/phy_mac_link.sv
+        - rtl/rmii_soc.sv
+        - rtl/util_mii_to_rmii.sv
         - rtl/udma_ethernet.sv
         - rtl/udma_ethernet_reg_if.sv
         - rtl/eth_axis_rx_buffer.sv

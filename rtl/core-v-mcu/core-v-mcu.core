@@ -119,6 +119,7 @@ filesets:
     - ../../emulation/xilinx/ips/xilinx_slow_clk_mngr.tcl
     - ../../emulation/xilinx/ips/xilinx_interleaved_ram.tcl
     - ../../emulation/xilinx/ips/xilinx_private_ram.tcl
+    - ../../emulation/xilinx/ips/xilinx_dc_fifo.tcl
     file_type: tclSource
 
   nexys-rtl:

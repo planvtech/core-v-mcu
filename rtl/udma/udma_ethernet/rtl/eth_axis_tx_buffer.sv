@@ -33,22 +33,21 @@ module eth_axis_tx_buffer
     logic   [35:0]  buffer_data_o;
     logic   [1:0]   queue = 2'h0;
     logic   [1:0]   read_data_byte_count;
-    udma_dc_fifo #(
-    .DATA_WIDTH(36),
-    .BUFFER_DEPTH(2048)
-    ) dc_fifo_tx(
-    .src_clk_i(s_clk_i),    //input  logic                  
-    .src_rstn_i(s_rstn_i),   //input  logic                  
-    .src_data_i({s_axis_tuser,s_axis_tlast,s_axis_byte_count[1:0],s_axis_tdata[31:0]}),   //input  logic [DATA_WIDTH-1:0] 
-    .src_valid_i(s_axis_tvalid),  //input  logic                  
-    .src_ready_o(s_axis_tready),  //output logic                  
-    .dst_clk_i(m_clk_i),    //input  logic                  
-    .dst_rstn_i(m_rstn_i),   //input  logic                  
-    .dst_data_o(buffer_data_o[35:0]),   //output logic [DATA_WIDTH-1:0] 
-    .dst_valid_o(buffer_valid_o),  //output logic                  
-    .dst_ready_i(buffer_rd_en)   //input  logic                  
+    logic fifo_full;
+    xilinx_dc_fifo dc_fifo_tx(
+    .wr_clk(s_clk_i),    //input  logic                  
+    .wr_rst(~s_rstn_i),   //input  logic                  
+    .din({s_axis_tuser,s_axis_tlast,s_axis_byte_count[1:0],s_axis_tdata[31:0]}),   //input  logic [DATA_WIDTH-1:0] 
+    .wr_en(s_axis_tvalid),  //input  logic                  
+    .full(fifo_full),  //output logic                  
+    .rd_clk(m_clk_i),    //input  logic                  
+    .rd_rst(~m_rstn_i),   //input  logic
+    .empty(),                  
+    .dout(buffer_data_o[35:0]),   //output logic [DATA_WIDTH-1:0] 
+    .valid(buffer_valid_o),  //output logic                  
+    .rd_en(buffer_rd_en)   //input  logic                  
     );
-
+    assign s_axis_tready = ~fifo_full;
     assign  read_data_byte_count = buffer_data_o[33:32];
     //operation :
     // 32 bits is written in the fifo, we read 8 bits at a time,

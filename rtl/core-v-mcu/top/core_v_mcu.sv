@@ -28,7 +28,23 @@ module core_v_mcu #(
     input  [`N_IO-1:0]                   io_in_i,
     output [`N_IO-1:0]                   io_out_o,
     output [`N_IO-1:0][`NBIT_PADCFG-1:0] pad_cfg_o,
-    output [`N_IO-1:0]                   io_oe_o
+    output [`N_IO-1:0]                   io_oe_o,
+    output                               eth_refclk_o,
+    input                                eth_rxd0_i,
+    input                                eth_rxd1_i,
+    input                                eth_crs_dv_i,
+    output                               eth_txd0_o,
+    output                               eth_txd1_o,
+    output                               eth_tx_en_o,
+    output                               eth_rstn_o,
+    input                                eth_rx_er_i                               
+    // input  logic                phy_rx_clk_i,
+    // input  logic   [3:0]        phy_rxd_i,
+    // input  logic                phy_rx_ctl_i,
+    // output logic                phy_tx_clk_o,
+    // output logic   [3:0]        phy_txd_o,
+    // output logic                phy_tx_ctl_o,
+    // output logic                phy_reset_n_o
 );
 
   localparam AXI_ADDR_WIDTH = 32;
@@ -289,7 +305,12 @@ module core_v_mcu #(
       .fpgaio_in_o (s_fpgaio_in),
       .fpgaio_oe_i (s_fpgaio_oe)
   );
-
+  wire [1:0] phy_txd_s;
+  assign eth_txd0_o = phy_txd_s[0];
+  assign eth_txd1_o = phy_txd_s[1];
+  wire [1:0] phy_rxd_s;
+  assign eth_rxd0_i = phy_rxd_s[0];
+  assign eth_rxd1_i = phy_rxd_s[1];
   //
   // SOC DOMAIN
   //
@@ -333,8 +354,7 @@ module core_v_mcu #(
   assign testio_i[18] = stm_i ? io_in_i[23] : 0;  // efpga_test_MLATCH_i =
   assign testio_i[19] = stm_i ? io_in_i[21] : 0;  //efpga_test_fcb_pif_vldi_i =
   assign testio_i[20] = stm_i;  //efpga_STM_i = testio_i[20];
-
-
+  
   soc_domain #(
       .USE_FPU           (USE_FPU),
       .USE_HWPE          (USE_HWPE),
@@ -375,7 +395,14 @@ module core_v_mcu #(
       .fpgaio_out_o(s_fpgaio_out),
       .fpgaio_in_i (s_fpgaio_in),
       .fpgaio_oe_o (s_fpgaio_oe),
-
+      // ETH_INTERFACE
+    //   .phy_rx_clk_i(phy_rx_clk_i),
+    //   .phy_rxd_i(phy_rxd_i),
+    //   .phy_rx_ctl_i(phy_rx_ctl_i),
+    //   .phy_tx_clk_o(phy_tx_clk_o),
+    //   .phy_txd_o(phy_txd_o),
+    //   .phy_tx_ctl_o(phy_tx_ctl_o),
+    //   .phy_reset_n_o(phy_reset_n_o),
       //    .selected_mode_i   ('0),
       //      .dma_pe_evt_ack_o  (s_dma_pe_evt_ack),
       //      .dma_pe_evt_valid_i(s_dma_pe_evt_valid),
@@ -386,8 +413,14 @@ module core_v_mcu #(
 
       //eFPGA TEST MODE
       .testio_i(testio_i),
-      .testio_o(testio_o)
-
+      .testio_o(testio_o),
+      .eth_refclk_o(eth_refclk_o),
+      .phy_rxd_i(phy_rxd_s),
+      .phy_crs_dv_i(eth_crs_dv_i),
+      .phy_txd_o(phy_txd_s),
+      .phy_tx_en_o(eth_tx_en_o),
+      .phy_rstn_o(eth_rstn_o),
+      .phy_rx_er_i(eth_rx_er_i)
   );
 
   assign s_test_mode     = '0;

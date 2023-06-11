@@ -75,11 +75,11 @@ module clk_gen (
     .resetn(rstn_glob_i),
     .clk_in1(emul_clk_i[0]),
     .clk_out1(eth_clk_o),
-    .clk_out2(eth_clk_90_o),
-    .clk_out3(eth_delay_ref_clk_o),
+    .clk_out2(eth_delay_ref_clk_o),
     .locked(s_eth_locked)
     );
 
+  assign eth_clk_90_o = 1'b0;
   assign soc_cfg_lock_o = s_locked;
   assign per_cfg_lock_o = s_locked;
   assign cluster_cfg_lock_o = s_locked;
