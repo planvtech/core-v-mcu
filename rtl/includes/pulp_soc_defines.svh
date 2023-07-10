@@ -129,7 +129,7 @@
 // Peripherals
 //
 //--------------------------------------
-`define N_IO        57    // Number of IO in pad frame // mkdigitals altered this, before adding eth pins :48
+`define N_IO        61    // Number of IO in pad frame // mkdigitals altered this, before adding eth pins :48
 `define N_SYSIO     3     // Number of IO used for system functions like reset
 `define N_GPIO      32    // Number of IO the GPIO block can potentially control
 
@@ -174,5 +174,5 @@
 `define LOG2(VALUE) ((VALUE) < ( 1 ) ? 0 : (VALUE) < ( 2 ) ? 1 : (VALUE) < ( 4 ) ? 2 : (VALUE)< (8) ? 3:(VALUE) < ( 16 )  ? 4 : (VALUE) < ( 32 )  ? 5 : (VALUE) < ( 64 )  ? 6 : (VALUE) < ( 128 ) ? 7 : (VALUE) < ( 256 ) ? 8 : (VALUE) < ( 512 ) ? 9 : 10)
 
 /* Interfaces have been moved to pulp_interfaces.sv. Sorry :) */
-
+`define ETH_LOOPBACK
 `endif

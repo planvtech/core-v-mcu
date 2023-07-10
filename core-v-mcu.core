@@ -65,6 +65,7 @@ filesets:
     - rtl/core-v-mcu/soc/soc_interconnect.sv
     - rtl/core-v-mcu/soc/soc_interconnect_wrap.sv
     - rtl/core-v-mcu/soc/soc_peripherals.sv
+    - rtl/core-v-mcu/soc/soc_clk_checkers.sv
     - rtl/core-v-mcu/udma_subsystem/udma_subsystem.sv
     - rtl/core-v-mcu/fc/fc_demux.sv
     - rtl/core-v-mcu/fc/fc_subsystem.sv

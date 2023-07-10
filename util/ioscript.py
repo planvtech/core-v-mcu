@@ -767,6 +767,7 @@ if args.pad_control_sv != None:
 ################################################
 if args.pad_frame_sv != None:
     with open(args.pad_frame_sv, 'w') as pad_frame_sv:
+        print("------- PAD FRAME --------")
         #
         # Write Apache license and header
         #
@@ -1020,6 +1021,15 @@ if args.xilinx_core_v_mcu_sv != None:
             if (sysionames[ionum] != "ref_clk_i" and
                 sysionames[ionum] != "jtag_tck_i" and
                 sysionames[ionum] != "jtag_tdo_o" and
+                sysionames[ionum] != "eth_refclk_o" and
+                sysionames[ionum] != "eth_rstn_o" and
+                sysionames[ionum] != "eth_tx_en_o" and
+                sysionames[ionum] != "eth_txd0_o" and
+                sysionames[ionum] != "eth_txd1_o" and
+                sysionames[ionum] != "ld_ref_clk_lock_o" and
+                sysionames[ionum] != "ld_ref_clk_blink_o" and
+                sysionames[ionum] != "ld_eth_clk_lock_o" and
+                sysionames[ionum] != "ld_eth_clk_blink_o" and
                 sysionames[ionum] != "sysclk_p_i") :
                 if sysionames[ionum] == "bootsel_i" or sysionames[ionum] == "stm_i" :
                     x_sv.write("  pad_functional_pd i_pad_%d   (.OEN(~s_io_oe[%d]), .I(s_io_out[%d]), .O(s_io_in[%d]), .PAD(xilinx_io[%d]), .PEN(~s_pad_cfg[%d][0]));\n" %\
@@ -1034,6 +1044,33 @@ if args.xilinx_core_v_mcu_sv != None:
                 if sysionames[ionum] == "jtag_tdo_o" :
                     x_sv.write("  pad_functional_pu i_pad_%d   (.OEN(~s_io_oe[%d]), .I(s_jtag_tdo), .O(s_io_in[%d]), .PAD(xilinx_io[%d]), .PEN(~s_pad_cfg[%d][0]));\n" %\
                     (ionum, ionum, ionum, ionum, ionum))
+                if sysionames[ionum] == "eth_refclk_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_refclk;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "eth_rstn_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_rstn;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "eth_tx_en_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_tx_en;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "eth_txd0_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_txd0;\n" %\
+                    (ionum))    
+                if sysionames[ionum] == "eth_txd1_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_txd1;\n" %\
+                    (ionum))    
+                if sysionames[ionum] == "ld_ref_clk_lock_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_ref_clk_lock;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "ld_ref_clk_blink_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_ref_clk_blink;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "ld_eth_clk_lock_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_eth_clk_lock;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "ld_eth_clk_blink_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_eth_clk_blink;\n" %\
+                    (ionum))                                                                            
                 if sysionames[ionum] == "ref_clk_i":
                     x_sv.write("  // Input clock buffer\n")
                     x_sv.write("  IBUFG #(\n")

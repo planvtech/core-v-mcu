@@ -19,20 +19,26 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /* verilator lint_off REDEFMACRO */
-`define ETH_REG_RX_SADDR    5'b00000 //BASEADDR+0x00
-`define ETH_REG_RX_SIZE     5'b00001 //BASEADDR+0x04
-`define ETH_REG_RX_CFG      5'b00010 //BASEADDR+0x08
-
-`define ETH_REG_TX_SADDR    5'b00011 //BASEADDR+0x0C
-`define ETH_REG_TX_SIZE     5'b00100 //BASEADDR+0x10
-`define ETH_REG_TX_CFG      5'b00101 //BASEADDR+0x14
-
-`define ETH_REG_STATUS      5'b00110 //BASEADDR+0x18
-`define ETH_REG_ETH_SETUP   5'b00111 //BASEADDR+0x1C
-`define ETH_REG_ERROR       5'b01000 //BASEADDR+0x20
-`define ETH_REG_IRQ_EN      5'b01001 //BASEADDR+0x24
-`define ETH_REG_RX_FCS      5'b01010 //BASEADDR+0x28
-`define ETH_REG_TX_FCS      5'b01011 //BASEADDR+0x2C
+`define ETH_REG_RX_SADDR_0  5'b00000 //BASEADDR+0x00
+`define ETH_REG_RX_SADDR_1  5'b00001 //BASEADDR+0x04
+`define ETH_REG_RX_SADDR_2  5'b00010 //BASEADDR+0x08
+`define ETH_REG_RX_SADDR_3  5'b00011 //BASEADDR+0x0C
+`define ETH_REG_RX_DESC_0   5'b00100 //BASEADDR+0x10
+`define ETH_REG_RX_DESC_1   5'b00101 //BASEADDR+0x14
+`define ETH_REG_RX_DESC_2   5'b00110 //BASEADDR+0x18
+`define ETH_REG_RX_DESC_3   5'b00111 //BASEADDR+0x1C
+`define ETH_REG_RX_CADDR    5'b01000 //BASEADDR+0x20
+`define ETH_REG_RX_SIZE     5'b01001 //BASEADDR+0x24
+`define ETH_REG_RX_CFG      5'b01010 //BASEADDR+0x28
+`define ETH_REG_TX_SADDR    5'b01011 //BASEADDR+0x2C
+`define ETH_REG_TX_SIZE     5'b01100 //BASEADDR+0x30
+`define ETH_REG_TX_CFG      5'b01101 //BASEADDR+0x34
+`define ETH_REG_STATUS      5'b01110 //BASEADDR+0x38
+`define ETH_REG_ETH_SETUP   5'b01111 //BASEADDR+0x3C
+`define ETH_REG_ERROR       5'b10000 //BASEADDR+0x40
+`define ETH_REG_IRQ_EN      5'b10001 //BASEADDR+0x44
+`define ETH_REG_RX_FCS      5'b10010 //BASEADDR+0x48
+`define ETH_REG_TX_FCS      5'b10011 //BASEADDR+0x4C
 /* verilator lint_on REDEFMACRO */
 
 module udma_ethernet_reg_if #(
@@ -49,8 +55,13 @@ module udma_ethernet_reg_if #(
 	output  logic               [31:0]  cfg_data_o,
 	output  logic                       cfg_ready_o,
 
-    output  logic [L2_AWIDTH_NOAL-1:0]  cfg_rx_startaddr_o,
-    output  logic     [TRANS_SIZE-1:0]  cfg_rx_size_o,
+    output  logic [L2_AWIDTH_NOAL-1:0]  cfg_rx_startaddr0_o,
+    output  logic [L2_AWIDTH_NOAL-1:0]  cfg_rx_startaddr1_o,
+    output  logic [L2_AWIDTH_NOAL-1:0]  cfg_rx_startaddr2_o,
+    output  logic [L2_AWIDTH_NOAL-1:0]  cfg_rx_startaddr3_o,
+    input   logic [L2_AWIDTH_NOAL-1:0]  cfg_rx_pointer_i,
+    input   logic     [TRANS_SIZE-1:0]  cfg_rx_size_i,
+
     output  logic                       cfg_rx_continuous_o,
     output  logic                       cfg_rx_en_o,
     output  logic                       cfg_rx_clr_o,
@@ -81,7 +92,15 @@ module udma_ethernet_reg_if #(
     input   logic                       tx_busy_i
 );
 
-    logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr;
+    logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr0;
+    logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr1;
+    logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr2;
+    logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr3;
+    logic [31:0]               r_rx_desc_0 = 'h0;
+    logic [31:0]               r_rx_desc_1 = 'h0;
+    logic [31:0]               r_rx_desc_2 = 'h0;
+    logic [31:0]               r_rx_desc_3 = 'h0;
+    logic [1:0]                r_rx_pointer = 2'b11;                        
     logic   [TRANS_SIZE-1 : 0] r_rx_size;
     logic                      r_rx_continuous;
     logic                      r_rx_en;
@@ -113,8 +132,11 @@ module udma_ethernet_reg_if #(
     assign s_wr_addr = (cfg_valid_i & ~cfg_rwn_i) ? cfg_addr_i : 5'h0;
     assign s_rd_addr = (cfg_valid_i &  cfg_rwn_i) ? cfg_addr_i : 5'h0;
 
-    assign cfg_rx_startaddr_o  = r_rx_startaddr;
-    assign cfg_rx_size_o       = r_rx_size;
+    assign cfg_rx_startaddr0_o  = r_rx_startaddr0;
+    assign cfg_rx_startaddr1_o  = r_rx_startaddr1;
+    assign cfg_rx_startaddr2_o  = r_rx_startaddr2;
+    assign cfg_rx_startaddr3_o  = r_rx_startaddr3;
+    assign r_rx_size           = cfg_rx_size_i;
     assign cfg_rx_continuous_o = r_rx_continuous;
     assign cfg_rx_en_o         = r_rx_en;
     assign cfg_rx_clr_o        = r_rx_clr;
@@ -135,8 +157,11 @@ module udma_ethernet_reg_if #(
     begin
         if(~rstn_i)
         begin
-            // SPI REGS
-            r_rx_startaddr              <=  'h0;
+            // REGS
+            r_rx_startaddr0             <=  'h0;
+            r_rx_startaddr1             <=  'h0;
+            r_rx_startaddr2             <=  'h0;
+            r_rx_startaddr3             <=  'h0;
             r_rx_size                   <=  'h0;
             r_rx_continuous             <=  'h0;
             r_rx_en                     <=  'h0;
@@ -157,7 +182,6 @@ module udma_ethernet_reg_if #(
         begin
             r_rx_en  <=  'h0;
             r_tx_en  <=  'h0;
-
 
             if(status_i[7])
                 r_err_tx_fifo_overflow <= 1'b1;
@@ -189,14 +213,38 @@ module udma_ethernet_reg_if #(
             else if(s_err_clr)
                 r_err_rx_fifo_bad_frame  <= 1'b0;
 
+            r_rx_pointer <= cfg_rx_pointer_i;
+            if(r_rx_pointer != cfg_rx_pointer_i)
+            begin
+                r_rx_desc_0[31] <= cfg_rx_pointer_i == 2'b00 ? 1'b1 : r_rx_desc_0[31];
+                r_rx_desc_0[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b00 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_0[TRANS_SIZE-1:0];
+                r_rx_desc_1[31] <= cfg_rx_pointer_i == 2'b01 ? 1'b1 : r_rx_desc_1[31];
+                r_rx_desc_1[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b01 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_1[TRANS_SIZE-1:0];
+                r_rx_desc_2[31] <= cfg_rx_pointer_i == 2'b10 ? 1'b1 : r_rx_desc_2[31];
+                r_rx_desc_2[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b10 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_2[TRANS_SIZE-1:0];
+                r_rx_desc_3[31] <= cfg_rx_pointer_i == 2'b11 ? 1'b1 : r_rx_desc_3[31];
+                r_rx_desc_3[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b11 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_3[TRANS_SIZE-1:0];
+            end
 
             if (cfg_valid_i & ~cfg_rwn_i)
             begin
                 case (s_wr_addr)
-                `ETH_REG_RX_SADDR:
-                    r_rx_startaddr    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
-                `ETH_REG_RX_SIZE:
-                    r_rx_size         <= cfg_data_i[TRANS_SIZE-1:0];
+                `ETH_REG_RX_SADDR_0:
+                    r_rx_startaddr0    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+                `ETH_REG_RX_SADDR_1:
+                    r_rx_startaddr1    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+                `ETH_REG_RX_SADDR_2:
+                    r_rx_startaddr2    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+                `ETH_REG_RX_SADDR_3:
+                    r_rx_startaddr3    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+                `ETH_REG_RX_DESC_0:
+                    r_rx_desc_0[31]    <=  cfg_data_i[31];
+                `ETH_REG_RX_DESC_1:
+                    r_rx_desc_1[31]    <=  cfg_data_i[31];
+                `ETH_REG_RX_DESC_2:
+                    r_rx_desc_2[31]    <=  cfg_data_i[31];
+                `ETH_REG_RX_DESC_3:
+                    r_rx_desc_3[31]    <=  cfg_data_i[31];
                 `ETH_REG_RX_CFG:
                 begin
                     r_rx_clr           <= cfg_data_i[6];
@@ -224,6 +272,7 @@ module udma_ethernet_reg_if #(
                     r_eth_err_irq_en <= cfg_data_i[1];
                     r_eth_rx_irq_en  <= cfg_data_i[0];
                   end
+                
                 endcase
             end
         end
@@ -236,7 +285,23 @@ module udma_ethernet_reg_if #(
         s_err_clr = 1'b0;
 
         case (s_rd_addr)
-        `ETH_REG_RX_SADDR:
+        `ETH_REG_RX_SADDR_0:
+            cfg_data_o <= r_rx_startaddr0    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+        `ETH_REG_RX_SADDR_1:
+            cfg_data_o <= r_rx_startaddr1    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+        `ETH_REG_RX_SADDR_2:
+            cfg_data_o <= r_rx_startaddr2    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+        `ETH_REG_RX_SADDR_3:
+            cfg_data_o <= r_rx_startaddr3    <= cfg_data_i[L2_AWIDTH_NOAL-1:0];
+        `ETH_REG_RX_DESC_0:
+            cfg_data_o <= r_rx_desc_0;
+        `ETH_REG_RX_DESC_1:
+            cfg_data_o <= r_rx_desc_1;
+        `ETH_REG_RX_DESC_2:
+            cfg_data_o <= r_rx_desc_2;
+        `ETH_REG_RX_DESC_3:
+            cfg_data_o <= r_rx_desc_3;
+        `ETH_REG_RX_CADDR:
             cfg_data_o = cfg_rx_curr_addr_i;
         `ETH_REG_RX_SIZE:
             cfg_data_o[TRANS_SIZE-1:0] = cfg_rx_bytes_left_i;

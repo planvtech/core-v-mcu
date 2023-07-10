@@ -164,8 +164,12 @@ module udma_ethernet #(
     logic        [TRANS_SIZE-1:0]  reg_tx_bytes_left_s;
     logic                          s_tx_busy;
 
-    logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr_s;
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr0_s;
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr1_s;
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr2_s;
+    logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr3_s;
     logic        [TRANS_SIZE-1:0]  reg_rx_size_s;
+    logic                   [1:0]  reg_rx_pointer_s;
     logic                          reg_rx_continuous_s;
     logic                          reg_rx_en_to_ctrl;
     logic                          reg_rx_en_from_ctrl;
@@ -211,8 +215,12 @@ module udma_ethernet #(
         .cfg_ready_o        ( cfg_ready_o         ),
         .cfg_data_o         ( cfg_data_o          ),
 
-        .cfg_rx_startaddr_o ( reg_rx_startaddr_s  ),
-        .cfg_rx_size_o      ( reg_rx_size_s       ),
+        .cfg_rx_startaddr0_o( reg_rx_startaddr0_s ),
+        .cfg_rx_startaddr1_o( reg_rx_startaddr1_s ),
+        .cfg_rx_startaddr2_o( reg_rx_startaddr2_s ),
+        .cfg_rx_startaddr3_o( reg_rx_startaddr3_s ),
+        .cfg_rx_pointer_i   ( reg_rx_pointer_s    ),
+        .cfg_rx_size_i      ( reg_rx_size_s       ),
         .cfg_rx_continuous_o( reg_rx_continuous_s ),
         .cfg_rx_en_o        ( reg_rx_en_to_ctrl   ),
         .cfg_rx_clr_o       ( reg_rx_clr_s        ),
@@ -327,7 +335,12 @@ module udma_ethernet #(
 
     ////////////// interface with the register control ////////
 
-    .reg_rx_startaddr_i(reg_rx_startaddr_s),
+    .reg_rx_startaddr0_i(reg_rx_startaddr0_s),
+    .reg_rx_startaddr1_i(reg_rx_startaddr1_s),
+    .reg_rx_startaddr2_i(reg_rx_startaddr2_s),
+    .reg_rx_startaddr3_i(reg_rx_startaddr3_s),
+    .reg_rx_pointer_o(reg_rx_pointer_s),
+    .reg_rx_size_o(reg_rx_size_s),
     .reg_rx_continuous_i(reg_rx_continuous_s),
     .reg_rx_clr_i(reg_rx_clr_s),
     .reg_rx_en_o(reg_rx_en_from_ctrl),

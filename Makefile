@@ -22,7 +22,7 @@ IOSCRIPT_GENESY+=emulation/core-v-mcu-genesys2/constraints/core-v-mcu-pin-assign
 
 
 #Must also change the localparam 'L2_BANK_SIZE' in pulp_soc.sv accordingly
-export INTERLEAVED_BANK_SIZE= 24576 #mkdigitals altered this value, org: 28672
+export INTERLEAVED_BANK_SIZE= 16384 #mkdigitals altered this value, org: 28672
 #Must also change the localparam 'L2_BANK_SIZE_PRI' in pulp_soc.sv accordingly
 export PRIVATE_BANK_SIZE=8192
 
@@ -132,6 +132,7 @@ nexys-emul:
 					--pin-table nexys-pin-table.csv\
 					--perdef-json perdef.json\
 					--pad-control rtl/core-v-mcu/top/pad_control.sv\
+					--pad-frame rtl/core-v-mcu/top/pad_frame.sv\
 					--emulation-toplevel core_v_mcu_nexys\
 					--xilinx-core-v-mcu-sv emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v\
 					--input-xdc emulation/core-v-mcu-nexys/constraints/Nexys-A7-100T-Master.xdc\
@@ -213,6 +214,7 @@ ${IOSCRIPT_OUT}:	${IOSCRIPT}
 					--periph-bus-defines rtl/includes/periph_bus_defines.svh\
 					--perdef-json perdef.json\
 					--pad-control rtl/core-v-mcu/top/pad_control.sv\
+					--pad-frame rtl/core-v-mcu/top/pad_frame.sv\
 					--xilinx-core-v-mcu-sv emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v\
 					--input-xdc emulation/core-v-mcu-nexys/constraints/Nexys-A7-100T-Master.xdc\
 					--output-xdc emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc

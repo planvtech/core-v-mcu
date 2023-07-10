@@ -37,7 +37,11 @@ module core_v_mcu #(
     output                               eth_txd1_o,
     output                               eth_tx_en_o,
     output                               eth_rstn_o,
-    input                                eth_rx_er_i                               
+    input                                eth_rx_er_i,
+    output                               ld_ref_clk_lock_o,
+    output                               ld_ref_clk_blink_o,
+    output                               ld_eth_clk_lock_o,
+    output                               ld_eth_clk_blink_o                               
     // input  logic                phy_rx_clk_i,
     // input  logic   [3:0]        phy_rxd_i,
     // input  logic                phy_rx_ctl_i,
@@ -420,7 +424,11 @@ module core_v_mcu #(
       .phy_txd_o(phy_txd_s),
       .phy_tx_en_o(eth_tx_en_o),
       .phy_rstn_o(eth_rstn_o),
-      .phy_rx_er_i(eth_rx_er_i)
+      .phy_rx_er_i(eth_rx_er_i),
+      .ld_ref_clk_lock(ld_ref_clk_lock_o),
+      .ld_ref_clk_blink(ld_ref_clk_blink_o),
+      .ld_eth_clk_lock(ld_eth_clk_lock_o),
+      .ld_eth_clk_blink(ld_eth_clk_blink_o)
   );
 
   assign s_test_mode     = '0;

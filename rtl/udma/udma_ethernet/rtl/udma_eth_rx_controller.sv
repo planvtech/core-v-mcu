@@ -32,7 +32,12 @@ module udma_eth_rx_controller #(
 
     ////////////// interface with the register control ////////
 
-    input   logic [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr_i,
+    input   logic [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr0_i,
+    input   logic [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr1_i,
+    input   logic [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr2_i,
+    input   logic [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr3_i,
+    output  logic [1:0]                 reg_rx_pointer_o,
+    output  logic [TRANS_SIZE-1:0]      reg_rx_size_o,
     input   logic                       reg_rx_continuous_i,
     input   logic                       reg_rx_clr_i,
     output  logic                       reg_rx_en_o,
@@ -103,6 +108,10 @@ logic               packet_queue_out_ready = 1'b0;
 logic       [10:0]  packet_queue_out_data;
 logic       [10:0]  udma_rx_count = 11'h0;
 logic               packet_queue_out_valid;
+
+logic       [1:0]   w_pointer = 2'b00;
+logic       [1:0]   r_pointer = 2'b11;
+
 always_ff @( posedge sys_clk_i or negedge sys_rstn_i ) begin : receive_control
     if(!sys_rstn_i)
     begin
@@ -121,6 +130,7 @@ always_ff @( posedge sys_clk_i or negedge sys_rstn_i ) begin : receive_control
                         cfg_rx_en_o <= 1'b1;
                         cfg_rx_size_o <= packet_queue_out_data;
                         state <= STATE_STREAM;
+                        w_pointer <= w_pointer + 2'b01;
                         rx_buffer_rd_en_o <= 1'b1;
                         udma_rx_count <= 11'h1;
                     end
@@ -144,6 +154,8 @@ always_ff @( posedge sys_clk_i or negedge sys_rstn_i ) begin : receive_control
                         udma_rx_count <= 11'h0;
                         rx_buffer_rd_en_o <= 1'b0;
                         state <= STATE_IDLE;
+                        reg_rx_size_o <= cfg_rx_size_o;
+                        r_pointer <= w_pointer;
                         eth_rx_event <= 1'b1;
                     end
                     else
@@ -174,7 +186,17 @@ udma_dc_fifo #(
 
 /////////////////////////////// signal reroutings ////////////////////
 
-assign cfg_rx_startaddr_o = reg_rx_startaddr_i;
+always @(*)
+begin
+    case(w_pointer)
+    2'b00: cfg_rx_startaddr_o <= reg_rx_startaddr0_i;
+    2'b01: cfg_rx_startaddr_o <= reg_rx_startaddr1_i;
+    2'b10: cfg_rx_startaddr_o <= reg_rx_startaddr2_i;
+    2'b11: cfg_rx_startaddr_o <= reg_rx_startaddr3_i;
+    endcase
+end
+
+assign reg_rx_pointer_o = r_pointer;
 assign cfg_rx_continuous_o = reg_rx_continuous_i;
 assign cfg_rx_clr_o = reg_rx_clr_i;
 assign reg_rx_en_o = cfg_rx_en_i;

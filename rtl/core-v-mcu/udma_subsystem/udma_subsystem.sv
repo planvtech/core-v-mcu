@@ -1083,6 +1083,8 @@ module udma_subsystem #(
       //phy signals loopback
       assign phy_rxd = phy_txd;
       assign phy_crs_dv = phy_tx_en;
+      assign phy_txd_o = 'h0;
+      assign phy_rstn_o = 'h0;
       //
 `else
       assign phy_rxd = phy_rxd_i;
@@ -1091,7 +1093,8 @@ module udma_subsystem #(
       assign phy_rstn_o = s_per_rst[PER_ID_ETH+g_eth];
       assign phy_tx_en_o = phy_tx_en;
       assign phy_rx_er = phy_rx_er_i;
-
+`endif
+      
       ODDR2 #(
           .DDR_ALIGNMENT("C0"),
           .SRTYPE("ASYNC")
@@ -1106,9 +1109,6 @@ module udma_subsystem #(
           .R(1'b0),
           .S(1'b0)
       );
-
-`endif
-      
 
       udma_ethernet #(
         .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),

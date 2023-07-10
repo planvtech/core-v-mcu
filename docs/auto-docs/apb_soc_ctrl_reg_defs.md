@@ -43,7 +43,7 @@ I/O function selection controls the select field of a mux that connects the I/O 
 | --------------------- |   --- |   --- |        --- | ------------------------- |
 | N_GPIO     | 23:16 |    RO |         32 | Number of IO connected to GPIO controller |
 | N_SYSIO    |  15:8 |    RO |          3 | Number of fixed-function IO |
-| N_IO       |   7:0 |    RO |         57 | Number of IO on device (not necessarily on package) |
+| N_IO       |   7:0 |    RO |         61 | Number of IO on device (not necessarily on package) |
 
 ### IO_CFG1 offset = 0x0018
 
@@ -151,7 +151,7 @@ I/O function selection controls the select field of a mux that connects the I/O 
 ### SOFT_RESET offset = 0x00FC
 
 
-### IO_CTRL[57] offset = 0x0400
+### IO_CTRL[61] offset = 0x0400
 
 | Field      |  Bits |  Type |    Default | Description     |
 | --------------------- |   --- |   --- |        --- | ------------------------- |

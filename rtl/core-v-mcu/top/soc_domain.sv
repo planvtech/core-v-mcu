@@ -125,7 +125,11 @@ module soc_domain
     output wire [1:0]   phy_txd_o,
     output wire         phy_tx_en_o,
     output wire         phy_rstn_o,
-    input wire          phy_rx_er_i
+    input wire          phy_rx_er_i,
+    output wire         ld_ref_clk_lock,
+    output wire         ld_ref_clk_blink,
+    output wire         ld_eth_clk_lock,
+    output wire         ld_eth_clk_blink
 );
 
   localparam FLL_ADDR_WIDTH = 32;
@@ -134,7 +138,7 @@ module soc_domain
   // The L2 parameter do not influence the size of the memories.
   // Change them in the l2_ram_multibank. This parameters
   // are only here to save area in the uDMA by only storing relevant bits.
-  localparam L2_BANK_SIZE = 24576;  // in 32-bit words
+  localparam L2_BANK_SIZE = 16384;  // in 32-bit words
   localparam L2_MEM_ADDR_WIDTH = $clog2(
       L2_BANK_SIZE * NB_L2_BANKS
   ) - $clog2(
@@ -233,6 +237,7 @@ module soc_domain
   logic                                               s_eth_clk_90;
   logic                                               s_eth_rstn;
   logic                                               s_eth_delay_ref_clk;   
+  logic                                               s_eth_lock;
 
   logic                                               s_dma_pe_evt;
   logic                                               s_dma_pe_irq;
@@ -514,7 +519,25 @@ module soc_domain
       .clk_per_o(s_periph_clk),
       .eth_clk_o(s_eth_clk),
       .eth_clk_90_o(s_eth_clk_90),
-      .eth_delay_ref_clk_o(s_eth_delay_ref_clk)
+      .eth_delay_ref_clk_o(s_eth_delay_ref_clk),
+      .eth_lock_o(s_eth_lock)
+  );
+
+  
+  soc_clk_checkers #(
+    .REF_CLK_PERIOD_NS(100),
+    .ETH_CLK_PERIOD_NS(20)
+  )
+  clk_check
+  (
+    .ref_clk(s_soc_clk),
+    .ref_clk_locked(s_soc_fll_master.lock),
+    .eth_clk(s_eth_clk),
+    .eth_clk_locked(s_eth_lock),
+    .ld_ref_clk_lock(ld_ref_clk_lock),
+    .ld_ref_clk_blink(ld_ref_clk_blink),
+    .ld_eth_clk_lock(ld_eth_clk_lock),
+    .ld_eth_clk_blink(ld_eth_clk_blink)
   );
 
   soc_interconnect_wrap #(

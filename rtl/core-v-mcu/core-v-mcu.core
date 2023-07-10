@@ -65,6 +65,7 @@ filesets:
     - soc/soc_interconnect.sv
     - soc/soc_interconnect_wrap.sv
     - soc/soc_peripherals.sv
+    - soc/soc_clk_checkers.sv
     - udma_subsystem/udma_subsystem.sv
     - fc/fc_demux.sv
     - fc/fc_subsystem.sv

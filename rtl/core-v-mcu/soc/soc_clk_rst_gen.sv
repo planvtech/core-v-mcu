@@ -53,7 +53,8 @@ module soc_clk_rst_gen (
     output logic clk_cluster_o,
     output logic eth_clk_o,
     output logic eth_clk_90_o,
-    output logic eth_delay_ref_clk_o
+    output logic eth_delay_ref_clk_o,
+    output logic eth_lock_o
 
 );
 
@@ -88,6 +89,7 @@ module soc_clk_rst_gen (
       .eth_clk_o(s_eth_clk),
       .eth_clk_90_o(s_eth_clk_90),
       .eth_delay_ref_clk_o(s_eth_delay_ref_clk),
+      .eth_lock_o(eth_lock_o),
       .soc_cfg_lock_o(soc_fll_slave_lock_o),
       .soc_cfg_req_i(soc_fll_slave_req_i),
       .soc_cfg_ack_o(soc_fll_slave_ack_o),

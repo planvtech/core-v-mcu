@@ -33,7 +33,7 @@ module clk_gen (
                     output logic        eth_clk_o,
                     output logic        eth_clk_90_o,
                     output logic        eth_delay_ref_clk_o,
-
+                    output logic        eth_lock_o,
                      output logic        soc_cfg_lock_o,
                      input logic         soc_cfg_req_i,
                      output logic        soc_cfg_ack_o,

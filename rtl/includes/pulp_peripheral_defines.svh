@@ -18,8 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-`define BUILD_DATE 32'h20230611
-`define BUILD_TIME 32'h00065005
+`define BUILD_DATE 32'h20230710
+`define BUILD_TIME 32'h00022358
 
 //  PER_ID definitions
 `define PER_ID_UART      0
@@ -107,8 +107,12 @@
 `define IOINDEX_ETH_TX_EN_O           13
 `define IOINDEX_ETH_TXD0_O            14
 `define IOINDEX_ETH_TXD1_O            15
-`define IOINDEX_STM_I                 53
-`define IOINDEX_BOOTSEL_I             54
+`define IOINDEX_LD_REF_CLK_LOCK_O     16
+`define IOINDEX_LD_REF_CLK_BLINK_O    17
+`define IOINDEX_LD_ETH_CLK_LOCK_O     18
+`define IOINDEX_LD_ETH_CLK_BLINK_O    19
+`define IOINDEX_STM_I                 57
+`define IOINDEX_BOOTSEL_I             58
 //  Width of perio bus
 `define N_PERIO  47
 

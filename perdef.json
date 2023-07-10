@@ -75,6 +75,23 @@
 	  "type": "sysio",
 	  "direction": "output"
 	},
+	{ "name": "ld_ref_clk_lock",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "ld_ref_clk_blink",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "ld_eth_clk_lock",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "ld_eth_clk_blink",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+
 	{ "name": "uart",
 	  "usable":	true,
 	  "type":		"udma",
