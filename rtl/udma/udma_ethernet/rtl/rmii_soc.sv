@@ -94,70 +94,70 @@ idelayctrl_inst
     .RDY()
 );
 
-`ifndef ETH_LOOPBACK
+//`ifndef ETH_LOOPBACK
 
-// IODELAY elements for RGMII interface to PHY
-wire [1:0] phy_rxd_delay;
-wire       phy_crs_dv_delay;
+//// IODELAY elements for RGMII interface to PHY
+//wire [1:0] phy_rxd_delay;
+//wire       phy_crs_dv_delay;
 
-IDELAYE2 #(
-    .IDELAY_TYPE("FIXED")
-)
-phy_rxd_idelay_0
-(
-    .IDATAIN(phy_rxd[0]),
-    .DATAOUT(phy_rxd_delay[0]),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
-    .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
-);
+//IDELAYE2 #(
+//    .IDELAY_TYPE("FIXED")
+//)
+//phy_rxd_idelay_0
+//(
+//    .IDATAIN(phy_rxd[0]),
+//    .DATAOUT(phy_rxd_delay[0]),
+//    .DATAIN(1'b0),
+//    .C(1'b0),
+//    .CE(1'b0),
+//    .INC(1'b0),
+//    .CINVCTRL(1'b0),
+//    .CNTVALUEIN(5'd0),
+//    .CNTVALUEOUT(),
+//    .LD(1'b0),
+//    .LDPIPEEN(1'b0),
+//    .REGRST(1'b0)
+//);
 
-IDELAYE2 #(
-    .IDELAY_TYPE("FIXED")
-)
-phy_rxd_idelay_1
-(
-    .IDATAIN(phy_rxd[1]),
-    .DATAOUT(phy_rxd_delay[1]),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
-    .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
-);
+//IDELAYE2 #(
+//    .IDELAY_TYPE("FIXED")
+//)
+//phy_rxd_idelay_1
+//(
+//    .IDATAIN(phy_rxd[1]),
+//    .DATAOUT(phy_rxd_delay[1]),
+//    .DATAIN(1'b0),
+//    .C(1'b0),
+//    .CE(1'b0),
+//    .INC(1'b0),
+//    .CINVCTRL(1'b0),
+//    .CNTVALUEIN(5'd0),
+//    .CNTVALUEOUT(),
+//    .LD(1'b0),
+//    .LDPIPEEN(1'b0),
+//    .REGRST(1'b0)
+//);
 
-IDELAYE2 #(
-    .IDELAY_VALUE(0),
-    .IDELAY_TYPE("FIXED")
-)
-phy_rx_en_idelay
-(
-    .IDATAIN(phy_crs_dv),
-    .DATAOUT(phy_crs_dv_delay),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
-    .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
-);
-`endif
+//IDELAYE2 #(
+//    .IDELAY_VALUE(0),
+//    .IDELAY_TYPE("FIXED")
+//)
+//phy_rx_en_idelay
+//(
+//    .IDATAIN(phy_crs_dv),
+//    .DATAOUT(phy_crs_dv_delay),
+//    .DATAIN(1'b0),
+//    .C(1'b0),
+//    .CE(1'b0),
+//    .INC(1'b0),
+//    .CINVCTRL(1'b0),
+//    .CNTVALUEIN(5'd0),
+//    .CNTVALUEOUT(),
+//    .LD(1'b0),
+//    .LDPIPEEN(1'b0),
+//    .REGRST(1'b0)
+//);
+//`endif
 
 mii_core
 core_inst (
@@ -197,40 +197,40 @@ core_inst (
     .rx_fifo_good_frame(rx_fifo_good_frame)
 );
 
-`ifndef ETH_LOOPBACK
+//`ifndef ETH_LOOPBACK
 
-util_mii_to_rmii #(
-  .INTF_CFG(0),
-  .RATE_10_100(1)
-) 
-mii_2_rmii_inst
-(
+//util_mii_to_rmii #(
+//  .INTF_CFG(0),
+//  .RATE_10_100(1)
+//) 
+//mii_2_rmii_inst
+//(
 
-  // MAC to MII(PHY)
-  .mac_tx_en(mii_tx_en),      //input             mac_tx_en,
-  .mac_txd(mii_txd),        //input    [3:0]    mac_txd,
-  .mac_tx_er(mii_tx_er),      //input             mac_tx_er,
-  //MII to MAC
-  .mii_tx_clk(mii_tx_clk),     //output            mii_tx_clk,
-  .mii_rx_clk(mii_rx_clk),     //output            mii_rx_clk,
-  .mii_col(mii_col),        //output            mii_col,
-  .mii_crs(mii_crs),        //output            mii_crs,
-  .mii_rx_dv(mii_rx_dv),      //output            mii_rx_dv,
-  .mii_rx_er(mii_rx_er),      //output            mii_rx_er,
-  .mii_rxd(mii_rxd),        //output   [3:0]    mii_rxd,
-  // RMII to PHY
-  .rmii_txd(phy_txd),       //output   [1:0]    rmii_txd,
-  .rmii_tx_en(phy_tx_en),     //output            rmii_tx_en,
-  // PHY to RMII
-  .phy_rxd(phy_rxd_delay),        //input    [1:0]    phy_rxd,
-  .phy_crs_dv(phy_crs_dv_delay),     //input             phy_crs_dv,
-  .phy_rx_er(phy_rx_er),      //input             phy_rx_er,
-  // External
-  .ref_clk(clk_int),        //input             ref_clk,
-  .reset_n(~rst_int)         //input             reset_n
-);
+//  // MAC to MII(PHY)
+//  .mac_tx_en(mii_tx_en),      //input             mac_tx_en,
+//  .mac_txd(mii_txd),        //input    [3:0]    mac_txd,
+//  .mac_tx_er(mii_tx_er),      //input             mac_tx_er,
+//  //MII to MAC
+//  .mii_tx_clk(mii_tx_clk),     //output            mii_tx_clk,
+//  .mii_rx_clk(mii_rx_clk),     //output            mii_rx_clk,
+//  .mii_col(mii_col),        //output            mii_col,
+//  .mii_crs(mii_crs),        //output            mii_crs,
+//  .mii_rx_dv(mii_rx_dv),      //output            mii_rx_dv,
+//  .mii_rx_er(mii_rx_er),      //output            mii_rx_er,
+//  .mii_rxd(mii_rxd),        //output   [3:0]    mii_rxd,
+//  // RMII to PHY
+//  .rmii_txd(phy_txd),       //output   [1:0]    rmii_txd,
+//  .rmii_tx_en(phy_tx_en),     //output            rmii_tx_en,
+//  // PHY to RMII
+//  .phy_rxd(phy_rxd_delay),        //input    [1:0]    phy_rxd,
+//  .phy_crs_dv(phy_crs_dv_delay),     //input             phy_crs_dv,
+//  .phy_rx_er(phy_rx_er),      //input             phy_rx_er,
+//  // External
+//  .ref_clk(clk_int),        //input             ref_clk,
+//  .reset_n(~rst_int)         //input             reset_n
+//);
 
-`else
+//`else
 
 util_mii_to_rmii #(
   .INTF_CFG(0),
@@ -263,6 +263,6 @@ mii_2_rmii_inst
   .reset_n(~rst_int)         //input             reset_n
 );
 
-`endif
+//`endif
 
 endmodule

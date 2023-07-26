@@ -60,14 +60,13 @@ module udma_eth_tx_controller #(
     input   logic                      m_axis_tready_i 
 );
 
-logic [2:0] state = 3'b000;
+logic [1:0] state = 2'b00;
 logic [TRANS_SIZE-1:0]      byte_count = 'h1;
 //logic [1:0] remainder = 2'b00; // will be used for wordwise transmission
-localparam STATE_IDLE           =   3'b000,
-           STATE_WAIT_CMD       =   3'b001,
-           STATE_REQ            =   3'b010,
-           STATE_WAIT_GNT       =   3'b011,
-           STATE_TRANSMIT_BYTES =   3'b100; 
+localparam STATE_IDLE           =   2'b000,
+           STATE_WAIT_CMD       =   2'b001,
+           STATE_WAIT_GNT       =   2'b010,
+           STATE_TRANSMIT_BYTES =   2'b011; 
            //STATE_TRANSMIT_WORDS =   3'b101; //will be used for wordwise transmission
 
 assign busy_o   = state != STATE_IDLE & reg_tx_en_o;            
@@ -88,7 +87,6 @@ always_ff @( posedge clk_i or negedge rstn_i ) begin : state_machine
     else
     begin
 //      data_tx_req_o <= 1'b1;
-        byte_count <= 'h1;
         case(state)
         STATE_IDLE:     // fetch the instruction and raise the data_tx_req_o
         begin
@@ -112,11 +110,12 @@ always_ff @( posedge clk_i or negedge rstn_i ) begin : state_machine
 //              remainder <= reg_tx_size_i[1:0];
                 cfg_tx_startaddr_o <= reg_tx_startaddr_i;
                 m_axis_tuser_o <= 1'b1;
+                byte_count <= 'h1;
             end
         end
         STATE_WAIT_CMD:
         begin
-            if(cfg_tx_en_i)
+            if(cfg_tx_en_i & !cfg_tx_pending_i)
             begin
                 cfg_tx_en_o <= 1'b0;
                 state <= STATE_WAIT_GNT;

@@ -272,12 +272,20 @@ module udma_subsystem #(
   // logic   [3:0]                                          phy_txd;
   // logic                                                  phy_tx_ctl;
   // logic                                                  phy_reset_n;
-
+  
+`ifdef ETH_LOOPBACK
+  (*KEEP = "TRUE" *) logic [1:0]    phy_rxd;
+  (*KEEP = "TRUE" *) logic          phy_crs_dv;
+  (*KEEP = "TRUE" *) logic [1:0]    phy_txd;
+  (*KEEP = "TRUE" *) logic          phy_tx_en;
+  (*KEEP = "TRUE" *) logic          phy_rx_er;
+ `else
   logic [1:0]    phy_rxd;
   logic          phy_crs_dv;
   logic [1:0]    phy_txd;
   logic          phy_tx_en;
   logic          phy_rx_er;
+ `endif
   //////////////////////////////////////////
 
   integer                   i;
@@ -1085,6 +1093,7 @@ module udma_subsystem #(
       assign phy_crs_dv = phy_tx_en;
       assign phy_txd_o = 'h0;
       assign phy_rstn_o = 'h0;
+      assign phy_rx_er = 1'b0;
       //
 `else
       assign phy_rxd = phy_rxd_i;

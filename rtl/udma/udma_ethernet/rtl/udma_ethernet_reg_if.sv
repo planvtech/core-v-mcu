@@ -96,12 +96,12 @@ module udma_ethernet_reg_if #(
     logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr1;
     logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr2;
     logic [L2_AWIDTH_NOAL-1:0] r_rx_startaddr3;
-    logic [31:0]               r_rx_desc_0 = 'h0;
-    logic [31:0]               r_rx_desc_1 = 'h0;
-    logic [31:0]               r_rx_desc_2 = 'h0;
-    logic [31:0]               r_rx_desc_3 = 'h0;
-    logic [1:0]                r_rx_pointer = 2'b11;                        
-    logic   [TRANS_SIZE-1 : 0] r_rx_size;
+    (* KEEP = "TRUE" *) logic [31:0]               r_rx_desc_0 = 'h0;
+    (* KEEP = "TRUE" *) logic [31:0]               r_rx_desc_1 = 'h0;
+    (* KEEP = "TRUE" *) logic [31:0]               r_rx_desc_2 = 'h0;
+    (* KEEP = "TRUE" *) logic [31:0]               r_rx_desc_3 = 'h0;
+    (* KEEP = "TRUE" *) logic [1:0] r_rx_pointer = 2'b11;                        
+    (* KEEP = "TRUE" *) logic   [TRANS_SIZE-1 : 0] r_rx_size;
     logic                      r_rx_continuous;
     logic                      r_rx_en;
     logic                      r_rx_clr;
@@ -162,7 +162,6 @@ module udma_ethernet_reg_if #(
             r_rx_startaddr1             <=  'h0;
             r_rx_startaddr2             <=  'h0;
             r_rx_startaddr3             <=  'h0;
-            r_rx_size                   <=  'h0;
             r_rx_continuous             <=  'h0;
             r_rx_en                     <=  'h0;
             r_rx_clr                    <=  'h0;
@@ -177,6 +176,10 @@ module udma_ethernet_reg_if #(
             r_err_rx_error_bad_fcs      <=  'h0;
             r_err_rx_fifo_overflow      <=  'h0;
             r_err_rx_fifo_bad_frame     <=  'h0;
+            r_rx_desc_0                 <=  'h0;
+            r_rx_desc_1                 <=  'h0;
+            r_rx_desc_2                 <=  'h0;
+            r_rx_desc_3                 <=  'h0;
         end
         else
         begin
@@ -214,16 +217,31 @@ module udma_ethernet_reg_if #(
                 r_err_rx_fifo_bad_frame  <= 1'b0;
 
             r_rx_pointer <= cfg_rx_pointer_i;
+            
             if(r_rx_pointer != cfg_rx_pointer_i)
             begin
-                r_rx_desc_0[31] <= cfg_rx_pointer_i == 2'b00 ? 1'b1 : r_rx_desc_0[31];
-                r_rx_desc_0[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b00 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_0[TRANS_SIZE-1:0];
-                r_rx_desc_1[31] <= cfg_rx_pointer_i == 2'b01 ? 1'b1 : r_rx_desc_1[31];
-                r_rx_desc_1[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b01 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_1[TRANS_SIZE-1:0];
-                r_rx_desc_2[31] <= cfg_rx_pointer_i == 2'b10 ? 1'b1 : r_rx_desc_2[31];
-                r_rx_desc_2[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b10 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_2[TRANS_SIZE-1:0];
-                r_rx_desc_3[31] <= cfg_rx_pointer_i == 2'b11 ? 1'b1 : r_rx_desc_3[31];
-                r_rx_desc_3[TRANS_SIZE-1:0] <=  cfg_rx_pointer_i == 2'b11 ? cfg_rx_size_i[TRANS_SIZE-1:0] : r_rx_desc_3[TRANS_SIZE-1:0];
+                case(cfg_rx_pointer_i)
+                2'b00:
+                begin
+                    r_rx_desc_0[31] <= 1'b1;
+                    r_rx_desc_0[(TRANS_SIZE-1):0] <= r_rx_size[(TRANS_SIZE-1):0];
+                end
+                2'b01:
+                begin
+                    r_rx_desc_1[31] <= 1'b1;
+                    r_rx_desc_1[(TRANS_SIZE-1):0] <= r_rx_size[(TRANS_SIZE-1):0];
+                end
+                2'b10:
+                begin
+                    r_rx_desc_2[31] <= 1'b1;
+                    r_rx_desc_2[(TRANS_SIZE-1):0] <= r_rx_size[(TRANS_SIZE-1):0];
+                end
+                2'b11:
+                begin
+                    r_rx_desc_3[31] <= 1'b1;
+                    r_rx_desc_3[(TRANS_SIZE-1):0] <= r_rx_size[(TRANS_SIZE-1):0];
+                end
+                endcase;
             end
 
             if (cfg_valid_i & ~cfg_rwn_i)

@@ -37,12 +37,14 @@ filesets:
   nexys-xdc:
     files:
     - emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
+    - emulation/core-v-mcu-nexys/constraints/core-v-mcu-timing.xdc
     file_type: xdc
 
   nexys-cfg:
     files:
     - emulation/core-v-mcu-nexys/tcl/common.tcl
     - emulation/core-v-mcu-nexys/tcl/flatten.tcl
+    - emulation/core-v-mcu-nexys/tcl/synth_opts.tcl
     file_type: tclSource
 
   xilinx-ips:

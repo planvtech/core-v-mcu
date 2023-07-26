@@ -191,6 +191,7 @@ filesets:
   nexys-xdc:
     files:
     - emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
+    - emulation/core-v-mcu-nexys/constraints/core-v-mcu-timing.xdc
     file_type: xdc
 
   xilinx-tcl:

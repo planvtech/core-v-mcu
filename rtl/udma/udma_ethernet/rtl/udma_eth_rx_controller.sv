@@ -37,7 +37,7 @@ module udma_eth_rx_controller #(
     input   logic [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr2_i,
     input   logic [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr3_i,
     output  logic [1:0]                 reg_rx_pointer_o,
-    output  logic [TRANS_SIZE-1:0]      reg_rx_size_o,
+    output  logic     [TRANS_SIZE-1:0]  reg_rx_size_o,
     input   logic                       reg_rx_continuous_i,
     input   logic                       reg_rx_clr_i,
     output  logic                       reg_rx_en_o,
@@ -101,7 +101,9 @@ end
 ///////////////////////////////////////////////////////////////////////
 /////////////////////// udma read channel side/////////////////////////
 localparam  STATE_IDLE   = 2'b00,
-            STATE_STREAM = 2'b01;
+            STATE_PENDING = 2'b01,
+            STATE_STREAM = 2'b10;
+            
 
 logic        [1:0]  state = STATE_IDLE;
 logic               packet_queue_out_ready = 1'b0;
@@ -122,6 +124,7 @@ always_ff @( posedge sys_clk_i or negedge sys_rstn_i ) begin : receive_control
         case(state)
             STATE_IDLE:
             begin
+                rx_buffer_rd_en_o <= 1'b0;   
                 eth_rx_event <= 1'b0;
                 if(packet_queue_out_valid)
                 begin
@@ -129,9 +132,7 @@ always_ff @( posedge sys_clk_i or negedge sys_rstn_i ) begin : receive_control
                     begin
                         cfg_rx_en_o <= 1'b1;
                         cfg_rx_size_o <= packet_queue_out_data;
-                        state <= STATE_STREAM;
-                        w_pointer <= w_pointer + 2'b01;
-                        rx_buffer_rd_en_o <= 1'b1;
+                        state <= STATE_PENDING;
                         udma_rx_count <= 11'h1;
                     end
                     packet_queue_out_ready <= 1'b1;
@@ -140,13 +141,25 @@ always_ff @( posedge sys_clk_i or negedge sys_rstn_i ) begin : receive_control
                 begin
                     packet_queue_out_ready <= 1'b0;
                     cfg_rx_en_o <= 1'b0;
-                    rx_buffer_rd_en_o <= 1'b0;    
+                     
                 end
             end
-
+            STATE_PENDING:
+            begin
+                if(cfg_rx_en_i)
+                begin
+                    cfg_rx_en_o <= 1'b0;
+                end
+                if(~cfg_rx_pending_i)
+                begin
+                    rx_buffer_rd_en_o <= 1'b1;
+                    state <= STATE_STREAM;
+                end
+            end
             STATE_STREAM:
             begin
                 packet_queue_out_ready <= 1'b0;
+                
                 if(rx_buffer_ready_i & rx_buffer_valid_i)
                 begin
                     if(udma_rx_count == cfg_rx_size_o) 
@@ -154,8 +167,9 @@ always_ff @( posedge sys_clk_i or negedge sys_rstn_i ) begin : receive_control
                         udma_rx_count <= 11'h0;
                         rx_buffer_rd_en_o <= 1'b0;
                         state <= STATE_IDLE;
-                        reg_rx_size_o <= cfg_rx_size_o;
+                        w_pointer <= w_pointer + 2'b01;
                         r_pointer <= w_pointer;
+                        reg_rx_size_o <= cfg_rx_size_o;
                         eth_rx_event <= 1'b1;
                     end
                     else

@@ -32,31 +32,31 @@ Basic ETHERNET MAC driven by UDMA system
 
 | Field      |  Bits |  Type |    Default | Description     |
 | --------------------- |   --- |   --- |        --- | ------------------------- |
-| DESC_0     |  32:0 |    RW |            | status of the buffer_0 |
+| DESC_0     |  31:0 |    RW |            | status of the buffer_0 |
 
 ### RX_DESC_1 offset = 0x14
 
 | Field      |  Bits |  Type |    Default | Description     |
 | --------------------- |   --- |   --- |        --- | ------------------------- |
-| DESC_1     |  32:0 |    RW |            | status of the buffer_1 |
+| DESC_1     |  31:0 |    RW |            | status of the buffer_1 |
 
 ### RX_DESC_2 offset = 0x18
 
 | Field      |  Bits |  Type |    Default | Description     |
 | --------------------- |   --- |   --- |        --- | ------------------------- |
-| DESC_2     |  32:0 |    RW |            | status of the buffer_2 |
+| DESC_2     |  31:0 |    RW |            | status of the buffer_2 |
 
 ### RX_DESC_3 offset = 0x1C
 
 | Field      |  Bits |  Type |    Default | Description     |
 | --------------------- |   --- |   --- |        --- | ------------------------- |
-| DESC_3     |  32:0 |    RW |            | status of the buffer_3 |
+| DESC_3     |  31:0 |    RW |            | status of the buffer_3 |
 
 ### ETH_REG_RX_CADDR offset = 0x20
 
 | Field      |  Bits |  Type |    Default | Description     |
 | --------------------- |   --- |   --- |        --- | ------------------------- |
-| RX_CADDR   |  32:0 |     R |            | the address of the current transmission |
+| RX_CADDR   |  31:0 |     R |            | the address of the current transmission |
 
 ### RX_SIZE offset = 0x24
 

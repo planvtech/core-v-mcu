@@ -419,7 +419,7 @@ module soc_domain
       .fpgaio_oe_o (fpgaio_oe_o),
 
       // other FPGA signals
-      .fpga_clk_in(s_cluster_clk),
+      .fpga_clk_in(s_soc_clk), //mustafa changed this to test the effect of the cross clock handling, org : s_cluster_clk
 
 
       //eFPGA TEST MODE

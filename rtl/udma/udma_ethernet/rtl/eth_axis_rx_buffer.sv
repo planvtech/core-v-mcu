@@ -42,7 +42,7 @@ module eth_axis_rx_buffer
     logic   [35:0]  buffer_data_o;
     logic   [35:0]  buffer_data_i;
     logic   [1:0]   queue = 2'h0;
-    logic   [1:0]   read_data_byte_count;
+    logic   [1:0]   read_data_byte_count = 2'b00;
     logic           fifo_full;
     xilinx_dc_fifo dc_fifo_rx(
     .wr_clk(s_clk_i),    //input  logic                  
@@ -63,7 +63,7 @@ module eth_axis_rx_buffer
     logic [7:0] byte_n_2 = 8'h0;
     logic       tuser_reg   =   1'b0;
 
-    assign m_axis_tdata[1:0] = buffer_data_o[31:0];
+    assign m_axis_tdata[31:0] = buffer_data_o[31:0];
     assign m_axis_tuser = buffer_data_o[35];
     assign m_axis_tlast = buffer_data_o[34];
     assign m_axis_byte_count[1:0] = buffer_data_o[33:32];

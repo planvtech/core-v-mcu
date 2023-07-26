@@ -56,46 +56,46 @@ module udma_ethernet #(
     */
     output wire        eth_rx_event_o,
 
-	input  logic               [31:0] cfg_data_i,
-	input  logic                [4:0] cfg_addr_i,
-	input  logic                      cfg_valid_i,
-	input  logic                      cfg_rwn_i,
-	output logic                      cfg_ready_o,
-    output logic               [31:0] cfg_data_o,
+ input  logic               [31:0] cfg_data_i,
+ input  logic                [4:0] cfg_addr_i,
+ input  logic                      cfg_valid_i,
+ input  logic                      cfg_rwn_i,
+ output logic                      cfg_ready_o,
+ output logic               [31:0] cfg_data_o,
 
-    output logic [L2_AWIDTH_NOAL-1:0] cfg_rx_startaddr_o,       
-    output logic     [TRANS_SIZE-1:0] cfg_rx_size_o,            
-    output logic                [1:0] cfg_rx_datasize_o,        
-    output logic                      cfg_rx_continuous_o,      
-    output logic                      cfg_rx_en_o,              
-    output logic                      cfg_rx_clr_o,             
-    input  logic                      cfg_rx_en_i,              
-    input  logic                      cfg_rx_pending_i,         
-    input  logic [L2_AWIDTH_NOAL-1:0] cfg_rx_curr_addr_i,       
-    input  logic     [TRANS_SIZE-1:0] cfg_rx_bytes_left_i,      
+output logic [L2_AWIDTH_NOAL-1:0] cfg_rx_startaddr_o,       
+output logic     [TRANS_SIZE-1:0] cfg_rx_size_o,            
+output logic                [1:0] cfg_rx_datasize_o,        
+output logic                      cfg_rx_continuous_o,      
+output logic                      cfg_rx_en_o,              
+output logic                      cfg_rx_clr_o,             
+input  logic                      cfg_rx_en_i,              
+input  logic                      cfg_rx_pending_i,         
+input  logic [L2_AWIDTH_NOAL-1:0] cfg_rx_curr_addr_i,       
+input  logic     [TRANS_SIZE-1:0] cfg_rx_bytes_left_i,      
 
-    output logic [L2_AWIDTH_NOAL-1:0] cfg_tx_startaddr_o,       
-    output logic     [TRANS_SIZE-1:0] cfg_tx_size_o,            
-    output logic                [1:0] cfg_tx_datasize_o,        
-    output logic                      cfg_tx_continuous_o,      
-    output logic                      cfg_tx_en_o,              
-    output logic                      cfg_tx_clr_o,             
-    input  logic                      cfg_tx_en_i,              
-    input  logic                      cfg_tx_pending_i,         
-    input  logic [L2_AWIDTH_NOAL-1:0] cfg_tx_curr_addr_i,       
-    input  logic     [TRANS_SIZE-1:0] cfg_tx_bytes_left_i,      
+output logic [L2_AWIDTH_NOAL-1:0] cfg_tx_startaddr_o,       
+output logic     [TRANS_SIZE-1:0] cfg_tx_size_o,            
+output logic                [1:0] cfg_tx_datasize_o,        
+output logic                      cfg_tx_continuous_o,      
+output logic                      cfg_tx_en_o,              
+output logic                      cfg_tx_clr_o,             
+input  logic                      cfg_tx_en_i,              
+input  logic                      cfg_tx_pending_i,         
+input  logic [L2_AWIDTH_NOAL-1:0] cfg_tx_curr_addr_i,       
+input  logic     [TRANS_SIZE-1:0] cfg_tx_bytes_left_i,      
 
-    output logic                      data_tx_req_o,
-    input  logic                      data_tx_gnt_i,
-    output logic                [1:0] data_tx_datasize_o,
-    input  logic               [31:0] data_tx_i,
-    input  logic                      data_tx_valid_i,
-    output logic                      data_tx_ready_o,
+output logic                      data_tx_req_o,
+input  logic                      data_tx_gnt_i,
+output logic                [1:0] data_tx_datasize_o,
+input  logic               [31:0] data_tx_i,
+input  logic                      data_tx_valid_i,
+output logic                      data_tx_ready_o,
 
-    output logic                [1:0] data_rx_datasize_o,
-    output logic               [31:0] data_rx_o,
-    output logic                      data_rx_valid_o,
-    input  logic                      data_rx_ready_i
+output logic                [1:0] data_rx_datasize_o,
+output logic               [31:0] data_rx_o,
+output logic                      data_rx_valid_o,
+input  logic                      data_rx_ready_i
 );
 
     logic               [7:0]  s_eth_status;
@@ -168,7 +168,7 @@ module udma_ethernet #(
     logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr1_s;
     logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr2_s;
     logic    [L2_AWIDTH_NOAL-1:0]  reg_rx_startaddr3_s;
-    logic        [TRANS_SIZE-1:0]  reg_rx_size_s;
+    (* KEEP = "TRUE" *)logic       [TRANS_SIZE-1:0]  reg_rx_size_s;
     logic                   [1:0]  reg_rx_pointer_s;
     logic                          reg_rx_continuous_s;
     logic                          reg_rx_en_to_ctrl;
