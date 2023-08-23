@@ -30,6 +30,7 @@ filesets:
     - openhwgroup.org:ip:udma_qspi
     - openhwgroup.org:ip:udma_i2s
     - openhwgroup.org:ip:udma_i2c
+    - openhwgroup.org:ip:udma_smi
     - openhwgroup.org:ip:udma_filter
     - openhwgroup.org:ip:udma_external_per
     - openhwgroup.org:ip:udma_core

@@ -142,6 +142,7 @@
 `define N_UART    	2
 `define N_QSPIM    	2
 `define N_SPI     	`N_QSPIM		// ToDo: Compatibility
+`define N_SMI     	1
 `define N_I2CM    	2
 `define N_I2C     	`N_I2CM		// ToDo: Compatibility
 `define N_I2SC    	0
@@ -174,5 +175,4 @@
 `define LOG2(VALUE) ((VALUE) < ( 1 ) ? 0 : (VALUE) < ( 2 ) ? 1 : (VALUE) < ( 4 ) ? 2 : (VALUE)< (8) ? 3:(VALUE) < ( 16 )  ? 4 : (VALUE) < ( 32 )  ? 5 : (VALUE) < ( 64 )  ? 6 : (VALUE) < ( 128 ) ? 7 : (VALUE) < ( 256 ) ? 8 : (VALUE) < ( 512 ) ? 9 : 10)
 
 /* Interfaces have been moved to pulp_interfaces.sv. Sorry :) */
-`define ETH_LOOPBACK
 `endif

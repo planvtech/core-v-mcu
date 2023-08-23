@@ -18,8 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-`define BUILD_DATE 32'h20230725
-`define BUILD_TIME 32'h00053430
+`define BUILD_DATE 32'h20230823
+`define BUILD_TIME 32'h00034504
 
 //  PER_ID definitions
 `define PER_ID_UART      0
@@ -35,7 +35,8 @@
 `define PER_ID_FILTER    8
 `define PER_ID_FPGA      9
 `define PER_ID_ETH       9
-`define PER_ID_EXT_PER   10
+`define PER_ID_SMI       10
+`define PER_ID_EXT_PER   11
 
 //  UDMA TX channels
 `define CH_ID_TX_UART    0
@@ -114,7 +115,7 @@
 `define IOINDEX_STM_I                 57
 `define IOINDEX_BOOTSEL_I             58
 //  Width of perio bus
-`define N_PERIO  47
+`define N_PERIO  49
 
 //  define index locations in perio bus
 `define PERIO_UART_NPORTS 2
@@ -177,4 +178,7 @@
 `define PERIO_FILTER_NPORTS 0
 `define PERIO_FPGA_NPORTS 0
 `define PERIO_ETH_NPORTS 0
+`define PERIO_SMI_NPORTS 2
+`define PERIO_SMI0_MDIO  47
+`define PERIO_SMI0_MDC   48
 `define PERIO_EXT_PER_NPORTS 0

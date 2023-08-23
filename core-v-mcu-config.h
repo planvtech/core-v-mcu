@@ -44,6 +44,7 @@
 #define N_FILTER             1
 #define N_FPGA               0
 #define N_ETH                1
+#define N_SMI                1
 #define N_EXT_PER            0
 #define N_EFPGA_TCDM_PORTS   4
 #define N_FPGAIO             43

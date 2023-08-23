@@ -120,7 +120,7 @@ module udma_subsystem #(
   localparam N_STREAMS = `N_FILTER;
   localparam STREAM_ID_WIDTH = 1;  //$clog2(N_STREAMS)
 
-  localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + `N_ETH + N_EXT_PER;
+  localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + `N_ETH + `N_SMI + N_EXT_PER;
   if (N_PERIPHS > 28)
     $error("Too many udma periperals: limit is 28 (32 event channels - 4 for FPGA)");
   
@@ -158,7 +158,8 @@ module udma_subsystem #(
   localparam PER_ID_FILTER = PER_ID_CAM + `N_CAM;
   localparam PER_ID_FPGA = PER_ID_FILTER + `N_FILTER;
   localparam PER_ID_ETH = PER_ID_FPGA + `N_FPGA;
-  localparam PER_ID_EXT_PER = PER_ID_ETH + `N_ETH;
+  localparam PER_ID_SMI = PER_ID_ETH + `N_ETH;
+  localparam PER_ID_EXT_PER = PER_ID_SMI + `N_SMI;
   if (`PER_ID_EXT_PER != PER_ID_EXT_PER) $error("PER_ID_EXT_PER mismatch");
 
 
@@ -1197,4 +1198,48 @@ module udma_subsystem #(
       );
     end
   endgenerate
+
+// PHY_CFG
+  logic       md_oen;
+  generate
+    for (genvar g_smi = 0; g_smi < `N_SMI; g_smi++) begin : i_smi_gen
+     
+      assign s_per_rst[PER_ID_SMI+g_smi] = sys_resetn_i & !s_rst_periphs[PER_ID_SMI+g_smi];
+      assign perio_oe_o[`PERIO_SMI0_MDIO+`PERIO_SMI_NPORTS*g_smi] = md_oen;
+      udma_smi_top i_smi (
+        .sys_clk_i(s_clk_periphs_core[PER_ID_SMI+g_smi]),
+        .rstn_i(s_per_rst[PER_ID_SMI+g_smi]),
+        /*
+          * Ethernet: 1000BASE-T RGMII
+          */
+        // .phy_rx_clk(phy_rx_clk),    //  input wire        
+        // .phy_rxd(phy_rxd),          //  input wire [3:0]  
+        // .phy_rx_ctl(phy_rx_ctl),    //  input wire        
+        // .phy_tx_clk(phy_tx_clk),    //  output wire        
+        // .phy_txd(phy_txd),          //  output wire [3:0]  
+        // .phy_tx_ctl(phy_tx_ctl),    //  output wire        
+        // .phy_reset_n(phy_reset_n),  //  output wire        
+        // .phy_int_n(phy_int_n),      //  input wire        
+        // .phy_pme_n(phy_pme_n),      //  input wire        
+        //
+
+        /*
+          * Ethernet: 10 100 -T RMII
+          */
+        .mdi_i(perio_in_i[`PERIO_SMI0_MDIO+`PERIO_SMI_NPORTS*g_smi]),
+        .mdo_o(perio_out_o[`PERIO_SMI0_MDIO+`PERIO_SMI_NPORTS*g_smi]),
+        .md_oen_o(md_oen),
+        .mdc_o(perio_out_o[`PERIO_SMI0_MDC+`PERIO_SMI_NPORTS*g_smi]),
+
+        .cfg_data_i (s_periph_data_to),
+        .cfg_addr_i (s_periph_addr),
+        .cfg_valid_i(s_periph_valid[PER_ID_SMI+g_smi]),
+        .cfg_rwn_i  (s_periph_rwn),
+        .cfg_data_o (s_periph_data_from[PER_ID_SMI+g_smi]),
+        .cfg_ready_o(s_periph_ready[PER_ID_SMI+g_smi])           
+      );
+    end
+  endgenerate
+
+
 endmodule

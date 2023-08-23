@@ -89,6 +89,8 @@ module pad_control(
     assign perio_in_o[44] = ((pad_mux_i[47] == 2'd0) ? io_in_i[47] : 1'b1);
     assign perio_in_o[45] = ((pad_mux_i[48] == 2'd0) ? io_in_i[48] : 1'b1);
     assign perio_in_o[46] = ((pad_mux_i[49] == 2'd0) ? io_in_i[49] : 1'b1);
+    assign perio_in_o[47] =  1'b1;
+    assign perio_in_o[48] =  1'b1;
 
     ///////////////////////////////////////////////////
     // Assign signals to the apbio bus
