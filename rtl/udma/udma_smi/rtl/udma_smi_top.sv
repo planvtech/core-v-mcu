@@ -59,7 +59,7 @@ module udma_smi_top
 
     udma_smi_ctrl u_ctrl
     (
-        .clk_i(clk_i),
+        .clk_i(sys_clk_i),
         .rstn_i(rstn_i),
         .mdi_i(mdi_i),
         .mdo_o(mdo_o),

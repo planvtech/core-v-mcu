@@ -5,7 +5,7 @@ CAPI=2:
 # SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
 name: openhwgroup.org:ip:udma_smi
-description: uDMA SMA interface
+description: uDMA SMI interface
 
 filesets:
   files_rtl:
