@@ -86,15 +86,15 @@ module pad_frame(
     pad_functional_pd i_pad_14   (.OEN(~io_oe_i[14]), .I(io_out_i[14]), .O(io_in_o[14]), .PAD(io[14]), .PEN(~pad_cfg_i[14][0]));
       assign io_out_i[15] = eth_txd1_o;
     pad_functional_pd i_pad_15   (.OEN(~io_oe_i[15]), .I(io_out_i[15]), .O(io_in_o[15]), .PAD(io[15]), .PEN(~pad_cfg_i[15][0]));
-      assign io_out_i[16] = ld_ref_clk_lock_o;
     pad_functional_pd i_pad_16   (.OEN(~io_oe_i[16]), .I(io_out_i[16]), .O(io_in_o[16]), .PAD(io[16]), .PEN(~pad_cfg_i[16][0]));
-      assign io_out_i[17] = ld_ref_clk_blink_o;
     pad_functional_pd i_pad_17   (.OEN(~io_oe_i[17]), .I(io_out_i[17]), .O(io_in_o[17]), .PAD(io[17]), .PEN(~pad_cfg_i[17][0]));
-      assign io_out_i[18] = ld_eth_clk_lock_o;
+      assign io_out_i[18] = ld_ref_clk_lock_o;
     pad_functional_pd i_pad_18   (.OEN(~io_oe_i[18]), .I(io_out_i[18]), .O(io_in_o[18]), .PAD(io[18]), .PEN(~pad_cfg_i[18][0]));
-      assign io_out_i[19] = ld_eth_clk_blink_o;
+      assign io_out_i[19] = ld_ref_clk_blink_o;
     pad_functional_pd i_pad_19   (.OEN(~io_oe_i[19]), .I(io_out_i[19]), .O(io_in_o[19]), .PAD(io[19]), .PEN(~pad_cfg_i[19][0]));
+      assign io_out_i[20] = ld_eth_clk_lock_o;
     pad_functional_pd i_pad_20   (.OEN(~io_oe_i[20]), .I(io_out_i[20]), .O(io_in_o[20]), .PAD(io[20]), .PEN(~pad_cfg_i[20][0]));
+      assign io_out_i[21] = ld_eth_clk_blink_o;
     pad_functional_pd i_pad_21   (.OEN(~io_oe_i[21]), .I(io_out_i[21]), .O(io_in_o[21]), .PAD(io[21]), .PEN(~pad_cfg_i[21][0]));
     pad_functional_pd i_pad_22   (.OEN(~io_oe_i[22]), .I(io_out_i[22]), .O(io_in_o[22]), .PAD(io[22]), .PEN(~pad_cfg_i[22][0]));
     pad_functional_pd i_pad_23   (.OEN(~io_oe_i[23]), .I(io_out_i[23]), .O(io_in_o[23]), .PAD(io[23]), .PEN(~pad_cfg_i[23][0]));
@@ -131,11 +131,13 @@ module pad_frame(
     pad_functional_pd i_pad_54   (.OEN(~io_oe_i[54]), .I(io_out_i[54]), .O(io_in_o[54]), .PAD(io[54]), .PEN(~pad_cfg_i[54][0]));
     pad_functional_pd i_pad_55   (.OEN(~io_oe_i[55]), .I(io_out_i[55]), .O(io_in_o[55]), .PAD(io[55]), .PEN(~pad_cfg_i[55][0]));
     pad_functional_pd i_pad_56   (.OEN(~io_oe_i[56]), .I(io_out_i[56]), .O(io_in_o[56]), .PAD(io[56]), .PEN(~pad_cfg_i[56][0]));
-      assign stm_i = io_in_o[57];
     pad_functional_pd i_pad_57   (.OEN(~io_oe_i[57]), .I(io_out_i[57]), .O(io_in_o[57]), .PAD(io[57]), .PEN(~pad_cfg_i[57][0]));
-      assign bootsel_i = io_in_o[58];
     pad_functional_pd i_pad_58   (.OEN(~io_oe_i[58]), .I(io_out_i[58]), .O(io_in_o[58]), .PAD(io[58]), .PEN(~pad_cfg_i[58][0]));
+      assign stm_i = io_in_o[59];
     pad_functional_pd i_pad_59   (.OEN(~io_oe_i[59]), .I(io_out_i[59]), .O(io_in_o[59]), .PAD(io[59]), .PEN(~pad_cfg_i[59][0]));
+      assign bootsel_i = io_in_o[60];
     pad_functional_pd i_pad_60   (.OEN(~io_oe_i[60]), .I(io_out_i[60]), .O(io_in_o[60]), .PAD(io[60]), .PEN(~pad_cfg_i[60][0]));
+    pad_functional_pd i_pad_61   (.OEN(~io_oe_i[61]), .I(io_out_i[61]), .O(io_in_o[61]), .PAD(io[61]), .PEN(~pad_cfg_i[61][0]));
+    pad_functional_pd i_pad_62   (.OEN(~io_oe_i[62]), .I(io_out_i[62]), .O(io_in_o[62]), .PAD(io[62]), .PEN(~pad_cfg_i[62][0]));
 
 endmodule

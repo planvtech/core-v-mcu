@@ -21,11 +21,11 @@
 #ifndef __CORE_V_MCU_CONFIG_H_
 #define __CORE_V_MCU_CONFIG_H_
 
-#define BUILD_DATE 0x20230610
-#define BUILD_TIME 0x00171005
+#define BUILD_DATE 0x20230824
+#define BUILD_TIME 0x00155349
 
 //  SOC options
-#define N_IO                 56
+#define N_IO                 61
 #define N_SYSIO              3
 #define N_GPIO               32
 #define N_APBIO              51
@@ -33,6 +33,7 @@
 #define NBIT_PADMUX          2
 #define N_UART               2
 #define N_QSPIM              2
+#define N_SMI                1
 #define N_I2CM               2
 #define N_I2SC               0
 #define N_CSI2               0
@@ -44,7 +45,6 @@
 #define N_FILTER             1
 #define N_FPGA               0
 #define N_ETH                1
-#define N_SMI                1
 #define N_EXT_PER            0
 #define N_EFPGA_TCDM_PORTS   4
 #define N_FPGAIO             43
@@ -97,9 +97,12 @@
 #define UDMA_CH_ADDR_ETH        (0x1A102000 + 10 * 0x80)
 #define UDMA_ETH_ID(id)         (9 + id)
 #define UDMA_CH_ADDR_ETH0       (0x1A102000 + 10 * 0x80)
-#define UDMA_CH_ADDR_EXT_PER    (0x1A102000 + 11 * 0x80)
-#define UDMA_EXT_PER_ID(id)     (10 + id)
-#define UDMA_CH_ADDR_EXT_PER0   (0x1A102000 + 11 * 0x80)
+#define UDMA_CH_ADDR_SMI        (0x1A102000 + 11 * 0x80)
+#define UDMA_SMI_ID(id)         (10 + id)
+#define UDMA_CH_ADDR_SMI0       (0x1A102000 + 11 * 0x80)
+#define UDMA_CH_ADDR_EXT_PER    (0x1A102000 + 12 * 0x80)
+#define UDMA_EXT_PER_ID(id)     (11 + id)
+#define UDMA_CH_ADDR_EXT_PER0   (0x1A102000 + 12 * 0x80)
 
 //  Peripheral clock enable masks
 #define UDMA_CTRL_UART0_CLKEN      (1 << 0)
@@ -118,7 +121,8 @@
 #define UDMA_CTRL_FILTER0_CLKEN    (1 << 8)
 #define UDMA_CTRL_FPGA0_CLKEN      (1 << 9)
 #define UDMA_CTRL_ETH0_CLKEN       (1 << 9)
-#define UDMA_CTRL_EXT_PER0_CLKEN   (1 << 10)
+#define UDMA_CTRL_SMI0_CLKEN       (1 << 10)
+#define UDMA_CTRL_EXT_PER0_CLKEN   (1 << 11)
 
 //  FLL configuration information
 #define FLL_START_ADDR 0x1A100000
