@@ -405,7 +405,7 @@ module pad_control(
     assign io_oe_o[13] = 1'b1;
     assign io_oe_o[14] = 1'b1;
     assign io_oe_o[15] = 1'b1;
-    assign io_oe_o[16] = ((pad_mux_i[16] == 2'd0) ? perio_oe_i[`PERIO_SMI0_MDC] :
+    assign io_oe_o[16] = ((pad_mux_i[16] == 2'd0) ? 1'b1 :
                          ((pad_mux_i[16] == 2'd1) ? 1'b0 :
                          ((pad_mux_i[16] == 2'd2) ? 1'b0 :
                          ((pad_mux_i[16] == 2'd3) ? 1'b0 : 1'b0))));

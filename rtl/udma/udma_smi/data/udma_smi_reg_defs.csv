@@ -17,5 +17,5 @@ Register,Offset/Field,MSB,LSB,Type,Default,Description
 ,addr,4,0,WO,,Register address of PHY;
 0x18,TX_DATA,,,,,
 ,data,15,0,WO,,PHY register write data;
-0x20,RX_DATA,,,,,
+0x1C,RX_DATA,,,,,
 ,data,15,0,RO,,PHY register read data;

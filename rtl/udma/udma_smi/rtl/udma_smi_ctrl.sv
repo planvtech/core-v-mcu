@@ -96,10 +96,7 @@ module udma_smi_ctrl #(
 		begin
 			nd_reg_d1 <= nd_reg;
 
-			if(!busy_o)
-			begin
-				start_reg <= start_i ? 1'b1 : start_reg;
-			end
+			start_reg <= start_i ? 1'b1 : start_reg;
 
 			if(clk_en)
 			begin
@@ -147,14 +144,6 @@ module udma_smi_ctrl #(
 					if(data_count == 5'h0D)
 					begin
 						data_count <= 5'h0;
-						if(rw_reg)
-						begin
-							serializer[15:0] <= wr_data_reg[15:0];
-						end
-						else
-						begin
-							md_oen_o <= 1'b0;
-						end
 						state <= ST_TURN_AROUND;
 					end
 					else
@@ -162,11 +151,19 @@ module udma_smi_ctrl #(
 						data_count <= data_count + 5'h01;
 						serializer <= {serializer[14:0], 1'b0};
 					end
-					mdo_o <= serializer[15];
+					mdo_o <= serializer[13];
 				end
 				ST_TURN_AROUND:
 				begin
-					if(data_count <= 5'h01)
+				    if(rw_reg)
+                    begin
+                        serializer[15:0] <= wr_data_reg[15:0];
+                    end
+                    else
+                    begin
+                        md_oen_o <= 1'b0;
+                    end
+					if(data_count == 5'h01)
 					begin
 						data_count <= 5'h0;
 						state <= ST_DATA;
@@ -180,7 +177,7 @@ module udma_smi_ctrl #(
 				begin
 					if(rw_reg)
 					begin
-						if(data_count <= 5'h0F)
+						if(data_count == 5'h0F)
 						begin
 							data_count <= 5'h0;
 							state <= ST_IDLE;
@@ -195,7 +192,7 @@ module udma_smi_ctrl #(
 					end
 					else
 					begin
-						if(data_count <= 5'h0F)
+						if(data_count == 5'h10)
 						begin
 							data_count <= 5'h0;
 							state <= ST_IDLE;

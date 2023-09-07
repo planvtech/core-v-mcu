@@ -46,7 +46,7 @@ Basic SMI driven by UDMA system
 | --------------------- |   --- |   --- |        --- | ------------------------- |
 | data       |  15:0 |    WO |            | PHY register write data; |
 
-### RX_DATA offset = 0x20
+### RX_DATA offset = 0x1C
 
 | Field      |  Bits |  Type |    Default | Description     |
 | --------------------- |   --- |   --- |        --- | ------------------------- |

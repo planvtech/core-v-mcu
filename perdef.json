@@ -233,7 +233,7 @@
 	"type":		"udma",
 	"ports": {
 		"mdio"	: "bidir",
-		"mdc"	: "bidir"
+		"mdc"	: "output"
 	}
     },
 	{ "name": "ext_per",
