@@ -34,7 +34,7 @@ ${HDR_DIR}/core-v-mcu-config.h:	${DEF_FILES}
 					--soc-defines ../rtl/includes/pulp_soc_defines.svh\
 					--periph-bus-defines ../rtl/includes/periph_bus_defines.svh\
 					--peripheral-defines ../rtl/includes/pulp_peripheral_defines.svh\
-					--pin-table ../nexys-pin-table.csv\
+					--pin-table ../kr260-pin-table.csv\
 					--perdef-json ../perdef.json\
 					--cvmcu-h $@
 

@@ -44,11 +44,11 @@ module eth_mac_1g_rgmii_fifo #
     parameter USE_CLK90 = "TRUE",
     parameter ENABLE_PADDING = 1,
     parameter MIN_FRAME_LENGTH = 64,
-    parameter TX_FIFO_ADDR_WIDTH = 12,
+    parameter TX_FIFO_DEPTH = 4096,
     parameter TX_FRAME_FIFO = 1,
     parameter TX_DROP_BAD_FRAME = TX_FRAME_FIFO,
     parameter TX_DROP_WHEN_FULL = 0,
-    parameter RX_FIFO_ADDR_WIDTH = 12,
+    parameter RX_FIFO_DEPTH = 4096,
     parameter RX_FRAME_FIFO = 1,
     parameter RX_DROP_BAD_FRAME = RX_FRAME_FIFO,
     parameter RX_DROP_WHEN_FULL = RX_FRAME_FIFO
@@ -101,8 +101,6 @@ module eth_mac_1g_rgmii_fifo #
     output wire        rx_fifo_bad_frame,
     output wire        rx_fifo_good_frame,
     output wire [1:0]  speed,
-    output wire [31:0] rx_fcs_reg,
-    output wire [31:0] tx_fcs_reg,
 
     /*
      * Configuration
@@ -204,14 +202,12 @@ eth_mac_1g_rgmii_inst (
     .mac_gmii_tx_en(mac_gmii_tx_en),
     .rx_error_bad_frame(rx_error_bad_frame_int),
     .rx_error_bad_fcs(rx_error_bad_fcs_int),
-    .rx_fcs_reg(rx_fcs_reg),
-    .tx_fcs_reg(tx_fcs_reg),
     .speed(speed_int),
     .ifg_delay(ifg_delay)
 );
 
 axis_async_fifo #(
-    .ADDR_WIDTH(TX_FIFO_ADDR_WIDTH),
+    .DEPTH(TX_FIFO_DEPTH),
     .DATA_WIDTH(8),
     .KEEP_ENABLE(0),
     .LAST_ENABLE(1),
@@ -227,7 +223,7 @@ axis_async_fifo #(
 )
 tx_fifo (
     // Common reset
-    .async_rst(logic_rst | tx_rst),
+    .s_rst(logic_rst | tx_rst),
     // AXI input
     .s_clk(logic_clk),
     .s_axis_tdata(tx_axis_tdata),
@@ -258,7 +254,7 @@ tx_fifo (
 );
 
 axis_async_fifo #(
-    .ADDR_WIDTH(RX_FIFO_ADDR_WIDTH),
+    .DEPTH(RX_FIFO_DEPTH),
     .DATA_WIDTH(8),
     .KEEP_ENABLE(0),
     .LAST_ENABLE(1),
@@ -274,7 +270,7 @@ axis_async_fifo #(
 )
 rx_fifo (
     // Common reset
-    .async_rst(rx_rst | logic_rst),
+    .s_rst(rx_rst | logic_rst),
     // AXI input
     .s_clk(rx_clk),
     .s_axis_tdata(rx_fifo_axis_tdata),

@@ -85,10 +85,7 @@ module rgmii_core #
     output wire        rx_fifo_overflow,
     output wire        rx_fifo_bad_frame,
     output wire        rx_fifo_good_frame,
-    output wire [1:0]  speed,
-    output wire [31:0] rx_fcs_reg,
-    output wire [31:0] tx_fcs_reg
-
+    output wire [1:0]  speed
 );
 
 assign phy_reset_n = !rst;
@@ -96,13 +93,13 @@ assign phy_reset_n = !rst;
 eth_mac_1g_rgmii_fifo #(
     .TARGET(TARGET),
     .IODDR_STYLE("IODDR"),
-    .CLOCK_INPUT_STYLE("BUFR"),
+    .CLOCK_INPUT_STYLE("BUFG"),
     .USE_CLK90("TRUE"),
     .ENABLE_PADDING(1),
     .MIN_FRAME_LENGTH(8), ////mkdigitals altered this line, org: .MIN_FRAME_LENGTH(64),
-    .TX_FIFO_ADDR_WIDTH(12),
+    .TX_FIFO_DEPTH(4096),
     .TX_FRAME_FIFO(1),
-    .RX_FIFO_ADDR_WIDTH(12),
+    .RX_FIFO_DEPTH(4096),
     .RX_FRAME_FIFO(1)
 )
 eth_mac_inst (
@@ -137,8 +134,6 @@ eth_mac_inst (
     .tx_fifo_good_frame(tx_fifo_good_frame),
     .rx_error_bad_frame(rx_error_bad_frame),
     .rx_error_bad_fcs(rx_error_bad_fcs),
-    .rx_fcs_reg(rx_fcs_reg),
-    .tx_fcs_reg(tx_fcs_reg),
     .rx_fifo_overflow(rx_fifo_overflow),
     .rx_fifo_bad_frame(rx_fifo_bad_frame),
     .rx_fifo_good_frame(rx_fifo_good_frame),

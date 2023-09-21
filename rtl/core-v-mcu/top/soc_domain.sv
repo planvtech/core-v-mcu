@@ -81,13 +81,13 @@ module soc_domain
     output logic [`N_FPGAIO-1:0] fpgaio_oe_o,
 
     //ETH interface
-    // input  logic                phy_rx_clk_i,
-    // input  logic   [3:0]        phy_rxd_i,
-    // input  logic                phy_rx_ctl_i,
-    // output logic                phy_tx_clk_o,
-    // output logic   [3:0]        phy_txd_o,
-    // output logic                phy_tx_ctl_o,
-    // output logic                phy_reset_n_o,  
+    input  logic                phy_rx_clk_i,
+    input  logic   [3:0]        phy_rxd_i,
+    input  logic                phy_rx_ctl_i,
+    output logic                phy_tx_clk_o,
+    output logic   [3:0]        phy_txd_o,
+    output logic                phy_tx_ctl_o,
+    output logic                phy_reset_n_o,  
 
     ///////////////////////////////////////////////////
     //      To EFPGA                                 //
@@ -119,13 +119,6 @@ module soc_domain
     output logic        jtag_tdo_o,
     //    output logic [NB_CORES-1:0] cluster_dbg_irq_valid_o
     ///////////////////////////////////////////////////
-    output logic        eth_refclk_o,
-    input wire [1:0]    phy_rxd_i,
-    input wire          phy_crs_dv_i,
-    output wire [1:0]   phy_txd_o,
-    output wire         phy_tx_en_o,
-    output wire         phy_rstn_o,
-    input wire          phy_rx_er_i,
     output wire         ld_ref_clk_lock,
     output wire         ld_ref_clk_blink,
     output wire         ld_eth_clk_lock,
@@ -429,19 +422,19 @@ module soc_domain
       .cl_event_valid_o(s_cl_event_valid),
       .cl_event_ready_i(s_cl_event_ready),
 
-      // .phy_rx_clk_i(phy_rx_clk_i),
-      // .phy_rxd_i(phy_rxd_i),
-      // .phy_rx_ctl_i(phy_rx_ctl_i),
-      // .phy_tx_clk_o(phy_tx_clk_o),
-      // .phy_txd_o(phy_txd_o),
-      // .phy_tx_ctl_o(phy_tx_ctl_o),
-      // .phy_reset_n_o(phy_reset_n_o)
+      .phy_rx_clk_i(phy_rx_clk_i),
       .phy_rxd_i(phy_rxd_i),
-      .phy_crs_dv_i(phy_crs_dv_i),
+      .phy_rx_ctl_i(phy_rx_ctl_i),
+      .phy_tx_clk_o(phy_tx_clk_o),
       .phy_txd_o(phy_txd_o),
-      .phy_tx_en_o(phy_tx_en_o),
-      .phy_rstn_o(phy_rstn_o),
-      .phy_rx_er_i(phy_rx_er_i)
+      .phy_tx_ctl_o(phy_tx_ctl_o),
+      .phy_reset_n_o(phy_reset_n_o)
+      // .phy_rxd_i(phy_rxd_i),
+      // .phy_crs_dv_i(phy_crs_dv_i),
+      // .phy_txd_o(phy_txd_o),
+      // .phy_tx_en_o(phy_tx_en_o),
+      // .phy_rstn_o(phy_rstn_o),
+      // .phy_rx_er_i(phy_rx_er_i)
   );
 
 `ifndef PULP_FPGA_EMUL

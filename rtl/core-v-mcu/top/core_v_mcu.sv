@@ -29,26 +29,25 @@ module core_v_mcu #(
     output [`N_IO-1:0]                   io_out_o,
     output [`N_IO-1:0][`NBIT_PADCFG-1:0] pad_cfg_o,
     output [`N_IO-1:0]                   io_oe_o,
-    output                               eth_refclk_o,
-    input                                eth_rxd0_i,
-    input                                eth_rxd1_i,
-    input                                eth_crs_dv_i,
-    output                               eth_txd0_o,
-    output                               eth_txd1_o,
-    output                               eth_tx_en_o,
-    output                               eth_rstn_o,
-    input                                eth_rx_er_i,
-    output                               ld_ref_clk_lock_o,
+
+    output wire        eth_tx_clk_o,
+    output wire        eth_tx_ctrl_o,
+    output wire        eth_tx_d3_o,
+    output wire        eth_tx_d2_o,
+    output wire        eth_tx_d1_o,
+    output wire        eth_tx_d0_o,
+    
+    input wire         eth_rx_clk_i,
+    input wire         eth_rx_ctrl_i,
+    input wire         eth_rx_d3_i,
+    input wire         eth_rx_d2_i,
+    input wire         eth_rx_d1_i,
+    input wire         eth_rx_d0_i,   
+   
+    output wire        eth_rstb_o,
+
     output                               ld_ref_clk_blink_o,
-    output                               ld_eth_clk_lock_o,
-    output                               ld_eth_clk_blink_o                               
-    // input  logic                phy_rx_clk_i,
-    // input  logic   [3:0]        phy_rxd_i,
-    // input  logic                phy_rx_ctl_i,
-    // output logic                phy_tx_clk_o,
-    // output logic   [3:0]        phy_txd_o,
-    // output logic                phy_tx_ctl_o,
-    // output logic                phy_reset_n_o
+    output                               ld_eth_clk_blink_o
 );
 
   localparam AXI_ADDR_WIDTH = 32;
@@ -322,6 +321,28 @@ module core_v_mcu #(
   logic [20:0] testio_i;  //
   logic [15:0] testio_o;  //
 
+  logic ld_ref_clk_lock_o;
+  logic ld_ref_clk_blink;
+  logic ld_eth_clk_lock_o;
+  logic ld_eth_clk_blink;
+  
+  assign ld_ref_clk_blink_o = ld_ref_clk_lock_o & ld_ref_clk_blink;
+  assign ld_eth_clk_blink_o = ld_eth_clk_lock_o & ld_eth_clk_blink;
+
+  logic [3:0] phy_rxd;
+  logic [3:0] phy_txd;    
+
+  assign eth_tx_d3_o = phy_txd[3];
+  assign eth_tx_d2_o = phy_txd[2];
+  assign eth_tx_d1_o = phy_txd[1];
+  assign eth_tx_d0_o = phy_txd[0];
+
+  assign phy_rxd[3] = eth_rx_d3_i;
+  assign phy_rxd[2] = eth_rx_d2_i;
+  assign phy_rxd[1] = eth_rx_d1_i;
+  assign phy_rxd[0] = eth_rx_d0_i;
+
+
 
   assign io_out_o[20:0] = stm_i ? 0 : s_io_out[20:0];
   assign io_out_o[28:22] = stm_i ? 0 : s_io_out[28:22];
@@ -399,14 +420,7 @@ module core_v_mcu #(
       .fpgaio_out_o(s_fpgaio_out),
       .fpgaio_in_i (s_fpgaio_in),
       .fpgaio_oe_o (s_fpgaio_oe),
-      // ETH_INTERFACE
-    //   .phy_rx_clk_i(phy_rx_clk_i),
-    //   .phy_rxd_i(phy_rxd_i),
-    //   .phy_rx_ctl_i(phy_rx_ctl_i),
-    //   .phy_tx_clk_o(phy_tx_clk_o),
-    //   .phy_txd_o(phy_txd_o),
-    //   .phy_tx_ctl_o(phy_tx_ctl_o),
-    //   .phy_reset_n_o(phy_reset_n_o),
+
       //    .selected_mode_i   ('0),
       //      .dma_pe_evt_ack_o  (s_dma_pe_evt_ack),
       //      .dma_pe_evt_valid_i(s_dma_pe_evt_valid),
@@ -418,17 +432,18 @@ module core_v_mcu #(
       //eFPGA TEST MODE
       .testio_i(testio_i),
       .testio_o(testio_o),
-      .eth_refclk_o(eth_refclk_o),
-      .phy_rxd_i(phy_rxd_s),
-      .phy_crs_dv_i(eth_crs_dv_i),
-      .phy_txd_o(phy_txd_s),
-      .phy_tx_en_o(eth_tx_en_o),
-      .phy_rstn_o(eth_rstn_o),
-      .phy_rx_er_i(eth_rx_er_i),
+       // ETH_INTERFACE
+      .phy_rx_clk_i(eth_rx_clk_i),    //  input wire        
+      .phy_rxd_i(phy_rxd),          //  input wire [3:0]  
+      .phy_rx_ctl_i(eth_rx_ctrl_i),    //  input wire        
+      .phy_tx_clk_o(eth_tx_clk_o),    //  output wire        
+      .phy_txd_o(phy_txd),          //  output wire [3:0]  
+      .phy_tx_ctl_o(eth_tx_ctrl_o),    //  output wire        
+      .phy_reset_n_o(eth_rstb_o),  //  output wire 
       .ld_ref_clk_lock(ld_ref_clk_lock_o),
-      .ld_ref_clk_blink(ld_ref_clk_blink_o),
+      .ld_ref_clk_blink(ld_ref_clk_blink),
       .ld_eth_clk_lock(ld_eth_clk_lock_o),
-      .ld_eth_clk_blink(ld_eth_clk_blink_o)
+      .ld_eth_clk_blink(ld_eth_clk_blink)
   );
 
   assign s_test_mode     = '0;

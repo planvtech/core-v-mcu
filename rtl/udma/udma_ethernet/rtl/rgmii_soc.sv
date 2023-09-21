@@ -80,118 +80,190 @@ module rgmii_soc (
     output wire        rx_fifo_overflow,
     output wire        rx_fifo_bad_frame,
     output wire        rx_fifo_good_frame,
-    output wire [1:0]  speed,
-    output wire [31:0] rx_fcs_reg,
-    output wire [31:0] tx_fcs_reg
+    output wire [1:0]  speed
 
 );
 
 // IODELAY elements for RGMII interface to PHY
 wire [3:0] phy_rxd_delay;
 wire       phy_rx_ctl_delay;
+wire       idelay_ctrl_ref_clk;
 
-IDELAYCTRL
+BUFGCE BUFGCE_inst
+(
+    .O(idelay_ctrl_ref_clk),
+    .CE(1'b1),
+    .I(clk_200_int)
+);
+
+IDELAYCTRL #(
+      .SIM_DEVICE("ULTRASCALE")  // Set the device version for simulation functionality (ULTRASCALE)
+)
 idelayctrl_inst
 (
-    .REFCLK(clk_200_int),
+    .REFCLK(idelay_ctrl_ref_clk),
     .RST(rst_int),
     .RDY()
 );
 
-IDELAYE2 #(
-    .IDELAY_TYPE("FIXED")
+IDELAYE3 #(
+    .CASCADE("NONE"),               // Cascade setting (MASTER, NONE, SLAVE_END, SLAVE_MIDDLE)
+    .DELAY_FORMAT("COUNT"),         // Units of the DELAY_VALUE (COUNT, TIME)
+    .DELAY_SRC("IDATAIN"),          // Delay input (DATAIN, IDATAIN)
+    .DELAY_TYPE("FIXED"),           // Set the type of tap delay line (FIXED, VARIABLE, VAR_LOAD)
+    .DELAY_VALUE(0),                // Input delay value setting
+    .IS_CLK_INVERTED(1'b0),         // Optional inversion for CLK
+    .IS_RST_INVERTED(1'b0),         // Optional inversion for RST
+    .REFCLK_FREQUENCY(200.0),       // IDELAYCTRL clock input frequency in MHz (200.0-800.0)
+    .SIM_DEVICE("ULTRASCALE_PLUS"), // Set the device version for simulation functionality (ULTRASCALE,
+                                  // ULTRASCALE_PLUS, ULTRASCALE_PLUS_ES1, ULTRASCALE_PLUS_ES2)
+    .UPDATE_MODE("ASYNC")           // Determines when updates to the delay will take effect (ASYNC, MANUAL,
+                                  // SYNC)
 )
 phy_rxd_idelay_0
 (
-    .IDATAIN(phy_rxd[0]),
-    .DATAOUT(phy_rxd_delay[0]),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
+    .CASC_OUT(),
     .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
+    .DATAOUT(phy_rxd_delay[0]),
+    .CASC_IN(1'b0),
+    .CASC_RETURN(1'b0),
+    .CE(1'b0),
+    .CLK(1'b0),
+    .CNTVALUEIN(9'd0),
+    .DATAIN(1'b0),
+    .EN_VTC(1'b1),
+    .IDATAIN(phy_rxd[0]),
+    .INC(1'b0),
+    .LOAD(1'b0),
+    .RST(1'b0)
 );
 
-IDELAYE2 #(
-    .IDELAY_TYPE("FIXED")
+IDELAYE3 #(
+    .CASCADE("NONE"),               // Cascade setting (MASTER, NONE, SLAVE_END, SLAVE_MIDDLE)
+    .DELAY_FORMAT("COUNT"),         // Units of the DELAY_VALUE (COUNT, TIME)
+    .DELAY_SRC("IDATAIN"),          // Delay input (DATAIN, IDATAIN)
+    .DELAY_TYPE("FIXED"),           // Set the type of tap delay line (FIXED, VARIABLE, VAR_LOAD)
+    .DELAY_VALUE(0),                // Input delay value setting
+    .IS_CLK_INVERTED(1'b0),         // Optional inversion for CLK
+    .IS_RST_INVERTED(1'b0),         // Optional inversion for RST
+    .REFCLK_FREQUENCY(200.0),       // IDELAYCTRL clock input frequency in MHz (200.0-800.0)
+    .SIM_DEVICE("ULTRASCALE_PLUS"), // Set the device version for simulation functionality (ULTRASCALE,
+                                  // ULTRASCALE_PLUS, ULTRASCALE_PLUS_ES1, ULTRASCALE_PLUS_ES2)
+    .UPDATE_MODE("ASYNC")           // Determines when updates to the delay will take effect (ASYNC, MANUAL,
+                                  // SYNC)
 )
 phy_rxd_idelay_1
 (
-    .IDATAIN(phy_rxd[1]),
-    .DATAOUT(phy_rxd_delay[1]),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
+    .CASC_OUT(),
     .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
+    .DATAOUT(phy_rxd_delay[1]),
+    .CASC_IN(1'b0),
+    .CASC_RETURN(1'b0),
+    .CE(1'b0),
+    .CLK(1'b0),
+    .CNTVALUEIN(9'd0),
+    .DATAIN(1'b0),
+    .EN_VTC(1'b1),
+    .IDATAIN(phy_rxd[1]),
+    .INC(1'b0),
+    .LOAD(1'b0),
+    .RST(1'b0)
 );
 
-IDELAYE2 #(
-    .IDELAY_TYPE("FIXED")
+IDELAYE3 #(
+    .CASCADE("NONE"),               // Cascade setting (MASTER, NONE, SLAVE_END, SLAVE_MIDDLE)
+    .DELAY_FORMAT("COUNT"),         // Units of the DELAY_VALUE (COUNT, TIME)
+    .DELAY_SRC("IDATAIN"),          // Delay input (DATAIN, IDATAIN)
+    .DELAY_TYPE("FIXED"),           // Set the type of tap delay line (FIXED, VARIABLE, VAR_LOAD)
+    .DELAY_VALUE(0),                // Input delay value setting
+    .IS_CLK_INVERTED(1'b0),         // Optional inversion for CLK
+    .IS_RST_INVERTED(1'b0),         // Optional inversion for RST
+    .REFCLK_FREQUENCY(200.0),       // IDELAYCTRL clock input frequency in MHz (200.0-800.0)
+    .SIM_DEVICE("ULTRASCALE_PLUS"), // Set the device version for simulation functionality (ULTRASCALE,
+                                  // ULTRASCALE_PLUS, ULTRASCALE_PLUS_ES1, ULTRASCALE_PLUS_ES2)
+    .UPDATE_MODE("ASYNC")           // Determines when updates to the delay will take effect (ASYNC, MANUAL,
+                                  // SYNC)
 )
 phy_rxd_idelay_2
 (
-    .IDATAIN(phy_rxd[2]),
-    .DATAOUT(phy_rxd_delay[2]),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
+    .CASC_OUT(),
     .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
+    .DATAOUT(phy_rxd_delay[2]),
+    .CASC_IN(1'b0),
+    .CASC_RETURN(1'b0),
+    .CE(1'b0),
+    .CLK(1'b0),
+    .CNTVALUEIN(9'd0),
+    .DATAIN(1'b0),
+    .EN_VTC(1'b1),
+    .IDATAIN(phy_rxd[2]),
+    .INC(1'b0),
+    .LOAD(1'b0),
+    .RST(1'b0)
 );
 
-IDELAYE2 #(
-    .IDELAY_TYPE("FIXED")
+IDELAYE3 #(
+    .CASCADE("NONE"),               // Cascade setting (MASTER, NONE, SLAVE_END, SLAVE_MIDDLE)
+    .DELAY_FORMAT("COUNT"),         // Units of the DELAY_VALUE (COUNT, TIME)
+    .DELAY_SRC("IDATAIN"),          // Delay input (DATAIN, IDATAIN)
+    .DELAY_TYPE("FIXED"),           // Set the type of tap delay line (FIXED, VARIABLE, VAR_LOAD)
+    .DELAY_VALUE(0),                // Input delay value setting
+    .IS_CLK_INVERTED(1'b0),         // Optional inversion for CLK
+    .IS_RST_INVERTED(1'b0),         // Optional inversion for RST
+    .REFCLK_FREQUENCY(200.0),       // IDELAYCTRL clock input frequency in MHz (200.0-800.0)
+    .SIM_DEVICE("ULTRASCALE_PLUS"), // Set the device version for simulation functionality (ULTRASCALE,
+                                  // ULTRASCALE_PLUS, ULTRASCALE_PLUS_ES1, ULTRASCALE_PLUS_ES2)
+    .UPDATE_MODE("ASYNC")           // Determines when updates to the delay will take effect (ASYNC, MANUAL,
+                                  // SYNC)
 )
 phy_rxd_idelay_3
 (
-    .IDATAIN(phy_rxd[3]),
-    .DATAOUT(phy_rxd_delay[3]),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
+    .CASC_OUT(),
     .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
+    .DATAOUT(phy_rxd_delay[3]),
+    .CASC_IN(1'b0),
+    .CASC_RETURN(1'b0),
+    .CE(1'b0),
+    .CLK(1'b0),
+    .CNTVALUEIN(9'd0),
+    .DATAIN(1'b0),
+    .EN_VTC(1'b1),
+    .IDATAIN(phy_rxd[3]),
+    .INC(1'b0),
+    .LOAD(1'b0),
+    .RST(1'b0)
 );
 
-IDELAYE2 #(
-    .IDELAY_VALUE(0),
-    .IDELAY_TYPE("FIXED")
+IDELAYE3 #(
+    .CASCADE("NONE"),               // Cascade setting (MASTER, NONE, SLAVE_END, SLAVE_MIDDLE)
+    .DELAY_FORMAT("COUNT"),         // Units of the DELAY_VALUE (COUNT, TIME)
+    .DELAY_SRC("IDATAIN"),          // Delay input (DATAIN, IDATAIN)
+    .DELAY_TYPE("FIXED"),           // Set the type of tap delay line (FIXED, VARIABLE, VAR_LOAD)
+    .DELAY_VALUE(0),                // Input delay value setting
+    .IS_CLK_INVERTED(1'b0),         // Optional inversion for CLK
+    .IS_RST_INVERTED(1'b0),         // Optional inversion for RST
+    .REFCLK_FREQUENCY(200.0),       // IDELAYCTRL clock input frequency in MHz (200.0-800.0)
+    .SIM_DEVICE("ULTRASCALE_PLUS"), // Set the device version for simulation functionality (ULTRASCALE,
+                                  // ULTRASCALE_PLUS, ULTRASCALE_PLUS_ES1, ULTRASCALE_PLUS_ES2)
+    .UPDATE_MODE("ASYNC")           // Determines when updates to the delay will take effect (ASYNC, MANUAL,
+                                  // SYNC)
 )
 phy_rx_ctl_idelay
 (
-    .IDATAIN(phy_rx_ctl),
-    .DATAOUT(phy_rx_ctl_delay),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'd0),
+    .CASC_OUT(),
     .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
+    .DATAOUT(phy_rx_ctl_delay),
+    .CASC_IN(1'b0),
+    .CASC_RETURN(1'b0),
+    .CE(1'b0),
+    .CLK(1'b0),
+    .CNTVALUEIN(9'd0),
+    .DATAIN(1'b0),
+    .EN_VTC(1'b1),
+    .IDATAIN(phy_rx_ctl),
+    .INC(1'b0),
+    .LOAD(1'b0),
+    .RST(1'b0)
 );
 
 rgmii_core
@@ -230,8 +302,6 @@ core_inst (
     .tx_fifo_good_frame(tx_fifo_good_frame),
     .rx_error_bad_frame(rx_error_bad_frame),
     .rx_error_bad_fcs(rx_error_bad_fcs),
-    .rx_fcs_reg(rx_fcs_reg),
-    .tx_fcs_reg(tx_fcs_reg),
     .rx_fifo_overflow(rx_fifo_overflow),
     .rx_fifo_bad_frame(rx_fifo_bad_frame),
     .rx_fifo_good_frame(rx_fifo_good_frame),

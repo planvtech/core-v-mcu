@@ -90,19 +90,19 @@ module soc_peripherals #(
     output logic                  cl_event_valid_o,
     input  logic                  cl_event_ready_i,
 
-    // input  logic                phy_rx_clk_i,
-    // input  logic   [3:0]        phy_rxd_i,
-    // input  logic                phy_rx_ctl_i,
-    // output logic                phy_tx_clk_o,
-    // output logic   [3:0]        phy_txd_o,
-    // output logic                phy_tx_ctl_o,
-    // output logic                phy_reset_n_o
-    input wire [1:0]    phy_rxd_i,
-    input wire          phy_crs_dv_i,
-    output wire [1:0]   phy_txd_o,
-    output wire         phy_tx_en_o,
-    output wire         phy_rstn_o,
-    input wire          phy_rx_er_i
+    input  logic                phy_rx_clk_i,
+    input  logic   [3:0]        phy_rxd_i,
+    input  logic                phy_rx_ctl_i,
+    output logic                phy_tx_clk_o,
+    output logic   [3:0]        phy_txd_o,
+    output logic                phy_tx_ctl_o,
+    output logic                phy_reset_n_o
+    // input wire [1:0]    phy_rxd_i,
+    // input wire          phy_crs_dv_i,
+    // output wire [1:0]   phy_txd_o,
+    // output wire         phy_tx_en_o,
+    // output wire         phy_rstn_o,
+    // input wire          phy_rx_er_i
 );
 
 
@@ -441,19 +441,13 @@ module soc_peripherals #(
       .perio_out_o(perio_out_o),
       .perio_oe_o (perio_oe_o),
 
-    //   .phy_rx_clk_i(phy_rx_clk_i),
-    //   .phy_rxd_i(phy_rxd_i),
-    //   .phy_rx_ctl_i(phy_rx_ctl_i),
-    //   .phy_tx_clk_o(phy_tx_clk_o),
-    //   .phy_txd_o(phy_txd_o),
-    //   .phy_tx_ctl_o(phy_tx_ctl_o),
-    //   .phy_reset_n_o(phy_reset_n_o)
+      .phy_rx_clk_i(phy_rx_clk_i),
       .phy_rxd_i(phy_rxd_i),
-      .phy_crs_dv_i(phy_crs_dv_i),
+      .phy_rx_ctl_i(phy_rx_ctl_i),
+      .phy_tx_clk_o(phy_tx_clk_o),
       .phy_txd_o(phy_txd_o),
-      .phy_tx_en_o(phy_tx_en_o),
-      .phy_rstn_o(phy_rstn_o),
-      .phy_rx_er_i(phy_rx_er_i)
+      .phy_tx_ctl_o(phy_tx_ctl_o),
+      .phy_reset_n_o(phy_reset_n_o)
   );
 
   ////////////////////////////////////////////////////////////////////////////////////////////////

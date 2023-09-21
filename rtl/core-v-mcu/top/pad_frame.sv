@@ -29,18 +29,20 @@ module pad_frame(
     input  logic jtag_tdo_i,
     output logic jtag_tms_o,
     output logic jtag_trst_o,
-    input  logic eth_refclk_i,
-    input  logic eth_rstn_i,
-    output logic eth_crs_dv_o,
-    output logic eth_rx_er_o,
-    output logic eth_rxd0_o,
-    output logic eth_rxd1_o,
-    input  logic eth_tx_en_i,
-    input  logic eth_txd0_i,
-    input  logic eth_txd1_i,
-    input  logic ld_ref_clk_lock_i,
+    input  logic eth_rstb_i,
+    input  logic eth_tx_clk_i,
+    input  logic eth_tx_ctrl_i,
+    input  logic eth_tx_d0_i,
+    input  logic eth_tx_d1_i,
+    input  logic eth_tx_d2_i,
+    input  logic eth_tx_d3_i,
+    output logic eth_rx_clk_o,
+    output logic eth_rx_ctrl_o,
+    output logic eth_rx_d0_o,
+    output logic eth_rx_d1_o,
+    output logic eth_rx_d2_o,
+    output logic eth_rx_d3_o,
     input  logic ld_ref_clk_blink_i,
-    input  logic ld_eth_clk_lock_i,
     input  logic ld_eth_clk_blink_i,
 
     // internal io signals
@@ -54,47 +56,27 @@ module pad_frame(
     // dummy wire to make lint clean
     wire void1;
     // connect io
-      assign jtag_tck_i = io_in_o[0];
     pad_functional_pd i_pad_0   (.OEN(~io_oe_i[0]), .I(io_out_i[0]), .O(io_in_o[0]), .PAD(io[0]), .PEN(~pad_cfg_i[0][0]));
-      assign jtag_tdi_i = io_in_o[1];
     pad_functional_pd i_pad_1   (.OEN(~io_oe_i[1]), .I(io_out_i[1]), .O(io_in_o[1]), .PAD(io[1]), .PEN(~pad_cfg_i[1][0]));
-      assign io_out_i[2] = jtag_tdo_o;
     pad_functional_pd i_pad_2   (.OEN(~io_oe_i[2]), .I(io_out_i[2]), .O(io_in_o[2]), .PAD(io[2]), .PEN(~pad_cfg_i[2][0]));
-      assign jtag_tms_i = io_in_o[3];
     pad_functional_pd i_pad_3   (.OEN(~io_oe_i[3]), .I(io_out_i[3]), .O(io_in_o[3]), .PAD(io[3]), .PEN(~pad_cfg_i[3][0]));
-      assign jtag_trst_i = io_in_o[4];
     pad_functional_pd i_pad_4   (.OEN(~io_oe_i[4]), .I(io_out_i[4]), .O(io_in_o[4]), .PAD(io[4]), .PEN(~pad_cfg_i[4][0]));
-      assign ref_clk_i = io_in_o[5];
     pad_functional_pd i_pad_5   (.OEN(~io_oe_i[5]), .I(io_out_i[5]), .O(io_in_o[5]), .PAD(io[5]), .PEN(~pad_cfg_i[5][0]));
-      assign rstn_i = io_in_o[6];
     pad_functional_pd i_pad_6   (.OEN(~io_oe_i[6]), .I(io_out_i[6]), .O(io_in_o[6]), .PAD(io[6]), .PEN(~pad_cfg_i[6][0]));
-      assign io_out_i[7] = eth_refclk_o;
     pad_functional_pd i_pad_7   (.OEN(~io_oe_i[7]), .I(io_out_i[7]), .O(io_in_o[7]), .PAD(io[7]), .PEN(~pad_cfg_i[7][0]));
-      assign io_out_i[8] = eth_rstn_o;
     pad_functional_pd i_pad_8   (.OEN(~io_oe_i[8]), .I(io_out_i[8]), .O(io_in_o[8]), .PAD(io[8]), .PEN(~pad_cfg_i[8][0]));
-      assign eth_crs_dv_i = io_in_o[9];
     pad_functional_pd i_pad_9   (.OEN(~io_oe_i[9]), .I(io_out_i[9]), .O(io_in_o[9]), .PAD(io[9]), .PEN(~pad_cfg_i[9][0]));
-      assign eth_rx_er_i = io_in_o[10];
     pad_functional_pd i_pad_10   (.OEN(~io_oe_i[10]), .I(io_out_i[10]), .O(io_in_o[10]), .PAD(io[10]), .PEN(~pad_cfg_i[10][0]));
-      assign eth_rxd0_i = io_in_o[11];
     pad_functional_pd i_pad_11   (.OEN(~io_oe_i[11]), .I(io_out_i[11]), .O(io_in_o[11]), .PAD(io[11]), .PEN(~pad_cfg_i[11][0]));
-      assign eth_rxd1_i = io_in_o[12];
     pad_functional_pd i_pad_12   (.OEN(~io_oe_i[12]), .I(io_out_i[12]), .O(io_in_o[12]), .PAD(io[12]), .PEN(~pad_cfg_i[12][0]));
-      assign io_out_i[13] = eth_tx_en_o;
     pad_functional_pd i_pad_13   (.OEN(~io_oe_i[13]), .I(io_out_i[13]), .O(io_in_o[13]), .PAD(io[13]), .PEN(~pad_cfg_i[13][0]));
-      assign io_out_i[14] = eth_txd0_o;
     pad_functional_pd i_pad_14   (.OEN(~io_oe_i[14]), .I(io_out_i[14]), .O(io_in_o[14]), .PAD(io[14]), .PEN(~pad_cfg_i[14][0]));
-      assign io_out_i[15] = eth_txd1_o;
     pad_functional_pd i_pad_15   (.OEN(~io_oe_i[15]), .I(io_out_i[15]), .O(io_in_o[15]), .PAD(io[15]), .PEN(~pad_cfg_i[15][0]));
     pad_functional_pd i_pad_16   (.OEN(~io_oe_i[16]), .I(io_out_i[16]), .O(io_in_o[16]), .PAD(io[16]), .PEN(~pad_cfg_i[16][0]));
     pad_functional_pd i_pad_17   (.OEN(~io_oe_i[17]), .I(io_out_i[17]), .O(io_in_o[17]), .PAD(io[17]), .PEN(~pad_cfg_i[17][0]));
-      assign io_out_i[18] = ld_ref_clk_lock_o;
     pad_functional_pd i_pad_18   (.OEN(~io_oe_i[18]), .I(io_out_i[18]), .O(io_in_o[18]), .PAD(io[18]), .PEN(~pad_cfg_i[18][0]));
-      assign io_out_i[19] = ld_ref_clk_blink_o;
     pad_functional_pd i_pad_19   (.OEN(~io_oe_i[19]), .I(io_out_i[19]), .O(io_in_o[19]), .PAD(io[19]), .PEN(~pad_cfg_i[19][0]));
-      assign io_out_i[20] = ld_eth_clk_lock_o;
     pad_functional_pd i_pad_20   (.OEN(~io_oe_i[20]), .I(io_out_i[20]), .O(io_in_o[20]), .PAD(io[20]), .PEN(~pad_cfg_i[20][0]));
-      assign io_out_i[21] = ld_eth_clk_blink_o;
     pad_functional_pd i_pad_21   (.OEN(~io_oe_i[21]), .I(io_out_i[21]), .O(io_in_o[21]), .PAD(io[21]), .PEN(~pad_cfg_i[21][0]));
     pad_functional_pd i_pad_22   (.OEN(~io_oe_i[22]), .I(io_out_i[22]), .O(io_in_o[22]), .PAD(io[22]), .PEN(~pad_cfg_i[22][0]));
     pad_functional_pd i_pad_23   (.OEN(~io_oe_i[23]), .I(io_out_i[23]), .O(io_in_o[23]), .PAD(io[23]), .PEN(~pad_cfg_i[23][0]));
@@ -133,11 +115,10 @@ module pad_frame(
     pad_functional_pd i_pad_56   (.OEN(~io_oe_i[56]), .I(io_out_i[56]), .O(io_in_o[56]), .PAD(io[56]), .PEN(~pad_cfg_i[56][0]));
     pad_functional_pd i_pad_57   (.OEN(~io_oe_i[57]), .I(io_out_i[57]), .O(io_in_o[57]), .PAD(io[57]), .PEN(~pad_cfg_i[57][0]));
     pad_functional_pd i_pad_58   (.OEN(~io_oe_i[58]), .I(io_out_i[58]), .O(io_in_o[58]), .PAD(io[58]), .PEN(~pad_cfg_i[58][0]));
-      assign stm_i = io_in_o[59];
     pad_functional_pd i_pad_59   (.OEN(~io_oe_i[59]), .I(io_out_i[59]), .O(io_in_o[59]), .PAD(io[59]), .PEN(~pad_cfg_i[59][0]));
-      assign bootsel_i = io_in_o[60];
     pad_functional_pd i_pad_60   (.OEN(~io_oe_i[60]), .I(io_out_i[60]), .O(io_in_o[60]), .PAD(io[60]), .PEN(~pad_cfg_i[60][0]));
     pad_functional_pd i_pad_61   (.OEN(~io_oe_i[61]), .I(io_out_i[61]), .O(io_in_o[61]), .PAD(io[61]), .PEN(~pad_cfg_i[61][0]));
     pad_functional_pd i_pad_62   (.OEN(~io_oe_i[62]), .I(io_out_i[62]), .O(io_in_o[62]), .PAD(io[62]), .PEN(~pad_cfg_i[62][0]));
+    pad_functional_pd i_pad_63   (.OEN(~io_oe_i[63]), .I(io_out_i[63]), .O(io_in_o[63]), .PAD(io[63]), .PEN(~pad_cfg_i[63][0]));
 
 endmodule

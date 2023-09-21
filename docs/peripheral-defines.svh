@@ -19,7 +19,7 @@
  */
 
 `define BUILD_DATE 32'h20230921
-`define BUILD_TIME 32'h00143448
+`define BUILD_TIME 32'h00142719
 
 //  PER_ID definitions
 `define PER_ID_UART      0
@@ -99,23 +99,10 @@
 `define IOINDEX_JTAG_TRST_I           4
 `define IOINDEX_REF_CLK_I             5
 `define IOINDEX_RSTN_I                6
-`define IOINDEX_ETH_TX_CLK_O          9
-`define IOINDEX_ETH_TX_CTRL_O         10
-`define IOINDEX_ETH_TX_D3_O           11
-`define IOINDEX_ETH_TX_D2_O           12
-`define IOINDEX_ETH_TX_D1_O           13
-`define IOINDEX_ETH_TX_D0_O           14
-`define IOINDEX_ETH_RX_CLK_I          15
-`define IOINDEX_ETH_RX_CTRL_I         16
-`define IOINDEX_ETH_RX_D3_I           17
-`define IOINDEX_ETH_RX_D2_I           18
-`define IOINDEX_ETH_RX_D1_I           19
-`define IOINDEX_ETH_RX_D0_I           20
-`define IOINDEX_ETH_RSTB_O            21
-`define IOINDEX_LD_REF_CLK_BLINK_O    22
-`define IOINDEX_LD_ETH_CLK_BLINK_O    23
-`define IOINDEX_STM_I                 60
-`define IOINDEX_BOOTSEL_I             61
+`define IOINDEX_LD_REF_CLK_BLINK_O    19
+`define IOINDEX_LD_ETH_CLK_BLINK_O    21
+`define IOINDEX_STM_I                 59
+`define IOINDEX_BOOTSEL_I             60
 //  Width of perio bus
 `define N_PERIO  49
 

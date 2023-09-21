@@ -180,6 +180,7 @@ module udma_ethernet_reg_if #(
             r_rx_desc_1                 <=  'h0;
             r_rx_desc_2                 <=  'h0;
             r_rx_desc_3                 <=  'h0;
+            r_rx_pointer                <=  2'b11;
         end
         else
         begin

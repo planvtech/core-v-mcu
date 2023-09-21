@@ -39,51 +39,59 @@
 	  "type": "sysio",
 	  "direction": "input"
 	},
-	{ "name": "eth_refclk",
-	  "type": "sysio",
-	  "direction": "output"
-	},
-	{ "name": "eth_rstn",
+	{ "name": "eth_rstb",
 	"type": "sysio",
 	"direction": "output"
 	},
-	{ "name": "eth_crs_dv",
-	  "type": "sysio",
-	  "direction": "input"
-	},
-	{ "name": "eth_rx_er",
-	  "type": "sysio",
-	  "direction": "input"
-	},
-	{ "name": "eth_rxd0",
-	  "type": "sysio",
-	  "direction": "input"
-	},
-	{ "name": "eth_rxd1",
-	  "type": "sysio",
-	  "direction": "input"
-	},
-	{ "name": "eth_tx_en",
+	{ "name": "eth_tx_clk",
 	  "type": "sysio",
 	  "direction": "output"
 	},
-	{ "name": "eth_txd0",
+	{ "name": "eth_tx_ctrl",
 	  "type": "sysio",
 	  "direction": "output"
 	},
-	{ "name": "eth_txd1",
+	{ "name": "eth_tx_d0",
 	  "type": "sysio",
 	  "direction": "output"
 	},
-	{ "name": "ld_ref_clk_lock",
+	{ "name": "eth_tx_d1",
 	  "type": "sysio",
 	  "direction": "output"
 	},
+	{ "name": "eth_tx_d2",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "eth_tx_d3",
+	  "type": "sysio",
+	  "direction": "output"
+	},
+	{ "name": "eth_rx_clk",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_rx_ctrl",
+	"type": "sysio",
+	"direction": "input"
+  	},
+	{ "name": "eth_rx_d0",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_rx_d1",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_rx_d2",
+	  "type": "sysio",
+	  "direction": "input"
+	},
+	{ "name": "eth_rx_d3",
+	  "type": "sysio",
+	  "direction": "input"
+	},	
 	{ "name": "ld_ref_clk_blink",
-	  "type": "sysio",
-	  "direction": "output"
-	},
-	{ "name": "ld_eth_clk_lock",
 	  "type": "sysio",
 	  "direction": "output"
 	},
@@ -91,7 +99,6 @@
 	  "type": "sysio",
 	  "direction": "output"
 	},
-
 	{ "name": "uart",
 	  "usable":	true,
 	  "type":		"udma",

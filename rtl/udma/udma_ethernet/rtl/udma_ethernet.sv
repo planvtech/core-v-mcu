@@ -35,21 +35,21 @@ module udma_ethernet #(
     /*
      * Ethernet: 1000BASE-T RGMII
      */
-    // input wire         phy_rx_clk,
-    // input wire [3:0]   phy_rxd,
-    // input wire         phy_rx_ctl,
-    // output wire        phy_tx_clk,
-    // output wire [3:0]  phy_txd,
-    // output wire        phy_tx_ctl,
-    // output wire        phy_reset_n,
-    // input wire         phy_int_n,
-    // input wire         phy_pme_n,
+    input wire         phy_rx_clk,
+    input wire [3:0]   phy_rxd,
+    input wire         phy_rx_ctl,
+    output wire        phy_tx_clk,
+    output wire [3:0]  phy_txd,
+    output wire        phy_tx_ctl,
+    output wire        phy_reset_n,
+    input wire         phy_int_n,
+    input wire         phy_pme_n,
 
-    input wire [1:0]    phy_rxd,
-    input wire          phy_crs_dv,
-    output wire [1:0]   phy_txd,
-    output wire         phy_tx_en,
-    input wire          phy_rx_er,
+    // input wire [1:0]    phy_rxd,
+    // input wire          phy_crs_dv,
+    // output wire [1:0]   phy_txd,
+    // output wire         phy_tx_en,
+    // input wire          phy_rx_er,
 
     /*
     *   Interrupts
@@ -406,7 +406,7 @@ input  logic                      data_rx_ready_i
     .m_axis_tlast(eth_tx_axis_tlast),       //  output  logic           
     .m_axis_tready(eth_tx_axis_tready)      //  input   logic          
     );
- /*
+ 
     rgmii_soc rgmii_soc1
     (
         .rst_int(~periph_rstn_i),
@@ -437,42 +437,40 @@ input  logic                      data_rx_ready_i
         .tx_fifo_good_frame(eth_tx_fifo_good_frame),
         .rx_error_bad_frame(eth_rx_error_bad_frame),
         .rx_error_bad_fcs(eth_rx_error_bad_fcs),
-        .rx_fcs_reg(eth_rx_fcs_reg),
-        .tx_fcs_reg(eth_tx_fcs_reg),
         .rx_fifo_overflow(eth_rx_fifo_overflow),
         .rx_fifo_bad_frame(eth_rx_fifo_bad_frame),
         .rx_fifo_good_frame(eth_rx_fifo_good_frame),
         .speed(eth_speed)
     );
-*/
 
-    rmii_soc rmii_soc1
-    (
-        .rst_int(~periph_rstn_i),
-        .clk_int(periph_clk_i), //125 MHz clock
-        .clk_200_int(ref_clk_i_200), // 200 MHz clock for inout delays ref_clk
-        .phy_rxd(phy_rxd),
-        .phy_crs_dv(phy_crs_dv),
-        .phy_txd(phy_txd),
-        .phy_tx_en(phy_tx_en),
-        .phy_rx_er(phy_rx_er),
-        .tx_axis_tdata(eth_tx_axis_tdata),
-        .tx_axis_tvalid(eth_tx_axis_tvalid),
-        .tx_axis_tready(eth_tx_axis_tready),
-        .tx_axis_tlast(eth_tx_axis_tlast),
-        .tx_axis_tuser(eth_tx_axis_tuser),
-        .rx_axis_tdata(eth_rx_axis_tdata),
-        .rx_axis_tvalid(eth_rx_axis_tvalid),
-        .rx_axis_tlast(eth_rx_axis_tlast),
-        .rx_axis_tuser(eth_rx_axis_tuser),
-        .tx_fifo_overflow(eth_tx_fifo_overflow),
-        .tx_fifo_bad_frame(eth_tx_fifo_bad_frame),
-        .tx_fifo_good_frame(eth_tx_fifo_good_frame),
-        .rx_error_bad_frame(eth_rx_error_bad_frame),
-        .rx_error_bad_fcs(eth_rx_error_bad_fcs),
-        .rx_fifo_overflow(eth_rx_fifo_overflow),
-        .rx_fifo_bad_frame(eth_rx_fifo_bad_frame),
-        .rx_fifo_good_frame(eth_rx_fifo_good_frame)
-    );
+
+    // rmii_soc rmii_soc1
+    // (
+    //     .rst_int(~periph_rstn_i),
+    //     .clk_int(periph_clk_i), //125 MHz clock
+    //     .clk_200_int(ref_clk_i_200), // 200 MHz clock for inout delays ref_clk
+    //     .phy_rxd(phy_rxd),
+    //     .phy_crs_dv(phy_crs_dv),
+    //     .phy_txd(phy_txd),
+    //     .phy_tx_en(phy_tx_en),
+    //     .phy_rx_er(phy_rx_er),
+    //     .tx_axis_tdata(eth_tx_axis_tdata),
+    //     .tx_axis_tvalid(eth_tx_axis_tvalid),
+    //     .tx_axis_tready(eth_tx_axis_tready),
+    //     .tx_axis_tlast(eth_tx_axis_tlast),
+    //     .tx_axis_tuser(eth_tx_axis_tuser),
+    //     .rx_axis_tdata(eth_rx_axis_tdata),
+    //     .rx_axis_tvalid(eth_rx_axis_tvalid),
+    //     .rx_axis_tlast(eth_rx_axis_tlast),
+    //     .rx_axis_tuser(eth_rx_axis_tuser),
+    //     .tx_fifo_overflow(eth_tx_fifo_overflow),
+    //     .tx_fifo_bad_frame(eth_tx_fifo_bad_frame),
+    //     .tx_fifo_good_frame(eth_tx_fifo_good_frame),
+    //     .rx_error_bad_frame(eth_rx_error_bad_frame),
+    //     .rx_error_bad_fcs(eth_rx_error_bad_fcs),
+    //     .rx_fifo_overflow(eth_rx_fifo_overflow),
+    //     .rx_fifo_bad_frame(eth_rx_fifo_bad_frame),
+    //     .rx_fifo_good_frame(eth_rx_fifo_good_frame)
+    // );
 
 endmodule // udma_ethernet_top

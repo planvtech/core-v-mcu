@@ -215,7 +215,7 @@ if args.perdef_json != None:
 # Read pin-table and populate data structures
 #
 ################################################
-if args.soc_defines != None:  
+if args.soc_defines != None:
     sysionames = [-1 for row in range(int(soc_defines['N_IO']))]    # row for each sysiso = [ionum, 'name']
     N_IO = int(soc_defines['N_IO'])
     N_PERIO = perio_index
@@ -243,7 +243,7 @@ if args.soc_defines != None:
                     io_num = int(pin[2])
                     if pin[0] in xilinx_names:
                         print("ERROR: multiple assignment to xilinx_pin '%s' (IO_%d)" % (pin[0], io_num))
-                        error_count = error_count + 1               
+                        error_count = error_count + 1
                     xilinx_names[pin_num] = pin[0]
                     #
                     # Check for sysio name
@@ -1074,7 +1074,7 @@ if args.xilinx_core_v_mcu_sv != None:
                 if sysionames[ionum] == "ref_clk_i":
                     x_sv.write("  // Input clock buffer\n")
                     x_sv.write("  IBUFG #(\n")
-                    x_sv.write("    .IOSTANDARD(\"LVCMOS33\"),\n")
+                    x_sv.write("    .IOSTANDARD(\"LVCMOS18\"),\n")
                     x_sv.write("    .IBUF_LOW_PWR(\"FALSE\")\n")
                     x_sv.write("  ) i_sysclk_iobuf (\n")
                     x_sv.write("    .I(ref_clk),\n")
@@ -1143,7 +1143,7 @@ if args.input_xdc != None:
             output_xdc.write("set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {s_tck}]\n")
             for line in input_xdc:
                 elements = line.split()
-                if len(elements) >= 10 :
+                if len(elements) > 10 :
                     if elements[10] == "sysclk_p" or elements[10] == "sysclk_n" :
                         elements[0] = elements[0][1:]
                         output_xdc.write(' '.join(elements) + "\n")

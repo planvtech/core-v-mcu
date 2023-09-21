@@ -88,8 +88,6 @@ module eth_mac_1g_rgmii #
     output wire       rx_error_bad_frame,
     output wire       rx_error_bad_fcs,
     output wire [1:0] speed,
-    output wire [31:0] rx_fcs_reg,
-    output wire [31:0] tx_fcs_reg,
 
     /*
      * Configuration
@@ -247,8 +245,6 @@ eth_mac_1g_inst (
     .tx_mii_select(tx_mii_select_3),
     .rx_error_bad_frame(rx_error_bad_frame),
     .rx_error_bad_fcs(rx_error_bad_fcs),
-    .rx_fcs_reg(rx_fcs_reg),
-    .tx_fcs_reg(tx_fcs_reg),
     .ifg_delay(ifg_delay)
 );
 
