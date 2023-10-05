@@ -17,6 +17,7 @@
 `define SMI_REG_REGISTER_ADDR       5'b00101 //BASEADDR+0x14
 `define SMI_REG_TX_DATA             5'b00110 //BASEADDR+0x18
 `define SMI_REG_RX_DATA             5'b00111 //BASEADDR+0x1C
+`define SMI_REG_PHY_RSTN            5'b01000 //BASEADDR+0x20
 /* verilator lint_on REDEFMACRO */
 
 module udma_smi_reg_if
@@ -35,6 +36,7 @@ module udma_smi_reg_if
     input  logic	            		busy_i,
     input  logic	            		nd_i,
     output logic	            		rw_o, // 0 for read, 1 for write
+    output logic                        phy_reset_n,
     output logic	            [4:0]	phy_addr_o,	
     output logic	            [4:0]	reg_addr_o,
     output logic	            [15:0]	wr_data_o,
@@ -84,6 +86,8 @@ module udma_smi_reg_if
                     reg_addr_o         <= cfg_data_i[4:0];
                 `SMI_REG_TX_DATA:
                     wr_data_o      <= cfg_data_i[15:0];
+                `SMI_REG_PHY_RSTN:
+                    phy_reset_n    <= cfg_data_i[0];
                 endcase
             end
         end
@@ -105,6 +109,8 @@ module udma_smi_reg_if
             cfg_data_o[0] = {31'h0, busy_i};
         `SMI_REG_RX_DATA:
             cfg_data_o = {16'h0, rd_data_i};
+        `SMI_REG_PHY_RSTN:
+            cfg_data_o = {31'h0, phy_reset_n};
         default:
             cfg_data_o = 'h0;
         endcase

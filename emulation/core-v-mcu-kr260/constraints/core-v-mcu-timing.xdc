@@ -82,4 +82,4 @@ set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_core_v
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_ports xilinx_io[0]]] -group [get_clocks -of_objects [get_pins i_core_v_mcu/i_soc_domain/i_clk_rst_gen/clk_gen_i/i_clk_manager/clk_out*]]
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_ports xilinx_io[0]]] -group [get_clocks -of_objects [get_pins i_core_v_mcu/i_soc_domain/i_clk_rst_gen/clk_gen_i/i_eth_clk_manager/clk_out*]]
 
-set_multicycle_path -from [get_ports {xilinx_io[6]}] -to [get_pins {*}] 1
+#set_multicycle_path -from [get_ports {xilinx_io[6]}] -to [get_pins {*}] 1

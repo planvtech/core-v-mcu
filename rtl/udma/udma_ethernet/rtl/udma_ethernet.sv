@@ -41,7 +41,6 @@ module udma_ethernet #(
     output wire        phy_tx_clk,
     output wire [3:0]  phy_txd,
     output wire        phy_tx_ctl,
-    output wire        phy_reset_n,
     input wire         phy_int_n,
     input wire         phy_pme_n,
 
@@ -419,7 +418,6 @@ input  logic                      data_rx_ready_i
         .phy_tx_clk(phy_tx_clk),
         .phy_txd(phy_txd),
         .phy_tx_ctl(phy_tx_ctl),
-        .phy_reset_n(phy_reset_n),
         .phy_int_n(phy_int_n),
         .phy_pme_n(phy_pme_n),
         .mac_gmii_tx_en(),

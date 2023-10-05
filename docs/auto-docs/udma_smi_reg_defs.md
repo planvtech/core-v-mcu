@@ -52,6 +52,12 @@ Basic SMI driven by UDMA system
 | --------------------- |   --- |   --- |        --- | ------------------------- |
 | data       |  15:0 |    RO |            | PHY register read data; |
 
+### PHY_RSTN offset = 0x20
+
+| Field      |  Bits |  Type |    Default | Description     |
+| --------------------- |   --- |   --- |        --- | ------------------------- |
+| data       |   0:0 |    RW |            | PHY reset status; |
+
 ### Notes:
 
 | Access type | Description |

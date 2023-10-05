@@ -116,7 +116,6 @@ filesets:
     - emulation/xilinx/rtl/fpga_private_ram.sv
     - emulation/xilinx/rtl/fpga_slow_clk_gen.sv
     - emulation/xilinx/rtl/pad_functional_xilinx.sv
-    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
     - emulation/xilinx/rtl/sram512x64.v
     - emulation/xilinx/rtl/DW02_mac.sv
     - rtl/simulation/pPLL02F.sv
@@ -191,6 +190,7 @@ filesets:
 
   nexys-rtl:
     files:
+    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
     - emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v
     - emulation/xilinx/rtl/fpga_clk_gen.sv
     file_type: systemVerilogSource
@@ -203,6 +203,7 @@ filesets:
 
   kr260-rtl:
     files:
+    - emulation/xilinx/rtl/pulp_clock_gating_us.sv
     - emulation/core-v-mcu-kr260/rtl/core_v_mcu_kr260.v
     - emulation/xilinx/rtl/fpga_clk_gen.sv
     file_type: systemVerilogSource
@@ -226,6 +227,7 @@ filesets:
 
   genesys2-rtl:
     files:
+    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
     - emulation/core-v-mcu-genesys2/rtl/core_v_mcu_genesys2.v
     - emulation/core-v-mcu-genesys2/rtl/fpga_clk_gen.sv
     file_type: systemVerilogSource

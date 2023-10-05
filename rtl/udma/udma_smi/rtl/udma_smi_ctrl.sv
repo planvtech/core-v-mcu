@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 module udma_smi_ctrl #(
-    parameter	SLOW_CLK_COUNT = 64
+    parameter	SLOW_CLK_COUNT = 16
 ) (
 		input  logic            clk_i,
 		input  logic            rstn_i,
@@ -29,6 +29,7 @@ module udma_smi_ctrl #(
 
 	localparam CLK_HIGH_TIME_IN_CLK_CYCLES = SLOW_CLK_COUNT/2;
 	localparam CLK_HIGH_TIME_IN_CLK_CYCLES_M1 = CLK_HIGH_TIME_IN_CLK_CYCLES - 1;
+	localparam CLK_EN_TIME = CLK_HIGH_TIME_IN_CLK_CYCLES_M1/2;
 
 	logic [15:0]	clk_count	= 16'h0;
 
@@ -46,14 +47,21 @@ module udma_smi_ctrl #(
 		begin
 			if(clk_count == CLK_HIGH_TIME_IN_CLK_CYCLES_M1)
 			begin
-				clk_en <= mdc_o == 1'b0 ? 1'b1 : 1'b0;
 				clk_count <= 'h0;
 				mdc_o <= ~mdc_o;
 			end
 			else
 			begin
-				clk_en <= 1'b0;
 				clk_count <= clk_count + 16'h1;
+			end
+			
+			if(clk_count == CLK_EN_TIME)
+			begin
+			 clk_en <= mdc_o == 1'b0 ? 1'b1 : 1'b0;
+			end
+			else
+			begin
+			 clk_en <= 1'b0;
 			end
 		end
 	end

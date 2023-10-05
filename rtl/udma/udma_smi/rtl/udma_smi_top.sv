@@ -17,6 +17,7 @@ module udma_smi_top
     output logic			          mdo_o,
     output logic			          md_oen_o,
     output logic 			          mdc_o,
+    output wire                       phy_reset_n,
 
 	input  logic               [31:0] cfg_data_i,
 	input  logic                [4:0] cfg_addr_i,
@@ -46,11 +47,11 @@ module udma_smi_top
         .cfg_rwn_i          ( cfg_rwn_i           ),
         .cfg_ready_o        ( cfg_ready_o         ),
         .cfg_data_o         ( cfg_data_o          ),
-
         .start_o(s_start),
         .busy_i(s_busy),
         .nd_i(s_nd),
         .rw_o(s_rw),
+        .phy_reset_n(phy_reset_n),
         .phy_addr_o(s_phy_addr),
         .reg_addr_o(s_reg_addr),
         .wr_data_o(s_wr_data),

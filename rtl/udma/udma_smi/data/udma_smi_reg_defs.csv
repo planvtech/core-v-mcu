@@ -19,3 +19,5 @@ Register,Offset/Field,MSB,LSB,Type,Default,Description
 ,data,15,0,WO,,PHY register write data;
 0x1C,RX_DATA,,,,,
 ,data,15,0,RO,,PHY register read data;
+0x20,PHY_RSTN,,,,,
+,data,0,0,RW,,PHY reset status;
