@@ -46,15 +46,25 @@ module soc_clk_rst_gen (
 
     output logic rstn_soc_sync_o,
     output logic rstn_cluster_sync_o,
+    output logic rstn_eth_sync_o,
 
     output logic clk_soc_o,
     output logic clk_per_o,
-    output logic clk_cluster_o
+    output logic clk_cluster_o,
+    output logic eth_clk_o,
+    output logic eth_clk_90_o,
+    output logic eth_delay_ref_clk_o,
+    output logic eth_lock_o
+
 );
 
   logic s_clk_soc;
   logic s_clk_per;
   logic s_clk_cluster;
+
+  logic s_eth_clk;
+  logic s_eth_clk_90;
+  logic s_eth_delay_ref_clk;
 
   logic s_clk_fll_soc;
   logic s_clk_fll_per;
@@ -64,6 +74,7 @@ module soc_clk_rst_gen (
 
   logic s_rstn_soc_sync;
   logic s_rstn_cluster_sync;
+  logic s_rstn_eth;
 
 
   clk_gen clk_gen_i (
@@ -75,6 +86,10 @@ module soc_clk_rst_gen (
       .soc_clk_o(s_clk_fll_soc),
       .per_clk_o(s_clk_fll_per),
       .cluster_clk_o(s_clk_fll_cluster),
+      .eth_clk_o(s_eth_clk),
+      .eth_clk_90_o(s_eth_clk_90),
+      .eth_delay_ref_clk_o(s_eth_delay_ref_clk),
+      .eth_lock_o(eth_lock_o),
       .soc_cfg_lock_o(soc_fll_slave_lock_o),
       .soc_cfg_req_i(soc_fll_slave_req_i),
       .soc_cfg_ack_o(soc_fll_slave_ack_o),
@@ -131,16 +146,41 @@ module soc_clk_rst_gen (
       .rst_no (s_rstn_cluster_sync),  //to be used by logic clocked with ref clock in AO domain
       .init_no()  //not used
   );
+
 `else
   assign s_rstn_cluster_sync = s_rstn_soc;
 `endif
+
+`ifndef PULP_FPGA_EMUL
+  rstgen i_eth_rstgen (
+      .clk_i (s_eth_clk),
+      .rst_ni(s_rstn_soc),
+
+      .test_mode_i(test_mode_i),
+
+      .rst_no (s_rstn_eth),  //to be used by logic clocked with ref clock in AO domain
+      .init_no()  //not used
+  );
+
+`else
+  assign s_rstn_eth = s_rstn_soc;
+`endif
+
+
+
+
 
   assign clk_soc_o           = s_clk_soc;
   assign clk_per_o           = s_clk_per;
   assign clk_cluster_o       = s_clk_cluster;
 
+  assign eth_clk_o           = s_eth_clk;
+  assign eth_clk_90_o        = s_eth_clk_90;
+  assign eth_delay_ref_clk_o = s_eth_delay_ref_clk;
+
   assign rstn_soc_sync_o     = s_rstn_soc_sync;
   assign rstn_cluster_sync_o = s_rstn_cluster_sync;
+  assign rstn_eth_sync_o     = s_rstn_eth;
 
 `ifdef DO_NOT_USE_FLL
   assert property (@(posedge clk) (soc_fll_slave_req_i == 1'b0 && per_fll_slave_req_i == 1'b0))

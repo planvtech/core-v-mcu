@@ -36,14 +36,19 @@ module udma_subsystem #(
     input  logic                       L2_wo_rvalid_i,
     input  logic [  L2_DATA_WIDTH-1:0] L2_wo_rdata_i,
 
-    input logic dft_test_mode_i,
-    input logic dft_cg_enable_i,
+    input  logic dft_test_mode_i,
+    input  logic dft_cg_enable_i,
 
-    input logic sys_clk_i,
-    input logic efpga_clk_i,
-    input logic sys_resetn_i,
+    input  logic sys_clk_i,
+    input  logic efpga_clk_i,
+    input  logic sys_resetn_i,
 
-    input logic periph_clk_i,
+    input  logic periph_clk_i,
+    input  logic eth_clk_i,
+    input  logic eth_clk_90_i,
+    input  logic eth_rstn_i,
+    input  logic eth_delay_ref_clk_i,
+    output logic eth_refclk_o,
 
     input  logic [APB_ADDR_WIDTH-1:0] udma_apb_paddr,
     input  logic [              31:0] udma_apb_pwdata,
@@ -76,7 +81,21 @@ module udma_subsystem #(
 
     input  logic [`N_PERIO-1:0] perio_in_i,
     output logic [`N_PERIO-1:0] perio_out_o,
-    output logic [`N_PERIO-1:0] perio_oe_o
+    output logic [`N_PERIO-1:0] perio_oe_o,
+
+    input  logic                phy_rx_clk_i,
+    input  logic   [3:0]        phy_rxd_i,
+    input  logic                phy_rx_ctl_i,
+    output logic                phy_tx_clk_o,
+    output logic   [3:0]        phy_txd_o,
+    output logic                phy_tx_ctl_o,
+    output logic                phy_reset_n_o
+    // input wire [1:0]    phy_rxd_i,
+    // input wire          phy_crs_dv_i,
+    // output wire [1:0]   phy_txd_o,
+    // output wire         phy_tx_en_o,
+    // output wire         phy_rstn_o,
+    // input wire          phy_rx_er_i
 );
 
   localparam DEST_SIZE = 2;
@@ -90,21 +109,21 @@ module udma_subsystem #(
   localparam N_EXT_PER = 0;
 `endif
 
-  localparam N_RX_CHANNELS =   `N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_CAM + 2*`N_CSI2 + `N_FPGA + N_EXT_PER;
-  localparam N_TX_CHANNELS = 2*`N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_FPGA + N_EXT_PER;
+  localparam N_RX_CHANNELS =   `N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_CAM + 2*`N_CSI2 + `N_FPGA + `N_ETH + N_EXT_PER;
+  localparam N_TX_CHANNELS = 2*`N_SPI + `N_HYPER + `N_MRAM + `N_JTAG + `N_SDIO + `N_UART + `N_I2C + `N_I2S + `N_FPGA + `N_ETH + N_EXT_PER;
 
   if (`N_RX_CHANNELS != N_RX_CHANNELS) $error("N_RX_CHANNELS mismatch");
   if (`N_TX_CHANNELS != N_TX_CHANNELS) $error("N_TX_CHANNELS mismatch");
-
+  
   localparam N_RX_EXT_CHANNELS = `N_FILTER;
   localparam N_TX_EXT_CHANNELS = 2 * `N_FILTER;
   localparam N_STREAMS = `N_FILTER;
   localparam STREAM_ID_WIDTH = 1;  //$clog2(N_STREAMS)
 
-  localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + N_EXT_PER;
+  localparam N_PERIPHS = `N_SPI + `N_HYPER + `N_UART + `N_MRAM + `N_I2C + `N_CAM + `N_I2S + `N_CSI2 + `N_SDIO + `N_JTAG + `N_FILTER + `N_FPGA + `N_ETH + `N_SMI + N_EXT_PER;
   if (N_PERIPHS > 28)
     $error("Too many udma periperals: limit is 28 (32 event channels - 4 for FPGA)");
-
+  
   //TX Channels
   localparam CH_ID_TX_UART = 0;
   localparam CH_ID_TX_SPIM = CH_ID_TX_UART + `N_UART;
@@ -113,7 +132,8 @@ module udma_subsystem #(
   localparam CH_ID_TX_SDIO = CH_ID_TX_I2C + `N_I2C;
   localparam CH_ID_TX_I2S = CH_ID_TX_SDIO + `N_SDIO;
   localparam CH_ID_TX_FPGA = CH_ID_TX_I2S + `N_I2S;
-  localparam CH_ID_TX_EXT_PER = CH_ID_TX_FPGA + `N_FPGA;
+  localparam CH_ID_TX_ETH = CH_ID_TX_FPGA + `N_FPGA;
+  localparam CH_ID_TX_EXT_PER = CH_ID_TX_ETH + `N_ETH;
   if (`CH_ID_TX_EXT_PER != CH_ID_TX_EXT_PER) $error("CH_ID_TX_EXT_PER mismatch");
 
   //RX Channels
@@ -124,7 +144,8 @@ module udma_subsystem #(
   localparam CH_ID_RX_I2S = CH_ID_RX_SDIO + `N_SDIO;
   localparam CH_ID_RX_CAM = CH_ID_RX_I2S + `N_I2S;
   localparam CH_ID_RX_FPGA = CH_ID_RX_CAM + `N_CAM;
-  localparam CH_ID_RX_EXT_PER = CH_ID_RX_FPGA + `N_FPGA;
+  localparam CH_ID_RX_ETH = CH_ID_RX_FPGA + `N_FPGA;
+  localparam CH_ID_RX_EXT_PER = CH_ID_RX_ETH + `N_ETH;
   if (`CH_ID_RX_EXT_PER != CH_ID_RX_EXT_PER) $error("CH_ID_RX_EXT_PER mismatch");
 
   // PER_ID definitions
@@ -136,7 +157,9 @@ module udma_subsystem #(
   localparam PER_ID_CAM = PER_ID_I2S + `N_I2S;
   localparam PER_ID_FILTER = PER_ID_CAM + `N_CAM;
   localparam PER_ID_FPGA = PER_ID_FILTER + `N_FILTER;
-  localparam PER_ID_EXT_PER = PER_ID_FPGA + `N_FPGA;
+  localparam PER_ID_ETH = PER_ID_FPGA + `N_FPGA;
+  localparam PER_ID_SMI = PER_ID_ETH + `N_ETH;
+  localparam PER_ID_EXT_PER = PER_ID_SMI + `N_SMI;
   if (`PER_ID_EXT_PER != PER_ID_EXT_PER) $error("PER_ID_EXT_PER mismatch");
 
 
@@ -240,8 +263,33 @@ module udma_subsystem #(
   logic                                                  s_filter_eot_evt;
   logic                                                  s_filter_act_evt;
 
+  logic                                                  eth_rx_evt;
+ 
+  //phy loopback, will be set to outputs after verification at this level
+  // logic                                                  phy_rx_clk;
+  // logic   [3:0]                                          phy_rxd;
+  // logic                                                  phy_rx_ctl;
+  // logic                                                  phy_tx_clk;
+  // logic   [3:0]                                          phy_txd;
+  // logic                                                  phy_tx_ctl;
+  // logic                                                  phy_reset_n;
+  
+`ifdef ETH_LOOPBACK
+  (*KEEP = "TRUE" *) logic [1:0]    phy_rxd;
+  (*KEEP = "TRUE" *) logic          phy_crs_dv;
+  (*KEEP = "TRUE" *) logic [1:0]    phy_txd;
+  (*KEEP = "TRUE" *) logic          phy_tx_en;
+  (*KEEP = "TRUE" *) logic          phy_rx_er;
+ `else
+  logic [1:0]    phy_rxd;
+  logic          phy_crs_dv;
+  logic [1:0]    phy_txd;
+  logic          phy_tx_en;
+  logic          phy_rx_er;
+ `endif
+  //////////////////////////////////////////
 
-  integer                                                i;
+  integer                   i;
 
   assign s_cam_evt     = 1'b0;
   assign s_i2s_evt     = 1'b0;
@@ -264,6 +312,7 @@ module udma_subsystem #(
       .N_RX_EXT_CHANNELS(N_RX_EXT_CHANNELS),
       .N_TX_EXT_CHANNELS(N_TX_EXT_CHANNELS),
       .N_STREAMS        (N_STREAMS),
+      .DEST_SIZE        (DEST_SIZE),
       .STREAM_ID_WIDTH  (STREAM_ID_WIDTH),
       .TRANS_SIZE       (TRANS_SIZE),
       .N_PERIPHS        (N_PERIPHS),
@@ -399,9 +448,12 @@ module udma_subsystem #(
           .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
           .TRANS_SIZE(TRANS_SIZE)
       ) i_uart (
-          .sys_clk_i   (s_clk_periphs_core[PER_ID_UART+g_uart]),
-          .periph_clk_i(s_clk_periphs_per[PER_ID_UART+g_uart]),
-          .rstn_i      (s_per_rst[PER_ID_UART+g_uart]),
+        //  .sys_clk_i   (s_clk_periphs_core[PER_ID_UART+g_uart]),
+        //  .periph_clk_i(s_clk_periphs_per[PER_ID_UART+g_uart]),
+          .sys_clk_i(sys_clk_i),
+          .periph_clk_i(periph_clk_i),
+          // .rstn_i(s_per_rst[PER_ID_UART+g_uart]),
+          .rstn_i      (sys_resetn_i), //mkdigitals, org: s_per_rst[PER_ID_UART+g_uart]
 
           // Signals to pads
           .uart_tx_o(perio_out_o[`PERIO_UART0_TX+`PERIO_UART_NPORTS*g_uart]),
@@ -472,9 +524,12 @@ module udma_subsystem #(
           .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
           .TRANS_SIZE    (TRANS_SIZE)
       ) i_spim (
-          .sys_clk_i      (s_clk_periphs_core[PER_ID_SPIM+g_spi]),
-          .periph_clk_i   (s_clk_periphs_per[PER_ID_SPIM+g_spi]),
-          .rstn_i         (s_per_rst[PER_ID_SPIM+g_spi]),
+        //  .sys_clk_i      (s_clk_periphs_core[PER_ID_SPIM+g_spi]),
+        //  .periph_clk_i   (s_clk_periphs_per[PER_ID_SPIM+g_spi]),
+          .sys_clk_i(sys_clk_i),
+          .periph_clk_i(periph_clk_i),
+          // .rstn_i(s_per_rst[PER_ID_SPIM+g_spi]),
+          .rstn_i         (sys_resetn_i), //mkdigitals , org: s_per_rst[PER_ID_SPIM+g_spi]
           .dft_test_mode_i(dft_test_mode_i),
           .dft_cg_enable_i(dft_cg_enable_i),
           .spi_eot_o      (s_spi_eot[g_spi]),
@@ -578,9 +633,12 @@ module udma_subsystem #(
           //
           // inputs & outputs
           //
-          .sys_clk_i   (s_clk_periphs_core[PER_ID_I2C+g_i2c]),
-          .periph_clk_i(s_clk_periphs_per[PER_ID_I2C+g_i2c]),
-          .rstn_i      (s_per_rst[PER_ID_I2C+g_i2c]),
+        //  .sys_clk_i   (s_clk_periphs_core[PER_ID_I2C+g_i2c]),
+        //  .periph_clk_i(s_clk_periphs_per[PER_ID_I2C+g_i2c]),
+          .sys_clk_i(sys_clk_i),
+          .periph_clk_i(periph_clk_i),
+          // .rstn_i(s_per_rst[PER_ID_I2C+g_i2c]),
+          .rstn_i      (sys_resetn_i),//mkdigitals, org : s_per_rst[PER_ID_I2C+g_i2c]
 
           .cfg_data_i (s_periph_data_to),
           .cfg_addr_i (s_periph_addr),
@@ -662,9 +720,12 @@ module udma_subsystem #(
           .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
           .TRANS_SIZE    (TRANS_SIZE)
       ) i_sdio (
-          .sys_clk_i   (s_clk_periphs_core[(PER_ID_SDIO+g_sdio)]),
-          .periph_clk_i(s_clk_periphs_per[(PER_ID_SDIO+g_sdio)]),
-          .rstn_i      (s_per_rst[PER_ID_SDIO+g_sdio]),
+        //  .sys_clk_i   (s_clk_periphs_core[(PER_ID_SDIO+g_sdio)]),
+        //  .periph_clk_i(s_clk_periphs_per[(PER_ID_SDIO+g_sdio)]),
+          .sys_clk_i(sys_clk_i),
+          .periph_clk_i(periph_clk_i),
+          // .rstn_i(s_per_rst[PER_ID_SDIO+g_sdio]),
+          .rstn_i      (sys_resetn_i),//mkdigitals, s_per_rst[PER_ID_SDIO+g_sdio]
 
           .err_o(s_sdio_err),
           .eot_o(s_sdio_eot),
@@ -737,9 +798,12 @@ module udma_subsystem #(
           .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
           .TRANS_SIZE(TRANS_SIZE)
       ) i_i2s_udma (
-          .sys_clk_i   (s_clk_periphs_core[PER_ID_I2S+g_i2s]),
-          .periph_clk_i(s_clk_periphs_per[PER_ID_I2S+g_i2s]),
-          .rstn_i      (s_per_rst[PER_ID_I2S+g_i2s]),
+        //  .sys_clk_i   (s_clk_periphs_core[PER_ID_I2S+g_i2s]),
+        //  .periph_clk_i(s_clk_periphs_per[PER_ID_I2S+g_i2s]),
+          .sys_clk_i(sys_clk_i),
+          .periph_clk_i(periph_clk_i),
+          // .rstn_i(s_per_rst[PER_ID_I2S+g_i2s]),
+          .rstn_i      (sys_resetn_i),//mkdigitals, org : s_per_rst[PER_ID_I2S+g_i2s]
 
           .dft_test_mode_i(dft_test_mode_i),
           .dft_cg_enable_i(dft_cg_enable_i),
@@ -826,7 +890,9 @@ module udma_subsystem #(
           .DATA_WIDTH(8)
       ) i_camera_if (
           .clk_i (s_clk_periphs_core[PER_ID_CAM+g_cam]),
+          // .clk_i(sys_clk_i),
           .rstn_i(s_per_rst[PER_ID_CAM+g_cam]),
+          // .rstn_i(sys_resetn_i), //mkdigitals, org : s_per_rst[PER_ID_CAM+g_cam]
 
           .dft_test_mode_i(dft_test_mode_i),
           .dft_cg_enable_i(dft_cg_enable_i),
@@ -873,13 +939,13 @@ module udma_subsystem #(
       assign s_events[4*(PER_ID_FILTER+g_filter)+2] = 1'b0;
       assign s_events[4*(PER_ID_FILTER+g_filter)+3] = 1'b0;
 
-      assign s_rx_ext_destination[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
+      assign s_rx_ext_destination[CH_ID_EXT_RX_FILTER+g_filter][DEST_SIZE - 1 : 0] = 'h0;
       assign s_rx_ext_stream[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
       assign s_rx_ext_stream_id[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
       assign s_rx_ext_sot[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
       assign s_rx_ext_eot[CH_ID_EXT_RX_FILTER+g_filter] = 'h0;
 
-      assign s_tx_ext_destination[CH_ID_EXT_TX_FILTER+g_filter] = 'h0;
+      assign s_tx_ext_destination[CH_ID_EXT_TX_FILTER+g_filter][DEST_SIZE - 1 : 0] = 'h0;
       assign s_tx_ext_destination[CH_ID_EXT_TX_FILTER+g_filter+1] = 'h0;
 
       assign s_per_rst[PER_ID_FILTER+g_filter] = sys_resetn_i & !s_rst_periphs[PER_ID_FILTER+g_filter];
@@ -889,7 +955,9 @@ module udma_subsystem #(
           .TRANS_SIZE(TRANS_SIZE)
       ) i_filter (
           .clk_i(s_clk_periphs_core[PER_ID_FILTER+g_filter]),
+          // .clk_i(sys_clk_i),
           .resetn_i(s_per_rst[PER_ID_FILTER+g_filter]),
+          //.resetn_i(sys_resetn_i), //mkdigitals, org : s_per_rst[PER_ID_FILTER+g_filter]
 
           .cfg_data_i (s_periph_data_to),
           .cfg_addr_i (s_periph_addr),
@@ -955,9 +1023,12 @@ module udma_subsystem #(
           .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
           .TRANS_SIZE(TRANS_SIZE)
       ) i_efpga (
-          .sys_clk_i   (s_clk_periphs_core[PER_ID_FPGA+g_fpga]),
-          .periph_clk_i(efpga_clk_i),
-          .rstn_i      (s_per_rst[PER_ID_FPGA+g_fpga]),
+         .sys_clk_i   (s_clk_periphs_core[PER_ID_FPGA+g_fpga]),
+//          .periph_clk_i(efpga_clk_i),
+          // .sys_clk_i(sys_clk_i),
+          .periph_clk_i(periph_clk_i),
+          .rstn_i(s_per_rst[PER_ID_FPGA+g_fpga]),
+          //.rstn_i      (sys_resetn_i),//mkdigitals, test for implementation, org : s_per_rst[PER_ID_FPGA+g_fpga]
 
           .cfg_data_i (s_periph_data_to),
           .cfg_addr_i (s_periph_addr),
@@ -1013,4 +1084,138 @@ module udma_subsystem #(
       );
     end
   endgenerate
+
+// ETHERNET
+  generate
+    for (genvar g_eth = 0; g_eth < `N_ETH; g_eth++) begin : i_eth_gen
+      assign s_events[4*(PER_ID_ETH+g_eth)+0] = s_rx_ch_events[CH_ID_RX_ETH+g_eth];
+      assign s_events[4*(PER_ID_ETH+g_eth)+1] = s_tx_ch_events[CH_ID_TX_ETH+g_eth];
+      assign s_events[4*(PER_ID_ETH+g_eth)+2] = eth_rx_evt;
+      assign s_events[4*(PER_ID_ETH+g_eth)+3] = 1'b0;
+
+      assign s_per_rst[PER_ID_ETH+g_eth] = sys_resetn_i & !s_rst_periphs[PER_ID_ETH+g_eth];
+
+      // ODDR2 #(
+      //     .DDR_ALIGNMENT("C0"),
+      //     .SRTYPE("ASYNC")
+      // )
+      // oddr_inst (
+      //     .Q(eth_refclk_o),
+      //     .C0(eth_clk_i),
+      //     .C1(~eth_clk_i),
+      //     .CE(1'b1),
+      //     .D0(1'b1),
+      //     .D1(1'b0),
+      //     .R(1'b0),
+      //     .S(1'b0)
+      // );
+
+      udma_ethernet #(
+        .L2_AWIDTH_NOAL(L2_AWIDTH_NOAL),
+        .TRANS_SIZE(TRANS_SIZE)
+      )i_ethernet (
+        // .sys_clk_i(s_clk_periphs_core[PER_ID_ETH+g_eth]),
+        .sys_clk_i(sys_clk_i),
+        .periph_clk_i(eth_clk_i),
+        //.periph_clk_i_90(eth_clk_90_i),
+        .periph_rstn_i(eth_rstn_i),
+        .ref_clk_i_200(eth_delay_ref_clk_i),// 200MHz delay gen ref clock
+        // .rstn_i(s_per_rst[PER_ID_ETH+g_eth]),
+        .rstn_i(sys_resetn_i), //mkdigitals, test for an implementation run, org : .rstn_i(s_per_rst[PER_ID_ETH+g_eth]),
+        /*
+          * Ethernet: 1000BASE-T RGMII
+          */
+        .phy_rx_clk(phy_rx_clk_i),    //  input wire        
+        .phy_rxd(phy_rxd_i),          //  input wire [3:0]  
+        .phy_rx_ctl(phy_rx_ctl_i),    //  input wire        
+        .phy_tx_clk(phy_tx_clk_i),    //  output wire        
+        .phy_txd(phy_txd_o),          //  output wire [3:0]  
+        .phy_tx_ctl(phy_tx_ctl_o),    //  output wire                
+        // .phy_int_n(phy_int_n),      //  input wire        
+        // .phy_pme_n(phy_pme_n),      //  input wire        
+        //
+
+        /*
+          * Ethernet: 10 100 -T RMII
+          */
+        // .phy_rxd(phy_rxd),
+        // .phy_crs_dv(phy_crs_dv),
+        // .phy_txd(phy_txd),
+        // .phy_tx_en(phy_tx_en),
+        // .phy_rx_er(phy_rx_er),
+
+        .eth_rx_event_o(eth_rx_evt),
+
+        .cfg_data_i (s_periph_data_to),
+        .cfg_addr_i (s_periph_addr),
+        .cfg_valid_i(s_periph_valid[PER_ID_ETH+g_eth]),
+        .cfg_rwn_i  (s_periph_rwn),
+        .cfg_data_o (s_periph_data_from[PER_ID_ETH+g_eth]),
+        .cfg_ready_o(s_periph_ready[PER_ID_ETH+g_eth]),
+
+        .cfg_rx_startaddr_o (s_rx_cfg_startaddr[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_size_o      (s_rx_cfg_size[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_continuous_o(s_rx_cfg_continuous[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_en_o        (s_rx_cfg_en[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_clr_o       (s_rx_cfg_clr[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_en_i        (s_rx_ch_en[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_pending_i   (s_rx_ch_pending[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_curr_addr_i (s_rx_ch_curr_addr[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_bytes_left_i(s_rx_ch_bytes_left[CH_ID_RX_ETH+g_eth]),
+        .cfg_rx_datasize_o  (),  // FIXME ANTONIO
+
+        .cfg_tx_startaddr_o (s_tx_cfg_startaddr[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_size_o      (s_tx_cfg_size[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_continuous_o(s_tx_cfg_continuous[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_en_o        (s_tx_cfg_en[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_clr_o       (s_tx_cfg_clr[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_en_i        (s_tx_ch_en[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_pending_i   (s_tx_ch_pending[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_curr_addr_i (s_tx_ch_curr_addr[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_bytes_left_i(s_tx_ch_bytes_left[CH_ID_TX_ETH+g_eth]),
+        .cfg_tx_datasize_o  (),  // FIXME ANTONIO     
+
+        .data_tx_req_o     (s_tx_ch_req[CH_ID_TX_ETH+g_eth]),
+        .data_tx_gnt_i     (s_tx_ch_gnt[CH_ID_TX_ETH+g_eth]),
+        .data_tx_datasize_o(s_tx_ch_datasize[CH_ID_TX_ETH+g_eth]),
+        .data_tx_i         (s_tx_ch_data[CH_ID_TX_ETH+g_eth]),
+        .data_tx_valid_i   (s_tx_ch_valid[CH_ID_TX_ETH+g_eth]),
+        .data_tx_ready_o   (s_tx_ch_ready[CH_ID_TX_ETH+g_eth]),
+
+        .data_rx_datasize_o(s_rx_ch_datasize[CH_ID_RX_ETH+g_eth]),
+        .data_rx_o         (s_rx_ch_data[CH_ID_RX_ETH+g_eth]),
+        .data_rx_valid_o   (s_rx_ch_valid[CH_ID_RX_ETH+g_eth]),
+        .data_rx_ready_i   (s_rx_ch_ready[CH_ID_RX_ETH+g_eth])                  
+      );
+    end
+  endgenerate
+
+// PHY_CFG
+  logic       md_oen;
+  generate
+    for (genvar g_smi = 0; g_smi < `N_SMI; g_smi++) begin : i_smi_gen
+     
+      assign s_per_rst[PER_ID_SMI+g_smi] = sys_resetn_i & !s_rst_periphs[PER_ID_SMI+g_smi];
+      assign perio_oe_o[`PERIO_SMI0_MDIO+`PERIO_SMI_NPORTS*g_smi] = md_oen;
+      udma_smi_top i_smi (
+      //  .sys_clk_i(s_clk_periphs_core[PER_ID_SMI+g_smi]),
+      //  .rstn_i(s_per_rst[PER_ID_SMI+g_smi]),
+        .sys_clk_i(sys_clk_i),
+        .rstn_i(sys_resetn_i),
+        .mdi_i(perio_in_i[`PERIO_SMI0_MDIO+`PERIO_SMI_NPORTS*g_smi]),
+        .mdo_o(perio_out_o[`PERIO_SMI0_MDIO+`PERIO_SMI_NPORTS*g_smi]),
+        .md_oen_o(md_oen),
+        .mdc_o(perio_out_o[`PERIO_SMI0_MDC+`PERIO_SMI_NPORTS*g_smi]),
+        .phy_reset_n(phy_reset_n_o),  //  output wire
+        .cfg_data_i (s_periph_data_to),
+        .cfg_addr_i (s_periph_addr),
+        .cfg_valid_i(s_periph_valid[PER_ID_SMI+g_smi]),
+        .cfg_rwn_i  (s_periph_rwn),
+        .cfg_data_o (s_periph_data_from[PER_ID_SMI+g_smi]),
+        .cfg_ready_o(s_periph_ready[PER_ID_SMI+g_smi])           
+      );
+    end
+  endgenerate
+
+
 endmodule

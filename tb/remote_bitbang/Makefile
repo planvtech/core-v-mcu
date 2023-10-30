@@ -80,7 +80,9 @@ debug: ALL_CFLAGS = $(ALL_CFLAGS_DBG)
 debug: all
 
 sv-lib: ALL_CFLAGS += -fPIC
-sv-lib: $(SV_LIB)
+sv-lib: 
+	@echo '************  bitbang makefile librbs.so ************'
+	$(SV_LIB)
 
 #compilation boilerplate
 $(SV_LIB): $(OBJS)

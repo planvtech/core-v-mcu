@@ -61,6 +61,8 @@ udma/udma_uart:
   path: udma/udma_uart
 udma/udma_i2c:
   path: udma/udma_i2c
+udma/udma_smi:
+  path: udma/udma_smi  
 udma/udma_i2s:
   path: udma/udma_i2s
 udma/udma_qspi:
@@ -73,6 +75,8 @@ udma/udma_filter:
   path: udma/udma_filter
 udma/udma_external_per:
   path: udma/udma_external_per
+udma/udma_ethernet:
+  path: udma/udma_ethernet
 logint_dc_fifo_xbar:
   path: logint_dc_fifo_xbar
 core-v-mcu:

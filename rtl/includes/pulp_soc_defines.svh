@@ -82,7 +82,7 @@
 `define NB_CORES      0
 `define NB_DMAS       0
 `define NB_MPERIPHS   1
-`define NB_SPERIPHS   8
+`define NB_SPERIPHS   9
 
 
 // DEFINES
@@ -129,7 +129,7 @@
 // Peripherals
 //
 //--------------------------------------
-`define N_IO        48    // Number of IO in pad frame
+`define N_IO        64    // Number of IO in pad frame // mkdigitals altered this, before adding eth pins :48
 `define N_SYSIO     3     // Number of IO used for system functions like reset
 `define N_GPIO      32    // Number of IO the GPIO block can potentially control
 
@@ -142,6 +142,7 @@
 `define N_UART    	2
 `define N_QSPIM    	2
 `define N_SPI     	`N_QSPIM		// ToDo: Compatibility
+`define N_SMI     	1
 `define N_I2CM    	2
 `define N_I2C     	`N_I2CM		// ToDo: Compatibility
 `define N_I2SC    	0
@@ -154,6 +155,7 @@
 `define N_MRAM    	0
 `define N_FILTER  	1
 `define N_FPGA    	0
+`define N_ETH       1
 `define N_EXT_PER   0			// ToDo: Only set to one if PULP_TRAINING -- do we still need?
 
 
@@ -173,5 +175,4 @@
 `define LOG2(VALUE) ((VALUE) < ( 1 ) ? 0 : (VALUE) < ( 2 ) ? 1 : (VALUE) < ( 4 ) ? 2 : (VALUE)< (8) ? 3:(VALUE) < ( 16 )  ? 4 : (VALUE) < ( 32 )  ? 5 : (VALUE) < ( 64 )  ? 6 : (VALUE) < ( 128 ) ? 7 : (VALUE) < ( 256 ) ? 8 : (VALUE) < ( 512 ) ? 9 : 10)
 
 /* Interfaces have been moved to pulp_interfaces.sv. Sorry :) */
-
 `endif

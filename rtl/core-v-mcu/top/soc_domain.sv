@@ -79,6 +79,16 @@ module soc_domain
     input  logic [`N_FPGAIO-1:0] fpgaio_in_i,
     output logic [`N_FPGAIO-1:0] fpgaio_out_o,
     output logic [`N_FPGAIO-1:0] fpgaio_oe_o,
+
+    //ETH interface
+    input  logic                phy_rx_clk_i,
+    input  logic   [3:0]        phy_rxd_i,
+    input  logic                phy_rx_ctl_i,
+    output logic                phy_tx_clk_o,
+    output logic   [3:0]        phy_txd_o,
+    output logic                phy_tx_ctl_o,
+    output logic                phy_reset_n_o,  
+
     ///////////////////////////////////////////////////
     //      To EFPGA                                 //
     ///////////////////////////////////////////////////
@@ -106,9 +116,13 @@ module soc_domain
     input  logic        jtag_trst_ni,
     input  logic        jtag_tms_i,
     input  logic        jtag_tdi_i,
-    output logic        jtag_tdo_o
+    output logic        jtag_tdo_o,
     //    output logic [NB_CORES-1:0] cluster_dbg_irq_valid_o
     ///////////////////////////////////////////////////
+    output wire         ld_ref_clk_lock,
+    output wire         ld_ref_clk_blink,
+    output wire         ld_eth_clk_lock,
+    output wire         ld_eth_clk_blink
 );
 
   localparam FLL_ADDR_WIDTH = 32;
@@ -117,7 +131,7 @@ module soc_domain
   // The L2 parameter do not influence the size of the memories.
   // Change them in the l2_ram_multibank. This parameters
   // are only here to save area in the uDMA by only storing relevant bits.
-  localparam L2_BANK_SIZE = 29184;  // in 32-bit words
+  localparam L2_BANK_SIZE = 16384;  // in 32-bit words
   localparam L2_MEM_ADDR_WIDTH = $clog2(
       L2_BANK_SIZE * NB_L2_BANKS
   ) - $clog2(
@@ -211,6 +225,12 @@ module soc_domain
   logic                                               s_soc_rstn;
   logic                                               s_rstn_glob;
   logic                                               s_sel_fll_clk;
+
+  logic                                               s_eth_clk;
+  logic                                               s_eth_clk_90;
+  logic                                               s_eth_rstn;
+  logic                                               s_eth_delay_ref_clk;   
+  logic                                               s_eth_lock;
 
   logic                                               s_dma_pe_evt;
   logic                                               s_dma_pe_irq;
@@ -333,6 +353,13 @@ module soc_domain
       .rstpin_ni      (rstn_glob_i),
       .sel_fll_clk_i  (s_sel_fll_clk),
       .ref_clk_i      (ref_clk_i),
+
+      .eth_clk_i          (s_eth_clk),
+      .eth_clk_90_i       (s_eth_clk_90),
+      .eth_rstn_i         (s_eth_rstn),
+      .eth_delay_ref_clk_i(s_eth_delay_ref_clk),
+      .eth_refclk_o       (eth_refclk_o),
+
       .dmactive_i     (s_dmactive),
       .wd_expired_o   (s_wd_expired),
       .dft_test_mode_i(dft_test_mode_i),
@@ -385,7 +412,7 @@ module soc_domain
       .fpgaio_oe_o (fpgaio_oe_o),
 
       // other FPGA signals
-      .fpga_clk_in(s_cluster_clk),
+      .fpga_clk_in(s_soc_clk), //mustafa changed this to test the effect of the cross clock handling, org : s_cluster_clk
 
 
       //eFPGA TEST MODE
@@ -393,8 +420,21 @@ module soc_domain
       .testio_o(testio_o),
       .cl_event_data_o(s_cl_event_data),
       .cl_event_valid_o(s_cl_event_valid),
-      .cl_event_ready_i(s_cl_event_ready)
+      .cl_event_ready_i(s_cl_event_ready),
 
+      .phy_rx_clk_i(phy_rx_clk_i),
+      .phy_rxd_i(phy_rxd_i),
+      .phy_rx_ctl_i(phy_rx_ctl_i),
+      .phy_tx_clk_o(phy_tx_clk_o),
+      .phy_txd_o(phy_txd_o),
+      .phy_tx_ctl_o(phy_tx_ctl_o),
+      .phy_reset_n_o(phy_reset_n_o)
+      // .phy_rxd_i(phy_rxd_i),
+      // .phy_crs_dv_i(phy_crs_dv_i),
+      // .phy_txd_o(phy_txd_o),
+      // .phy_tx_en_o(phy_tx_en_o),
+      // .phy_rstn_o(phy_rstn_o),
+      // .phy_rx_er_i(phy_rx_er_i)
   );
 
 `ifndef PULP_FPGA_EMUL
@@ -466,8 +506,31 @@ module soc_domain
       .cluster_fll_slave_r_data_o(s_cluster_fll_master.r_data),
       .cluster_fll_slave_lock_o  (s_cluster_fll_master.lock),
 
+      .rstn_eth_sync_o(s_eth_rstn),
+
       .clk_soc_o(s_soc_clk),
-      .clk_per_o(s_periph_clk)
+      .clk_per_o(s_periph_clk),
+      .eth_clk_o(s_eth_clk),
+      .eth_clk_90_o(s_eth_clk_90),
+      .eth_delay_ref_clk_o(s_eth_delay_ref_clk),
+      .eth_lock_o(s_eth_lock)
+  );
+
+  
+  soc_clk_checkers #(
+    .REF_CLK_PERIOD_NS(100),
+    .ETH_CLK_PERIOD_NS(20)
+  )
+  clk_check
+  (
+    .ref_clk(s_soc_clk),
+    .ref_clk_locked(s_soc_fll_master.lock),
+    .eth_clk(s_eth_clk),
+    .eth_clk_locked(s_eth_lock),
+    .ld_ref_clk_lock(ld_ref_clk_lock),
+    .ld_ref_clk_blink(ld_ref_clk_blink),
+    .ld_eth_clk_lock(ld_eth_clk_lock),
+    .ld_eth_clk_blink(ld_eth_clk_blink)
   );
 
   soc_interconnect_wrap #(

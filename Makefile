@@ -7,11 +7,12 @@ YML=$(shell find . -name '*.yml' -print)
 IOSCRIPT=rtl/includes/pulp_soc_defines.svh
 IOSCRIPT+=rtl/includes/pulp_peripheral_defines.svh
 IOSCRIPT+=rtl/includes/periph_bus_defines.svh
-IOSCRIPT+=nexys-pin-table.csv genesys2-pin-table.csv
+IOSCRIPT+=nexys-pin-table.csv genesys2-pin-table.csv kr260-pin-table.csv
 IOSCRIPT+=perdef.json
 NEXSY_XDC=emulation/core-v-mcu-nexys/constraints/Nexys-A7-100T-Master.xdc
 NEXYSA7_BITMAP?=emulation/core_v_mcu_nexys.bit
 GENESYS_XDC=emulation/core-v-mcu-nexys/constraints/Genesys2-Master.xdc
+KR260_XDC=emulation/core-v-mcu-kr260/constraints/KR260-Master.xdc
 
 IOSCRIPT_OUT=rtl/core-v-mcu/top/pad_control.sv
 IOSCRIPT_OUT+=rtl/includes/pulp_peripheral_defines.svh
@@ -19,10 +20,11 @@ IOSCRIPT_OUT+=rtl/includes/periph_bus_defines.svh
 IOSCRIPT_OUT+=core-v-mcu-config.h
 IOSCRIPT_NEXSY=emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
 IOSCRIPT_GENESY+=emulation/core-v-mcu-genesys2/constraints/core-v-mcu-pin-assignment.xdc
+IOSCRIPT_KR260=emulation/core-v-mcu-kr260/constraints/core-v-mcu-pin-assignment.xdc
 
 
 #Must also change the localparam 'L2_BANK_SIZE' in pulp_soc.sv accordingly
-export INTERLEAVED_BANK_SIZE=28672
+export INTERLEAVED_BANK_SIZE= 16384 #mkdigitals altered this value, org: 28672
 #Must also change the localparam 'L2_BANK_SIZE_PRI' in pulp_soc.sv accordingly
 export PRIVATE_BANK_SIZE=8192
 
@@ -34,6 +36,7 @@ help:
 			@echo "sw:             generate C header files (in ./sw)"
 			@echo "nexys-emul:     generate bitstream for Nexys-A7-100T emulation)"
 			@echo "genesys-emul:   generate bitstream for Genesys2 emulation)"
+			@echo "kr260-emul:     generate bitstream for KR260 emulation)"
 			@echo "buildsim:       build for Questa sim"
 			@echo "sim:            run Questa sim"
 			@echo "build-vivado:   build for Vivado simulation (xelab)"
@@ -132,6 +135,7 @@ nexys-emul:
 					--pin-table nexys-pin-table.csv\
 					--perdef-json perdef.json\
 					--pad-control rtl/core-v-mcu/top/pad_control.sv\
+					--pad-frame rtl/core-v-mcu/top/pad_frame.sv\
 					--emulation-toplevel core_v_mcu_nexys\
 					--xilinx-core-v-mcu-sv emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v\
 					--input-xdc emulation/core-v-mcu-nexys/constraints/Nexys-A7-100T-Master.xdc\
@@ -151,6 +155,8 @@ nexys-emul:
 					export PER_CLK_PERIOD_NS=200;\
 					export FPGA_CLK_PERIOD_NS=125;\
 					export SLOW_CLK_PERIOD_NS=4000;\
+					export ETH_CLK_PERIOD_NS=20;\
+					export ETH_DLY_REF_CLK_PERIOD_NS=5;\
 					fusesoc --cores-root . run --target=nexys-a7-100t --setup --build openhwgroup.org:systems:core-v-mcu\
 				) 2>&1 | tee lint.log
 				cp ./build/openhwgroup.org_systems_core-v-mcu_0/nexys-a7-100t-vivado/openhwgroup.org_systems_core-v-mcu_0.runs/impl_1/core_v_mcu_nexys.bit emulation/core_v_mcu_nexys.bit
@@ -196,6 +202,47 @@ genesys-emul:
 				cp ./build/openhwgroup.org_systems_core-v-mcu_0/genesys2-vivado/openhwgroup.org_systems_core-v-mcu_0.runs/impl_1/core_v_mcu_genesys2.bit emulation/core_v_mcu_genesys2.bit
 
 
+.PHONEY: kr260-emul
+kr260-emul:
+				@echo "*************************************"
+				@echo "*                                   *"
+				@echo "* setting up kr260 specific files   *"
+				@echo "*                                   *"
+				@echo "*************************************"
+				mkdir -p emulation/core-v-mcu-kr260/rtl
+				python3 util/ioscript.py\
+					--soc-defines rtl/includes/pulp_soc_defines.svh\
+					--peripheral-defines rtl/includes/pulp_peripheral_defines.svh\
+					--periph-bus-defines rtl/includes/periph_bus_defines.svh\
+					--pin-table kr260-pin-table.csv\
+					--perdef-json perdef.json\
+					--pad-control rtl/core-v-mcu/top/pad_control.sv\
+					--emulation-toplevel core_v_mcu_kr260\
+					--xilinx-core-v-mcu-sv emulation/core-v-mcu-kr260/rtl/core_v_mcu_kr260.v\
+					--input-xdc emulation/core-v-mcu-kr260/constraints/KR260-Master.xdc\
+					--output-xdc emulation/core-v-mcu-kr260/constraints/core-v-mcu-pin-assignment.xdc
+				util/format-verible
+				@echo "*************************************"
+				@echo "*                                   *"
+				@echo "* running Vivado                    *"
+				@echo "*                                   *"
+				@echo "*************************************"
+				(\
+					export BOARD=kr260;\
+					export BOARD_CLOCK_MHZ=25;\
+					export XILINX_PART=xck26-sfvc784-2lv-c;\
+					export XILINX_BOARD=xilinx.com:kr260_som:part0:1.1;\
+					export FC_CLK_PERIOD_NS=100;\
+					export PER_CLK_PERIOD_NS=100;\
+					export FPGA_CLK_PERIOD_NS=125;\
+					export SLOW_CLK_PERIOD_NS=4000;\
+					export ETH_CLK_PERIOD_NS=8;\
+					export ETH_DLY_REF_CLK_PERIOD_NS=5;\
+					fusesoc --cores-root . run --target=kr260 --setup --build openhwgroup.org:systems:core-v-mcu\
+				) 2>&1 | tee lint.log
+				cp ./build/openhwgroup.org_systems_core-v-mcu_0/kr260-vivado/openhwgroup.org_systems_core-v-mcu_0.runs/impl_1/core_v_mcu_kr260.bit emulation/core_v_mcu_kr260.bit
+
+
 .PHONY:docs
 docs:
 				(cd docs; make)
@@ -211,7 +258,8 @@ ${IOSCRIPT_OUT}:	${IOSCRIPT}
 					--periph-bus-defines rtl/includes/periph_bus_defines.svh\
 					--perdef-json perdef.json\
 					--pad-control rtl/core-v-mcu/top/pad_control.sv\
-					--xilinx-core-v-mcu-sv emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v\
+					--pad-frame rtl/core-v-mcu/top/pad_frame.sv
+#					--xilinx-core-v-mcu-sv emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v\
 					--input-xdc emulation/core-v-mcu-nexys/constraints/Nexys-A7-100T-Master.xdc\
 					--output-xdc emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
 
@@ -227,3 +275,17 @@ downloadn:
 downloadg:
 	vivado -mode batch -source emulation/xilinx/tcl/download.tcl -tclargs\
              emulation/core_v_mcu_genesys2.bit xc7k325t_0
+
+pythontest:
+				mkdir -p emulation/core-v-mcu-kr260/rtl
+				python3 util/ioscript.py\
+				--soc-defines rtl/includes/pulp_soc_defines.svh\
+				--peripheral-defines rtl/includes/pulp_peripheral_defines.svh\
+				--periph-bus-defines rtl/includes/periph_bus_defines.svh\
+				--pin-table kr260-pin-table.csv\
+				--perdef-json perdef.json\
+				--pad-control rtl/core-v-mcu/top/pad_control.sv\
+				--emulation-toplevel core_v_mcu_kr260\
+				--xilinx-core-v-mcu-sv emulation/core-v-mcu-kr260/rtl/core_v_mcu_kr260.v\
+				--input-xdc emulation/core-v-mcu-kr260/constraints/KR260-Master.xdc\
+				--output-xdc emulation/core-v-mcu-kr260/constraints/core-v-mcu-pin-assignment.xdc

@@ -26,10 +26,12 @@ filesets:
     - openhwgroup.org:ip:apb2per
     - openhwgroup.org:ip:apb_timer_unit
     - openhwgroup.org:ip:udma_uart
+    - openhwgroup.org:ip:udma_ethernet
     - openhwgroup.org:ip:udma_sdio
     - openhwgroup.org:ip:udma_qspi
     - openhwgroup.org:ip:udma_i2s
     - openhwgroup.org:ip:udma_i2c
+    - openhwgroup.org:ip:udma_smi
     - openhwgroup.org:ip:udma_filter
     - openhwgroup.org:ip:udma_external_per
     - openhwgroup.org:ip:udma_core
@@ -64,6 +66,7 @@ filesets:
     - soc/soc_interconnect.sv
     - soc/soc_interconnect_wrap.sv
     - soc/soc_peripherals.sv
+    - soc/soc_clk_checkers.sv
     - udma_subsystem/udma_subsystem.sv
     - fc/fc_demux.sv
     - fc/fc_subsystem.sv
@@ -118,6 +121,7 @@ filesets:
     - ../../emulation/xilinx/ips/xilinx_slow_clk_mngr.tcl
     - ../../emulation/xilinx/ips/xilinx_interleaved_ram.tcl
     - ../../emulation/xilinx/ips/xilinx_private_ram.tcl
+    - ../../emulation/xilinx/ips/xilinx_dc_fifo.tcl
     file_type: tclSource
 
   nexys-rtl:
@@ -128,6 +132,7 @@ filesets:
   nexys-xdc:
     files:
     - ../../emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
+    - ../../emulation/core-v-mcu-nexys/constraints/core-v-mcu-timing.xdc
     file_type: xdc
 
   nexys-cfg:

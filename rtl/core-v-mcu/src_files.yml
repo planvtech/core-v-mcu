@@ -23,6 +23,7 @@ core-v-mcu-soc:
     soc/soc_interconnect.sv,
     soc/soc_interconnect_wrap.sv,
     soc/soc_peripherals.sv,
+    soc/soc_clk_checkers.sv,
   ]
   vlog_opts : [
     -L riscv_dbg_lib,

@@ -215,7 +215,7 @@ if args.perdef_json != None:
 # Read pin-table and populate data structures
 #
 ################################################
-if args.soc_defines != None and args.pin_table != None:
+if args.soc_defines != None:
     sysionames = [-1 for row in range(int(soc_defines['N_IO']))]    # row for each sysiso = [ionum, 'name']
     N_IO = int(soc_defines['N_IO'])
     N_PERIO = perio_index
@@ -232,67 +232,69 @@ if args.soc_defines != None and args.pin_table != None:
     apbio_in_mux = [['' for j in range(N_PADSEL)] for i in range(N_GPIO)]
     fpgaio_in_mux = [['' for j in range(N_PADSEL)] for i in range(N_FPGAIO)]
     xilinx_names = ['' for i in range(N_IO)]
-    with open(args.pin_table, 'r') as f_pin_table:
-        pin_table = csv.reader(f_pin_table)
-        pin_num = -2
-        for pin in pin_table:
-            pin_num = pin_num + 1
-            if pin_num >= 0:
-                # Work to do
-                io_num = int(pin[2])
-                if pin[0] in xilinx_names:
-                    print("ERROR: multiple assignment to xilinx_pin '%s' (IO_%d)" % (pin[0], io_num))
-                    error_count = error_count + 1
-                xilinx_names[pin_num] = pin[0]
-                #
-                # Check for sysio name
-                #
-                sysio_only = False
-                if pin[3] != '':
-                    if pin[3] in sysio:
-                        sysionames[io_num] = pin[3] + ("_i" if (sysio[pin[3]] == 'input' or sysio[pin[3]] == 'snoop') else "_o")
-                        if sysio[pin[3]] != 'snoop':
-                            sysio_only = True
-                    else:
-                        print("ERROR: found '%s' in sysio column, but not defined as sysio in perdef.json (IO_%d)" % (pin[3], io_num))
+    if args.pin_table != None:
+        with open(args.pin_table, 'r') as f_pin_table:
+            pin_table = csv.reader(f_pin_table)
+            pin_num = -2
+            for pin in pin_table:
+                pin_num = pin_num + 1
+                if pin_num >= 0:
+                    # Work to do
+                    io_num = int(pin[2])
+                    if pin[0] in xilinx_names:
+                        print("ERROR: multiple assignment to xilinx_pin '%s' (IO_%d)" % (pin[0], io_num))
                         error_count = error_count + 1
-                for index in range(selcol,len(pin)):
-                    sel = index - selcol
-                    entry = pin[index]
-                    if sysio_only and entry != '':
-                        print("ERROR: found '%s' as a sel option for IO_%d which is a sysio" % (entry, io_num))
-                    if entry == '':
-                        entry = 'z'
-                    if entry != '' and entry in sysio:
-                        print("ERROR: found sysio '%s' as a sel option for IO_%d" % (entry, io_num))
-                        error_count = error_count + 1
-                    else:
-                        if entry[0:5] == 'apbio':    # apbio
-                            apbio_num = int(entry[6:])
-                            io_out_mux[io_num][sel] = "apbio_out_i[" + str(apbio_num) + "]"
-                            io_oe_mux[io_num][sel] = "apbio_oe_i[" + str(apbio_num) + "]"
-                            apbio_in_mux[apbio_num][sel] = "io_in_i[" + str(io_num) + "]"
-                        elif entry[0:6] == 'fpgaio':    # fpgaio
-                            fpgaio_num = int(entry[7:])
-                            io_out_mux[io_num][sel] = "fpgaio_out_i[" + str(fpgaio_num) + "]"
-                            io_oe_mux[io_num][sel] = "fpgaio_oe_i[" + str(fpgaio_num) + "]"
-                            fpgaio_in_mux[fpgaio_num][sel] = "io_in_i[" + str(io_num) + "]"
-                        elif entry == '' or entry[0] == '1' or entry[0] == '0' or entry[0] == 'z' or entry[0] == 'Z':
-                            io_out_mux[io_num][sel] = "1'b1" if entry[0] == '1' else "1'b0"
-                            io_oe_mux[io_num][sel] = "1'b1" if entry[0] == '1' or entry[0] == '0' else "1'b0"
+                    xilinx_names[pin_num] = pin[0]
+                    #
+                    # Check for sysio name
+                    #
+                    sysio_only = False
+                    if pin[3] != '':
+                        if pin[3] in sysio:
+                            sysionames[io_num] = pin[3] + ("_i" if (sysio[pin[3]] == 'input' or sysio[pin[3]] == 'snoop') else "_o")
+                            if sysio[pin[3]] != 'snoop':
+                                sysio_only = True
                         else:
-                            perio_index = "PERIO_" + entry.upper()
-                            index = perio_defines[perio_index]
-                            direction = perio_dir[perio_index]
-                            io_out_mux[io_num][sel] = "perio_out_i[`" + perio_index + "]" if direction == 'output' or direction == 'bidir' else "1'b0"
-                            if direction == "bidir":
-                                io_oe_mux[io_num][sel] = "perio_oe_i[`" + perio_index + "]"
-                            elif direction == "output":
-                                io_oe_mux[io_num][sel] = "1'b1"
+                            print("ERROR: found '%s' in sysio column, but not defined as sysio in perdef.json (IO_%d)" % (pin[3], io_num))
+                            error_count = error_count + 1
+                    for index in range(selcol,len(pin)):
+                        sel = index - selcol
+                        entry = pin[index]
+                        if sysio_only and entry != '':
+                            print("ERROR: found '%s' as a sel option for IO_%d which is a sysio" % (entry, io_num))
+                        if entry == '':
+                            entry = 'z'
+                        if entry != '' and entry in sysio:
+                            print("ERROR: found sysio '%s' as a sel option for IO_%d" % (entry, io_num))
+                            error_count = error_count + 1
+                        else:
+                            if entry[0:5] == 'apbio':    # apbio
+                                apbio_num = int(entry[6:])
+                                io_out_mux[io_num][sel] = "apbio_out_i[" + str(apbio_num) + "]"
+                                io_oe_mux[io_num][sel] = "apbio_oe_i[" + str(apbio_num) + "]"
+                                apbio_in_mux[apbio_num][sel] = "io_in_i[" + str(io_num) + "]"
+                            elif entry[0:6] == 'fpgaio':    # fpgaio
+                                fpgaio_num = int(entry[7:])
+                                io_out_mux[io_num][sel] = "fpgaio_out_i[" + str(fpgaio_num) + "]"
+                                io_oe_mux[io_num][sel] = "fpgaio_oe_i[" + str(fpgaio_num) + "]"
+                                fpgaio_in_mux[fpgaio_num][sel] = "io_in_i[" + str(io_num) + "]"
+                            elif entry == '' or entry[0] == '1' or entry[0] == '0' or entry[0] == 'z' or entry[0] == 'Z':
+                                io_out_mux[io_num][sel] = "1'b1" if entry[0] == '1' else "1'b0"
+                                io_oe_mux[io_num][sel] = "1'b1" if entry[0] == '1' or entry[0] == '0' else "1'b0"
                             else:
-                                io_oe_mux[io_num][sel] = "1'b0"
-                            perio_in_mux[index][sel] = "io_in_i[" + str(io_num) + "]"
-    f_pin_table.close()
+                                perio_index = "PERIO_" + entry.upper()
+                                index = perio_defines[perio_index]
+                                direction = perio_dir[perio_index]
+                                io_out_mux[io_num][sel] = "perio_out_i[`" + perio_index + "]" if direction == 'output' or direction == 'bidir' else "1'b0"
+                                if direction == "bidir":
+                                    io_oe_mux[io_num][sel] = "perio_oe_i[`" + perio_index + "]"
+                                elif direction == "output":
+                                    io_oe_mux[io_num][sel] = "1'b1"
+                                else:
+                                    io_oe_mux[io_num][sel] = "1'b0"
+                                perio_in_mux[index][sel] = "io_in_i[" + str(io_num) + "]"
+        f_pin_table.close()
+    
 
 ######################################################################
 #
@@ -765,6 +767,7 @@ if args.pad_control_sv != None:
 ################################################
 if args.pad_frame_sv != None:
     with open(args.pad_frame_sv, 'w') as pad_frame_sv:
+        print("------- PAD FRAME --------")
         #
         # Write Apache license and header
         #
@@ -1018,6 +1021,15 @@ if args.xilinx_core_v_mcu_sv != None:
             if (sysionames[ionum] != "ref_clk_i" and
                 sysionames[ionum] != "jtag_tck_i" and
                 sysionames[ionum] != "jtag_tdo_o" and
+                sysionames[ionum] != "eth_refclk_o" and
+                sysionames[ionum] != "eth_rstn_o" and
+                sysionames[ionum] != "eth_tx_en_o" and
+                sysionames[ionum] != "eth_txd0_o" and
+                sysionames[ionum] != "eth_txd1_o" and
+                sysionames[ionum] != "ld_ref_clk_lock_o" and
+                sysionames[ionum] != "ld_ref_clk_blink_o" and
+                sysionames[ionum] != "ld_eth_clk_lock_o" and
+                sysionames[ionum] != "ld_eth_clk_blink_o" and
                 sysionames[ionum] != "sysclk_p_i") :
                 if sysionames[ionum] == "bootsel_i" or sysionames[ionum] == "stm_i" :
                     x_sv.write("  pad_functional_pd i_pad_%d   (.OEN(~s_io_oe[%d]), .I(s_io_out[%d]), .O(s_io_in[%d]), .PAD(xilinx_io[%d]), .PEN(~s_pad_cfg[%d][0]));\n" %\
@@ -1032,10 +1044,37 @@ if args.xilinx_core_v_mcu_sv != None:
                 if sysionames[ionum] == "jtag_tdo_o" :
                     x_sv.write("  pad_functional_pu i_pad_%d   (.OEN(~s_io_oe[%d]), .I(s_jtag_tdo), .O(s_io_in[%d]), .PAD(xilinx_io[%d]), .PEN(~s_pad_cfg[%d][0]));\n" %\
                     (ionum, ionum, ionum, ionum, ionum))
+                if sysionames[ionum] == "eth_refclk_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_refclk;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "eth_rstn_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_rstn;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "eth_tx_en_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_tx_en;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "eth_txd0_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_txd0;\n" %\
+                    (ionum))    
+                if sysionames[ionum] == "eth_txd1_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_eth_txd1;\n" %\
+                    (ionum))    
+                if sysionames[ionum] == "ld_ref_clk_lock_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_ref_clk_lock;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "ld_ref_clk_blink_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_ref_clk_blink;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "ld_eth_clk_lock_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_eth_clk_lock;\n" %\
+                    (ionum))
+                if sysionames[ionum] == "ld_eth_clk_blink_o" :
+                    x_sv.write("  assign xilinx_io[%d] = s_ld_eth_clk_blink;\n" %\
+                    (ionum))                                                                            
                 if sysionames[ionum] == "ref_clk_i":
                     x_sv.write("  // Input clock buffer\n")
                     x_sv.write("  IBUFG #(\n")
-                    x_sv.write("    .IOSTANDARD(\"LVCMOS33\"),\n")
+                    x_sv.write("    .IOSTANDARD(\"LVCMOS18\"),\n")
                     x_sv.write("    .IBUF_LOW_PWR(\"FALSE\")\n")
                     x_sv.write("  ) i_sysclk_iobuf (\n")
                     x_sv.write("    .I(ref_clk),\n")
@@ -1104,7 +1143,7 @@ if args.input_xdc != None:
             output_xdc.write("set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {s_tck}]\n")
             for line in input_xdc:
                 elements = line.split()
-                if len(elements) >= 10 :
+                if len(elements) > 10 :
                     if elements[10] == "sysclk_p" or elements[10] == "sysclk_n" :
                         elements[0] = elements[0][1:]
                         output_xdc.write(' '.join(elements) + "\n")

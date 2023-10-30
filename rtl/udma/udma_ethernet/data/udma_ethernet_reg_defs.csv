@@ -1,0 +1,71 @@
+Module,UDMA_ETHERNET,,,,,,
+,Memory address: UDMA_CH_ADDR_ETHERNET(`UDMA_CH_ADDR_ETHERNET),,,,,,
+,,,,,,,
+,Basic ETHERNET MAC driven by UDMA system,,,,,,
+Register,Offset/Field,MSB,LSB,Type,Default,Description,
+0x00,RX_SADDR_0,,,,,,
+,SADDR_0,31,0,RW,,Address of receive buffer_0 on read, current address on read
+0x04,RX_SADDR_1,,,,,,
+,SADDR_1,31,0,RW,,Address of receive buffer_1 on read, current address on read
+0x08,RX_SADDR_2,,,,,,
+,SADDR_2,31,0,RW,,Address of receive buffer_2 on read, current address on read
+0x0C,RX_SADDR_3,,,,,,
+,SADDR_3,31,0,RW,,Address of receive buffer_3 on read, current address on read
+0x10,RX_DESC_0,,,,,,
+,DESC_0,31,0,RW,,status of the buffer_0, desc_0[31] => new data desc_0[15:0] => size
+0x14,RX_DESC_1,,,,,,
+,DESC_1,31,0,RW,,status of the buffer_1, desc_1[31] => new data desc_1[15:0] => size
+0x18,RX_DESC_2,,,,,,
+,DESC_2,31,0,RW,,status of the buffer_2, desc_2[31] => new data desc_2[15:0] => size
+0x1C,RX_DESC_3,,,,,,
+,DESC_3,31,0,RW,,status of the buffer_3, desc_3[31] => new data desc_3[15:0] => size
+0x20,ETH_REG_RX_CADDR,,,,,,
+,RX_CADDR,31,0,R,,the address of the current transmission,
+0x24,RX_SIZE,,,,,,
+,SIZE,15,0,RW,,Size of receive buffer on write, bytes left on read
+0x28,RX_CFG,,,,,,
+,CLR,6,6,WO,,Clear the receive channel,
+,PENDING,5,5,RO,,Receive transaction is pending,
+,EN,4,4,RW,,Enable the receive channel,
+,CONTINUOUS,0,0,RW,,0x0: stop after last transfer for channel,
+,,,,,,"0x1: after last transfer for channel,",
+,,,,,,reload buffer size and start address and restart channel,
+0x2C,TX_SADDR,,,,,,
+,SADDR,11,0,RW,,Address of transmit buffer on write, current address on read
+0x30,TX_SIZE,,,,,,
+,SIZE,15,0,RW,,Size of receive buffer on write, bytes left on read
+0x34,TX_CFG,,,,,,
+,CLR,6,6,WO,,Clear the transmit channel,
+,PENDING,5,5,RO,,Transmit transaction is pending,
+,EN,4,4,RW,,Enable the transmit channel,
+,CONTINUOUS,0,0,RW,,0x0: stop after last transfer for channel,
+,,,,,,"0x1: after last transfer for channel,",
+,,,,,,reload buffer size and start address and restart channel,
+0x38,STATUS,,,,,,
+,busy,10,10,RO,,,
+,speed,9,8,RO,,,
+,TX_FIFO_OVERFLOW,7,7,RO,,,
+,TX_FIFO_BAD_FRAME,6,6,RO,,,
+,TX_FIFO_GOOD_FRAME,5,5,RO,,,
+,RX_ERROR_BAD_FRAME,4,4,RO,,,
+,RX_ERROR_BAD_FCS,3,3,RO,,,
+,RX_FIFO_OVERFLOW,2,2,RO,,,
+,RX_FIFO_BAD_FRAME,1,1,RO,,,
+,RX_FIFO_GOOD_FRAME,0,0,RO,,,
+0x3C,ETH_SETUP,,,,,,
+,RX_ENABLE,9,9,RW,,,
+,TX_ENABLE,8,8,RW,,,
+0x40,ERROR,,,,,,
+,TX_ERROR_FIFO_OVERFLOW,5,5,RC,,0x1 indicates tx fifo overflow error, read clears the bit
+,TX_ERROR_FIFO_BAD_FRAME,4,4,RC,,0x1 indicates tx fifo bad frame error, read clears the bit
+,RX_ERROR_BAD_FRAME,3,3,RC,,0x1 indicates rx bad frame error, read clears the bit
+,RX_ERROR_BAD_FCS,2,2,RC,,0x1 indicates rx bad frame check sequence error, read clears the bit
+,RX_ERROR_FIFO_OVERFLOW,1,1,RC,,0x1 indicates rx fifo overflow error, read clears the bit
+,RX_ERROR_FIFO_BAD_FRAME,0,0,RC,,0x1 indicates rx fifo bad frame error, read clears the bit
+0x44,IRQ_EN,,,,,,
+,ERR_IRQ_EN,1,1,RW,,Enable the error interrupt,
+,RX_IRQ_EN,0,0,RW,,Enable the receiver interrupt,
+0x48,RX_FCS,,,,,,
+,rx_fcs,31,0,RO,,frame check sequence of the last received packet,
+0x4C,TX_FCS,,,,,,
+,tx_fcs,31,0,RO,,frame check sequence of the last transmitted packet,

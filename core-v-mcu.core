@@ -25,10 +25,12 @@ filesets:
     - openhwgroup.org:ip:apb2per
     - openhwgroup.org:ip:apb_timer_unit
     - openhwgroup.org:ip:udma_uart
+    - openhwgroup.org:ip:udma_ethernet
     - openhwgroup.org:ip:udma_sdio
     - openhwgroup.org:ip:udma_qspi
     - openhwgroup.org:ip:udma_i2s
     - openhwgroup.org:ip:udma_i2c
+    - openhwgroup.org:ip:udma_smi
     - openhwgroup.org:ip:udma_filter
     - openhwgroup.org:ip:udma_external_per
     - openhwgroup.org:ip:udma_core
@@ -64,6 +66,7 @@ filesets:
     - rtl/core-v-mcu/soc/soc_interconnect.sv
     - rtl/core-v-mcu/soc/soc_interconnect_wrap.sv
     - rtl/core-v-mcu/soc/soc_peripherals.sv
+    - rtl/core-v-mcu/soc/soc_clk_checkers.sv
     - rtl/core-v-mcu/udma_subsystem/udma_subsystem.sv
     - rtl/core-v-mcu/fc/fc_demux.sv
     - rtl/core-v-mcu/fc/fc_subsystem.sv
@@ -113,7 +116,6 @@ filesets:
     - emulation/xilinx/rtl/fpga_private_ram.sv
     - emulation/xilinx/rtl/fpga_slow_clk_gen.sv
     - emulation/xilinx/rtl/pad_functional_xilinx.sv
-    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
     - emulation/xilinx/rtl/sram512x64.v
     - emulation/xilinx/rtl/DW02_mac.sv
     - rtl/simulation/pPLL02F.sv
@@ -125,6 +127,7 @@ filesets:
   nexys-ips:
     files:
     - emulation/xilinx/ips/xilinx_clk_mngr.tcl
+    - emulation/xilinx/ips/xilinx_eth_clk_mngr.tcl
     file_type: tclSource
 
   genesys2-ips:
@@ -132,11 +135,18 @@ filesets:
     - emulation/core-v-mcu-genesys2/ips/xilinx_clk_mngr.tcl
     file_type: tclSource
 
+  kr260-ips:
+    files:
+    - emulation/xilinx/ips/xilinx_clk_mngr.tcl
+    - emulation/xilinx/ips/xilinx_eth_clk_mngr.tcl
+    file_type: tclSource
+
   xilinx-ips:
     files:
 #    - emulation/xilinx/ips/xilinx_slow_clk_mngr.tcl
     - emulation/xilinx/ips/xilinx_interleaved_ram.tcl
     - emulation/xilinx/ips/xilinx_private_ram.tcl
+    - emulation/xilinx/ips/xilinx_dc_fifo.tcl
     file_type: tclSource
 
   rom_init:
@@ -180,6 +190,7 @@ filesets:
 
   nexys-rtl:
     files:
+    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
     - emulation/core-v-mcu-nexys/rtl/core_v_mcu_nexys.v
     - emulation/xilinx/rtl/fpga_clk_gen.sv
     file_type: systemVerilogSource
@@ -187,8 +198,27 @@ filesets:
   nexys-xdc:
     files:
     - emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
+    - emulation/core-v-mcu-nexys/constraints/core-v-mcu-timing.xdc
     file_type: xdc
 
+  kr260-rtl:
+    files:
+    - emulation/xilinx/rtl/pulp_clock_gating_us.sv
+    - emulation/core-v-mcu-kr260/rtl/core_v_mcu_kr260.v
+    - emulation/xilinx/rtl/fpga_clk_gen.sv
+    file_type: systemVerilogSource
+
+  kr260-xdc:
+    files:
+    - emulation/core-v-mcu-kr260/constraints/core-v-mcu-pin-assignment.xdc
+    - emulation/core-v-mcu-kr260/constraints/core-v-mcu-timing.xdc
+    file_type: xdc
+
+  kr260-cfg:
+    files:
+    - emulation/core-v-mcu-kr260/tcl/synth_opts.tcl
+    file_type: tclSource
+  
   xilinx-tcl:
     files:
     - emulation/xilinx/tcl/common.tcl
@@ -197,6 +227,7 @@ filesets:
 
   genesys2-rtl:
     files:
+    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
     - emulation/core-v-mcu-genesys2/rtl/core_v_mcu_genesys2.v
     - emulation/core-v-mcu-genesys2/rtl/fpga_clk_gen.sv
     file_type: systemVerilogSource
@@ -285,7 +316,7 @@ targets:
         - --O0
         - -v 0
         - -timescale 1ns/1ps
-        xsim_options:
+  #      xsim_options:
 
   # A target for a Verilator model as a library.  Note that we do not disable
   # UNOPTFLAT warnings, since these will affect performance, so we want to see
@@ -363,3 +394,23 @@ targets:
       vivado:
         part: xc7k325tffg900-2
     toplevel: core_v_mcu_genesys2
+
+  kr260:
+    <<: *default_target
+    default_tool: vivado
+    description: Xilinx KR260 Board
+    parameters:
+    - PULP_FPGA_EMUL=true
+    filesets_append:
+    - kr260-ips
+    - xilinx-ips
+    - xilinx-tcl
+    - emulation-rtl
+    - kr260-rtl
+    - kr260-xdc
+    - kr260-cfg
+    - rom_init
+    tools:
+      vivado:
+        part: xck26-sfvc784-2lv-c
+    toplevel: core_v_mcu_kr260

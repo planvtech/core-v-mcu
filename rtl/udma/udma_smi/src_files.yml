@@ -1,0 +1,7 @@
+udma_smi:
+  files: [
+    rtl/udma_smi_reg_if.sv,
+    rtl/udma_smi_top.sv,
+    rtl/udma_smi_ctrl.sv,
+  ]
+

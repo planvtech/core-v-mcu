@@ -364,12 +364,36 @@ module apb_soc_ctrl #(
     end  // else: !if(~HRESETn)
   end  // always_ff @ (posedge HCLK, negedge HRESETn)
 
+//mkdigitals comment out begin
+  // always_ff @(posedge HCLK, negedge HRESETn) begin
+  //   if (~HRESETn) begin
+  //     r_bootsel <= {dmactive_i, bootsel_i};
+  //   end else begin
+  //     r_bootsel <= r_bootsel;
+  //   end
+  // end
+//mkdigitals comment out end
+
+//mkdigitals add begin
+  logic bootsel_set = 1'b0;
+
   always_ff @(posedge HCLK, negedge HRESETn) begin
     if (~HRESETn) begin
-      r_bootsel <= {dmactive_i, bootsel_i};
+      r_bootsel <= 2'b00;
+      bootsel_set <= 1'b0;
     end else begin
-      r_bootsel <= r_bootsel;
+      if(bootsel_set)
+      begin
+        r_bootsel <= r_bootsel;
+        bootsel_set <= bootsel_set;
+      end
+      else
+      begin
+        bootsel_set <= 1'b1;
+        r_bootsel <= {dmactive_i, bootsel_i};
+      end     
     end
   end
+//mkdigitals add end
 
 endmodule

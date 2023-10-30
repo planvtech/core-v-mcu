@@ -20,10 +20,12 @@ filesets:
     - emulation/xilinx/rtl/fpga_private_ram.sv
     - emulation/xilinx/rtl/fpga_slow_clk_gen.sv
     - emulation/xilinx/rtl/pad_functional_xilinx.sv
-    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
     - emulation/xilinx/rtl/xilinx_core_v_mcu.v
     file_type: systemVerilogSource
-
+  genesys2-rtl:
+    files:
+    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
+    file_type: systemVerilogSource
   genesys2-xdc:
     files:
     - constraints/genesys2.xdc
@@ -34,20 +36,45 @@ filesets:
     - fpga/genesys2.tcl
     file_type: tclSource
 
+  nexys-rtl:
+    files:
+    - emulation/xilinx/rtl/pulp_clock_gating_xilinx.sv
+    file_type: systemVerilogSource
   nexys-xdc:
     files:
     - emulation/core-v-mcu-nexys/constraints/core-v-mcu-pin-assignment.xdc
+    - emulation/core-v-mcu-nexys/constraints/core-v-mcu-timing.xdc
     file_type: xdc
 
   nexys-cfg:
     files:
     - emulation/core-v-mcu-nexys/tcl/common.tcl
     - emulation/core-v-mcu-nexys/tcl/flatten.tcl
+    - emulation/core-v-mcu-nexys/tcl/synth_opts.tcl
+    file_type: tclSource
+
+  kr260-rtl:
+    files:
+    - emulation/xilinx/rtl/pulp_clock_gating_us.sv
+    file_type: systemVerilogSource
+  kr260-xdc:
+    files:
+    - emulation/core-v-mcu-kr260/constraints/core-v-mcu-pin-assignment.xdc
+    - emulation/core-v-mcu-kr260/constraints/core-v-mcu-timing.xdc
+    file_type: xdc
+
+  kr260-cfg:
+    files:
+    - emulation/core-v-mcu-kr260/tcl/common.tcl
+    - emulation/core-v-mcu-kr260/tcl/flatten.tcl
+    - emulation/core-v-mcu-kr260/tcl/synth_opts.tcl
     file_type: tclSource
 
   xilinx-ips:
     files:
     - emulation/xilinx/ips/xilinx_clk_mngr.tcl
+    - emulation/xilinx/ips/xilinx_eth_clk_mngr.tcl
+    - emulation/xilinx/ips/xilinx_dc_fifo.tcl
     - emulation/xilinx/ips/xilinx_slow_clk_mngr.tcl
     - emulation/xilinx/ips/xilinx_interleaved_ram.tcl
     - emulation/xilinx/ips/xilinx_private_ram.tcl
@@ -72,6 +99,7 @@ targets:
     description: Digilent Genesys2 Board
     filesets:
     - files-rtl
+    - genesys2-rtl
     - genesys2-cfg
     - genesys2-xdc
     - xilinx-ips
@@ -87,9 +115,25 @@ targets:
     parameters:
     - PULP_FPGA_EMUL=true
     filesets_append:
+    - nexys-rtl
     - nexys-cfg
     - nexys-xdc
     tools:
       vivado:
         part: xc7a100tcsg324-1
+    toplevel: xilinx_core_v_mcu
+
+  kr260:
+    <<: *default
+    default_tool: vivado
+    description: Xilinx KR260 board
+    parameters:
+    - PULP_FPGA_EMUL=true
+    filesets_append:
+    - kr260-rtl
+    - kr260-cfg
+    - kr260-xdc
+    tools:
+      vivado:
+        part: xck26-sfvc784-2lv-c
     toplevel: xilinx_core_v_mcu
